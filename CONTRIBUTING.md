@@ -1,67 +1,93 @@
-# Contributing
+# 캠페인 페이지 수정 가이드
 
-## Editing Your Campaign
+## 기본 원칙
 
-1. Edit only your assigned `content/campaigns/SB-XX.md` file unless the team agrees otherwise.
-2. Do not edit generated `campaigns/SB-XX.html` files by hand.
-3. Use MITRE ATT&CK Technique IDs where possible.
-4. Keep the page concise enough to read as a campaign reference.
-5. Put detailed execution commands, PoC notes, and BAS implementation details in a private repository.
-6. If you need a fresh structure, copy `content/campaign-template.md`.
-7. If your page has `format: html` at the top, simple text edits are fine. For a full rewrite, copy the template and remove `format: html`.
+1. 자기 담당 파일만 수정합니다.
+2. 원본 파일은 `content/campaigns/SB-XX.md`입니다.
+3. `campaigns/SB-XX.html`은 빌드 결과물이므로 직접 수정하지 않습니다.
+4. 수정 후 `npm run build`를 실행합니다.
+5. 실제 credential, token, private key, 개인정보는 public 레포에 올리지 않습니다.
 
-## Markdown vs HTML
+## 담당 파일
 
-Use one of these two managed formats for assigned campaign pages:
+| 담당자 | 수정 파일 |
+| --- | --- |
+| 임준서 | `content/campaigns/SB-01.md` |
+| 김정현 | `content/campaigns/SB-02.md` |
+| 신가현 | `content/campaigns/SB-03.md` |
+| 서현재 | `content/campaigns/SB-04.md` |
+| 강지윤 | `content/campaigns/SB-05.md` |
+| 오한결 | `content/campaigns/SB-06.md` |
+
+## Markdown으로 작성하는 경우
+
+파일 맨 위는 아래 형식을 유지합니다.
 
 ```markdown
 ---
 id: SB-XX
-name: Campaign Name
-owner: Your Name
-description: Short description
+name: "캠페인 이름"
+owner: "작성자 이름"
+description: "캠페인 목록에 표시될 짧은 설명"
 ---
-
-## Overview
-
-Write in Markdown.
 ```
 
-Or, if you already wrote a rich HTML page:
+그 아래는 Markdown으로 작성합니다.
+
+## HTML로 작성하는 경우
+
+HTML을 직접 넣고 싶으면 파일 맨 위 설정 영역에 `format: html`을 추가합니다.
 
 ```markdown
 ---
 id: SB-XX
-name: Campaign Name
-owner: Your Name
-description: Short description
+name: "캠페인 이름"
+owner: "작성자 이름"
+description: "캠페인 목록에 표시될 짧은 설명"
 format: html
 ---
-
-<h1>Campaign Name</h1>
-<p>Write the body as HTML.</p>
 ```
 
-Standalone HTML files under `campaigns/` are also served by Vercel, but they are not automatically listed or wrapped by the shared campaign layout.
+그리고 그 아래에 HTML 본문을 작성합니다.
 
-## Pull Request Checklist
+```html
+<h1>캠페인 이름</h1>
+<p class="summary">캠페인 설명</p>
+```
 
-- [ ] The page renders locally.
-- [ ] No real credentials, tokens, keys, passwords, or private operational details are included.
-- [ ] Technique IDs and names are checked.
-- [ ] The campaign description is written in a realistic, portfolio-safe tone.
-- [ ] Links from `campaigns/index.html` still work.
+`format: html`을 넣으면 Markdown 변환을 하지 않고, 작성한 HTML 본문을 그대로 공통 레이아웃 안에 넣습니다.
 
-## Suggested Workflow
+## 수정 후 확인
 
 ```bash
 npm run build
 python3 -m http.server 8091
+```
 
-# edit content/campaigns/SB-XX.md
+브라우저에서 확인:
+
+```text
+http://127.0.0.1:8091/campaigns/
+```
+
+## push 방법
+
+```bash
 npm run build
 
 git add content/campaigns/SB-XX.md campaigns/SB-XX.html campaigns/index.html
 git commit -m "Update SB-XX campaign"
 git push origin main
 ```
+
+push 후 Vercel이 자동 배포합니다.
+
+## 작성 전 체크리스트
+
+- [ ] 내 담당 `content/campaigns/SB-XX.md` 파일을 수정했는가?
+- [ ] `format: html`이 필요한 경우 frontmatter에 넣었는가?
+- [ ] `npm run build`를 실행했는가?
+- [ ] 공개하면 안 되는 비밀번호, 토큰, SSH key, 개인정보가 없는가?
+- [ ] Techniques Used가 MITRE ATT&CK 형식에 맞게 작성되었는가?
+- [ ] 공격 실습 절차서가 아니라 캠페인 분석 페이지처럼 작성되었는가?
+- [ ] 로컬 페이지에서 표와 링크가 깨지지 않는지 확인했는가?

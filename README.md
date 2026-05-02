@@ -1,74 +1,224 @@
 # Spacebar MITRE ATT&CK Campaigns
 
-MITRE ATT&CK-inspired campaign pages for Spacebar incident response training.
+Spacebar 팀의 MITRE ATT&CK Campaign 형식 정리 페이지입니다.
 
-This repository contains static campaign pages created by the Spacebar team. Each page models a realistic enterprise-like victim environment, maps observed attack behavior to MITRE ATT&CK Techniques, and serves as a reference for later BAS, ELK, and incident response playbook work.
+각 팀원은 자신이 모델링한 기업형 피해 환경을 바탕으로 공격 흐름을 분석하고, 해당 행위를 MITRE ATT&CK Technique에 매핑하여 캠페인 페이지로 작성합니다. 이 페이지들은 이후 BAS 공격 모듈 설계, ELK 탐지 포인트 정리, 침해사고 대응 플레이북 작성에 활용됩니다.
 
-## Pages
+공개 페이지:
 
-- `content/campaigns/SB-01.md`: campaign source files that team members edit
-- `content/campaign-template.md`: copyable writing template
-- `campaigns/index.html`: campaign list
-- `campaigns/SB-01.html` ~ `campaigns/SB-06.html`: generated campaign pages
+```text
+https://spacebar-mitre-attack-campaigns.vercel.app/campaigns/
+```
 
-Do not edit generated HTML directly. Edit `content/campaigns/SB-XX.md`, then run the build.
-Some existing detailed pages use `format: html` in frontmatter to preserve rich tables and custom blocks. New or rewritten pages can use normal Markdown without that field.
+## 폴더 구조
 
-## Authoring Options
+```text
+content/campaigns/
+  SB-01.md              # 팀원이 실제로 수정하는 원본 파일
+  SB-02.md
+  ...
 
-Recommended authoring styles:
+campaigns/
+  index.html            # 빌드 결과물: 캠페인 목록 페이지
+  SB-01.html            # 빌드 결과물: 공개 HTML 페이지
+  SB-02.html
+  ...
 
-- Markdown source: edit `content/campaigns/SB-XX.md`. Vercel runs `npm run build`, converts it to `campaigns/SB-XX.html`, and deploys it automatically.
-- HTML body source: keep the file in `content/campaigns/SB-XX.md`, add `format: html` in frontmatter, and write the page body as HTML. The shared header, sidebar, campaign index, and site style still apply.
-- Fully custom HTML: place a standalone `.html` file directly under `campaigns/`. Vercel can serve it, but it will not be managed by the Markdown build or automatically added to the campaign index unless the index/build script is updated.
+assets/
+  campaign.css          # 공통 스타일
+  spacebarLogo.png      # 로고
 
-Avoid editing generated `campaigns/SB-XX.html` directly. Those files can be overwritten the next time `npm run build` runs.
+tools/
+  build-campaigns.js    # md/html 원본을 공개 HTML로 변환하는 스크립트
+```
 
-## Build
+중요:
+
+- 팀원은 기본적으로 `content/campaigns/SB-XX.md`만 수정합니다.
+- `campaigns/SB-XX.html`은 빌드 결과물이므로 직접 수정하지 않는 것을 권장합니다.
+- `main` 브랜치에 push하면 Vercel에서 자동으로 빌드 및 배포됩니다.
+
+## 팀원별 수정 파일
+
+| ID | 담당자 | 파일 |
+| --- | --- | --- |
+| SB-01 | 임준서 | `content/campaigns/SB-01.md` |
+| SB-02 | 김정현 | `content/campaigns/SB-02.md` |
+| SB-03 | 신가현 | `content/campaigns/SB-03.md` |
+| SB-04 | 서현재 | `content/campaigns/SB-04.md` |
+| SB-05 | 강지윤 | `content/campaigns/SB-05.md` |
+| SB-06 | 오한결 | `content/campaigns/SB-06.md` |
+
+## 작성 방식 1: Markdown으로 작성하기
+
+가장 기본 방식입니다. `content/campaigns/SB-XX.md` 파일 맨 위에 아래처럼 정보를 적고, 그 아래는 Markdown으로 작성하면 됩니다.
+
+```markdown
+---
+id: SB-XX
+name: "캠페인 이름"
+owner: "작성자 이름"
+description: "캠페인 목록에 표시될 짧은 설명"
+---
+
+# 캠페인 이름
+
+## Overview
+
+여기에 캠페인 설명을 작성합니다.
+
+## Groups
+
+| ID | Name | Description |
+| --- | --- | --- |
+| G-SB-XXX | 그룹명 | 그룹 설명 |
+
+## Techniques Used
+
+| Domain | ID | Name | Use |
+| --- | --- | --- | --- |
+| Enterprise | TXXXX | Technique Name | 이 캠페인에서 해당 Technique이 어떻게 사용되었는지 작성 |
+
+## Software
+
+| ID | Name | Description |
+| --- | --- | --- |
+| S-SB-XXX | 도구명 | 도구 설명 |
+
+## References
+
+- 참고 자료
+```
+
+이 방식은 글 위주로 정리할 때 편합니다.
+
+## 작성 방식 2: HTML 본문으로 작성하기
+
+팀원이 이미 HTML로 캠페인 페이지를 만들어왔거나, 복잡한 표와 블록을 직접 제어하고 싶다면 이 방식을 사용하면 됩니다.
+
+`format: html`은 파일 맨 위의 `---` 설정 영역에 넣습니다.
+
+예시:
+
+```markdown
+---
+id: SB-XX
+name: "캠페인 이름"
+owner: "작성자 이름"
+description: "캠페인 목록에 표시될 짧은 설명"
+format: html
+---
+
+<h1>캠페인 이름</h1>
+
+<p class="summary">
+  여기에 HTML로 캠페인 설명을 작성합니다.
+</p>
+
+<h2 id="techniques-used">Techniques Used</h2>
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>Domain</th>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Use</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Enterprise</td>
+        <td class="id-cell">TXXXX</td>
+        <td>Technique Name</td>
+        <td>캠페인에서 해당 Technique이 어떻게 사용되었는지 작성합니다.</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+```
+
+이 방식도 공통 헤더, 왼쪽 캠페인 메뉴, 공통 CSS가 자동으로 적용됩니다.
+
+## 작성 방식 3: 완전 독립 HTML 파일 올리기
+
+직접 만든 HTML 파일을 그대로 올리고 싶다면 `campaigns/파일명.html`에 넣을 수도 있습니다.
+
+다만 이 방식은 권장하지 않습니다.
+
+- 캠페인 목록에 자동으로 추가되지 않습니다.
+- 왼쪽 캠페인 메뉴가 자동으로 붙지 않습니다.
+- 공통 스타일과 구조가 깨질 수 있습니다.
+- 나중에 팀 페이지를 통합 관리하기 어렵습니다.
+
+따라서 가능하면 `content/campaigns/SB-XX.md` 안에서 Markdown 또는 `format: html` 방식으로 작성해 주세요.
+
+## 로컬에서 미리보기
+
+처음 한 번만 의존성을 설치합니다.
+
+```bash
+npm install
+```
+
+수정 후 HTML을 생성합니다.
 
 ```bash
 npm run build
 ```
 
-## Local Preview
+로컬 서버를 실행합니다.
 
 ```bash
-npm run build
 python3 -m http.server 8091
 ```
 
-Open:
+브라우저에서 아래 주소를 열면 됩니다.
 
 ```text
 http://127.0.0.1:8091/campaigns/
 ```
 
-## Deployment
+## 수정 후 push 방법
 
-This is a static site and can be deployed with Vercel or GitHub Pages.
+자기 파일을 수정한 뒤 아래 순서로 올리면 됩니다.
 
-Recommended:
+```bash
+npm run build
 
-- Vercel project name: `spacebar-mitre-attack-campaigns`
-- Root directory: repository root
-- Build command: `npm run build`
-- Output directory: none
+git status
+git add content/campaigns/SB-XX.md campaigns/SB-XX.html campaigns/index.html
+git commit -m "Update SB-XX campaign"
+git push origin main
+```
 
-GitHub Pages alternative:
+`main`에 push되면 Vercel이 자동으로 배포합니다.
 
-- Source: `Deploy from a branch`
-- Branch: `main`
-- Folder: `/`
+## 공개 페이지 작성 주의사항
 
-## Collaboration
+이 레포는 public입니다. 포트폴리오로 보여줄 수 있는 수준의 내용만 작성합니다.
 
-Each team member owns one `content/campaigns/SB-XX.md` page. Keep public pages portfolio-safe:
+- 실제 비밀번호, SSH private key, API token, 세션 값은 절대 올리지 않습니다.
+- 실제 개인 정보나 고객 정보는 올리지 않습니다.
+- 실제 내부망 IP, 개인 장비 정보, 민감한 경로는 필요하면 가명화합니다.
+- PoC 상세 명령어, 공격 자동화 코드, BAS 구현 세부사항은 private 레포나 별도 문서에 둡니다.
+- Techniques Used는 “공격 절차서”가 아니라 “캠페인 분석 보고서”처럼 작성합니다.
 
-- Do not commit real credentials, SSH keys, tokens, or private IPs that identify a real environment.
-- Use sanitized or lab-only descriptions.
-- Keep destructive exploitation details in private runbooks, not public campaign pages.
-- Write Techniques Used in a campaign-report style, not as a step-by-step exploit guide.
+## 이 캠페인 페이지를 왜 작성하나요?
 
-## Disclaimer
+이 문서는 단순 발표용 페이지가 아닙니다.
 
-This project is not affiliated with, endorsed by, or sponsored by MITRE. MITRE ATT&CK is referenced only as a public framework for organizing adversary behavior.
+각 캠페인 페이지는 아래 작업의 기준 문서가 됩니다.
+
+- 어떤 기업형 피해 환경을 만들었는지 설명
+- 어떤 공격 흐름을 재현할지 정리
+- 어떤 MITRE ATT&CK Technique을 사용할지 선정
+- BAS 공격 모듈을 어떤 단위로 만들지 결정
+- ELK에서 어떤 로그와 아티팩트를 봐야 하는지 정리
+- DF/IR 보고서와 대응 플레이북 작성 기준으로 활용
+
+즉, 캠페인 페이지는 “우리 환경에서 어떤 공격을 수행하고, 무엇을 탐지하고, 무엇을 대응할 것인가”를 정리하는 기준표입니다.
+
+## 안내
+
+이 프로젝트는 MITRE ATT&CK을 참고한 교육 및 프로젝트 산출물입니다. MITRE와 공식적으로 관련되거나 후원받은 프로젝트가 아닙니다.
