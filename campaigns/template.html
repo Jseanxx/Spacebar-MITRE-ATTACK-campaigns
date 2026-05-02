@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Campaign Template | Spacebar Campaigns</title>
+  <link rel="stylesheet" href="../assets/campaign.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="./"><img class="brand-logo" src="../assets/spacebarLogo.png" alt="Spacebar"><span>Spacebar Campaigns</span></a>
+    </div>
+  </header>
+
+  <div class="notice">
+    <div class="notice-inner">Static campaign page template. Fill placeholders after campaign analysis.</div>
+  </div>
+
+  <main class="page">
+    <div class="breadcrumbs"><a href="./">Home</a> / <a href="./">Campaigns</a> / <span>Campaign Template</span></div>
+
+    <h1>Campaign Name Placeholder</h1>
+    <p class="summary placeholder">
+      Campaign summary placeholder. Describe the modeled enterprise victim environment, adversary flow, and why this campaign matters.
+    </p>
+
+    <div class="meta-grid" aria-label="Campaign metadata">
+      <div class="meta-label">ID:</div>
+      <div class="meta-value">SB-00</div>
+      <div class="meta-label">First Seen:</div>
+      <div class="meta-value">TBD</div>
+      <div class="meta-label">Last Seen:</div>
+      <div class="meta-value">TBD</div>
+      <div class="meta-label">Version:</div>
+      <div class="meta-value">0.1</div>
+      <div class="meta-label">Created:</div>
+      <div class="meta-value">TBD</div>
+      <div class="meta-label">Last Modified:</div>
+      <div class="meta-value">TBD</div>
+    </div>
+
+    <h2>Groups</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="id-cell">G-SB-000</td>
+            <td class="placeholder">TBD</td>
+            <td class="placeholder">TBD</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2 id="techniques-used">Techniques Used</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Domain</th>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Tactic</th>
+            <th>Use</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Enterprise</td>
+            <td class="id-cell">T1592</td>
+            <td>Gather Victim Host Information</td>
+            <td>Reconnaissance</td>
+            <td>공격자는 내부 개발망에서 접근 가능한 Jenkins CI/CD 서버를 식별하고, 웹 인터페이스와 HTTP 응답 정보를 통해 Jenkins 버전, 서버 구성 요소, 서비스 역할을 확인했다. 이를 통해 해당 시스템이 빌드·테스트·배포 자동화를 담당하는 개발 인프라임을 파악하고, 알려진 Jenkins CLI 파일 읽기 취약점 악용 가능성을 판단했다.</td>
+          </tr>
+          <tr>
+            <td>Enterprise</td>
+            <td class="id-cell">T1049</td>
+            <td>System Network Connections Discovery</td>
+            <td>Discovery</td>
+            <td>공격자는 Jenkins 서버 내부에서 리스닝 포트와 네트워크 연결 상태를 확인하여 Jenkins 웹 포트, 에이전트 통신 포트, 컨테이너 네트워크 구성을 파악했다. 이를 통해 CI/CD 서버가 내부 개발망에서 어떤 서비스와 통신하는지 확인하고 후속 탐색 대상을 선정했다.</td>
+          </tr>
+          <tr>
+            <td class="placeholder">Enterprise</td>
+            <td class="id-cell placeholder">T0000</td>
+            <td class="placeholder">Technique Placeholder</td>
+            <td class="placeholder">Tactic Placeholder</td>
+            <td class="placeholder">Describe how this campaign uses the technique.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2 id="software">Software</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="id-cell">S-SB-000</td>
+            <td class="placeholder">TBD</td>
+            <td class="placeholder">TBD</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2 id="references">References</h2>
+    <ol>
+      <li class="placeholder">Reference placeholder.</li>
+    </ol>
+
+    <footer class="footer">
+      Spacebar Project. This page is a training artifact and is not affiliated with MITRE ATT&amp;CK.
+    </footer>
+  </main>
+</body>
+</html>

@@ -1,0 +1,325 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Operation Hanguel Flow | Spacebar Campaigns</title>
+  <link rel="stylesheet" href="../assets/campaign.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="./"><img class="brand-logo" src="../assets/spacebarLogo.png" alt="Spacebar"><span>Spacebar Campaigns</span></a>
+    </div>
+  </header>
+
+  <main class="page">
+    <div class="breadcrumbs"><a href="./">Home</a> / <a href="./">Campaigns</a> / <span>Operation Hanguel Flow</span></div>
+
+    <h1>Operation Hanguel Flow</h1>
+    <p class="summary">
+      Operation Hanguel Flow는 공개 노출된 Langflow 기반 AI/RAG 워크플로 서버를 대상으로 한 침해 캠페인이다.
+      HanguelFlow는 Langflow CVE-2025-3248을 악용해 비인증 코드 검증 API에 접근하고, 애플리케이션 런타임 권한에서 Python 실행, 시스템 정보 확인, 파일 경로 탐색, credential 단서 수집, 후속 도구 전송과 HTTP 기반 외부 통신으로 이어지는 활동을 수행했다.
+      피해 환경은 nginx reverse proxy, Langflow 애플리케이션, 내부 문서 서버, Custom IR Agent, ELK Stack으로 구성된 기업형 AI 서비스 운영 환경으로 모델링된다.
+    </p>
+
+    <div class="meta-grid" aria-label="Campaign metadata">
+      <div class="meta-label">ID:</div>
+      <div class="meta-value">SB-06</div>
+      <div class="meta-label">Name:</div>
+      <div class="meta-value">Operation Hanguel Flow</div>
+      <div class="meta-label">Source Profile ID:</div>
+      <div class="meta-value">HGC-2025-001</div>
+      <div class="meta-label">First Seen:</div>
+      <div class="meta-value">May 2026</div>
+      <div class="meta-label">Last Seen:</div>
+      <div class="meta-value">May 2026</div>
+      <div class="meta-label">Version:</div>
+      <div class="meta-value">0.3</div>
+      <div class="meta-label">Created:</div>
+      <div class="meta-value">01 May 2026</div>
+      <div class="meta-label">Last Modified:</div>
+      <div class="meta-value">02 May 2026</div>
+      <div class="meta-label">Target:</div>
+      <div class="meta-value">Self-hosted AI workflow / RAG builder</div>
+      <div class="meta-label">Objective:</div>
+      <div class="meta-value">External access, execution, discovery, tool transfer</div>
+    </div>
+
+    <div class="tag-row" aria-label="Campaign tags">
+      <span class="tag">CVE-2025-3248</span>
+      <span class="tag">Langflow &lt; 1.3.0</span>
+      <span class="tag">ATT&amp;CK Enterprise</span>
+      <span class="tag">Enterprise AI Infrastructure</span>
+    </div>
+
+    <h2 id="overview">Overview</h2>
+    <p>
+      Langflow는 AI agent와 workflow를 시각적으로 구성하는 오픈소스 플랫폼이다.
+      CVE-2025-3248은 <code>/api/v1/validate/code</code> 엔드포인트에서 인증 검증이 빠진 상태로 사용자 입력 코드가 실행될 수 있는 취약점으로 정리된다.
+      공개 노출된 AI 도구 서버는 업무 자동화, RAG, LLM 연동 API key를 포함할 수 있어 공격자의 초기 접근 지점으로 악용될 수 있다.
+    </p>
+
+    <div class="info-grid" aria-label="Operation Hanguel Flow overview">
+      <div class="info-cell">
+        <b>Initial Access</b>
+        <span>외부 노출 Langflow API에 비인증 HTTP 요청 전송</span>
+      </div>
+      <div class="info-cell">
+        <b>Execution</b>
+        <span>Python code validation 흐름을 악용한 명령 실행</span>
+      </div>
+      <div class="info-cell">
+        <b>Discovery</b>
+        <span>계정, 호스트명, 환경변수, 파일 경로 확인</span>
+      </div>
+      <div class="info-cell">
+        <b>Detection Goal</b>
+        <span>API 요청, 프로세스 실행, 의심 명령, 후속 다운로드를 묶어 탐지</span>
+      </div>
+    </div>
+
+    <div class="phase-grid" aria-label="Campaign phase matrix">
+      <div class="phase-item"><b>Recon</b><span>T1595</span><br><span>T1590</span></div>
+      <div class="phase-item"><b>Initial Access</b><span>T1190</span></div>
+      <div class="phase-item"><b>Execution</b><span>T1059</span><br><span>T1059.006</span></div>
+      <div class="phase-item"><b>Discovery</b><span>T1082</span><br><span>T1083</span></div>
+      <div class="phase-item"><b>Collection</b><span>T1552.001</span></div>
+      <div class="phase-item"><b>Command &amp; Control</b><span>T1105</span><br><span>T1071.001</span></div>
+    </div>
+
+    <h2>Groups</h2>
+    <div class="table-wrap medium-table">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="id-cell">G-SB-006</td>
+            <td>HanguelFlow</td>
+            <td>Operation Hanguel Flow 활동과 연결된 가상 공격 그룹이다.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2 id="techniques-used">Techniques Used</h2>
+    <div class="table-tools">
+      <label class="searchbox" for="techFilter">
+        <span>Filter</span>
+        <input id="techFilter" type="search" placeholder="예: RCE, Python, T1190, Discovery">
+      </label>
+    </div>
+    <div class="table-wrap wide-table">
+      <table id="techTable">
+        <thead>
+          <tr>
+            <th>Domain</th>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Use</th>
+            <th>Primary Logs</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Enterprise</td>
+            <td class="id-cell">T1590</td>
+            <td>Gather Victim Network Information</td>
+            <td>Operation Hanguel Flow 당시 HanguelFlow는 공개 서비스 배너, URL 구조, reverse proxy 응답을 바탕으로 Langflow 운영 인프라 정보를 수집했다.</td>
+            <td>reverse proxy access log, DNS log, firewall log</td>
+          </tr>
+          <tr>
+            <td>Enterprise</td>
+            <td class="id-cell">T1595</td>
+            <td>Active Scanning</td>
+            <td>Operation Hanguel Flow 당시 HanguelFlow는 공개 노출된 Langflow 웹 서비스와 API 포트를 식별하기 위해 HTTP 스캔을 수행했다.</td>
+            <td>reverse proxy access log, firewall log</td>
+          </tr>
+          <tr>
+            <td>Enterprise</td>
+            <td class="id-cell">T1190</td>
+            <td>Exploit Public-Facing Application</td>
+            <td>Operation Hanguel Flow 당시 HanguelFlow는 Langflow CVE-2025-3248의 비인증 코드 검증 API를 악용하여 외부에서 원격 코드 실행을 시도했다.</td>
+            <td>nginx access log, Langflow app log</td>
+          </tr>
+          <tr>
+            <td>Enterprise</td>
+            <td class="id-cell">T1059.006</td>
+            <td>Command and Scripting Interpreter: Python</td>
+            <td>Operation Hanguel Flow 당시 HanguelFlow는 취약한 코드 검증 경로에서 Python 코드 또는 Python을 통한 시스템 명령 호출을 실행했다.</td>
+            <td>process telemetry, container stdout</td>
+          </tr>
+          <tr>
+            <td>Enterprise</td>
+            <td class="id-cell">T1082</td>
+            <td>System Information Discovery</td>
+            <td>Operation Hanguel Flow 당시 HanguelFlow는 애플리케이션 런타임 권한에서 계정, 호스트명, 커널, 컨테이너 실행 환경과 같은 시스템 정보를 확인했다.</td>
+            <td>agent process event, shell history, app output</td>
+          </tr>
+          <tr>
+            <td>Enterprise</td>
+            <td class="id-cell">T1083</td>
+            <td>File and Directory Discovery</td>
+            <td>Operation Hanguel Flow 당시 HanguelFlow는 Langflow 설정, 업로드 디렉터리, workspace, 내부 문서 서버 연결 정보, secret 파일 위치를 탐색했다.</td>
+            <td>process event, file access event</td>
+          </tr>
+          <tr>
+            <td>Enterprise</td>
+            <td class="id-cell">T1552.001</td>
+            <td>Unsecured Credentials: Credentials In Files</td>
+            <td>Operation Hanguel Flow 당시 HanguelFlow는 .env, 설정 파일, API key 파일에서 LLM provider token, DB credential, 내부 문서 서버 접근 단서를 찾으려 했다.</td>
+            <td>file access event, command line</td>
+          </tr>
+          <tr>
+            <td>Enterprise</td>
+            <td class="id-cell">T1105</td>
+            <td>Ingress Tool Transfer</td>
+            <td>Operation Hanguel Flow 당시 HanguelFlow는 curl, wget, Python HTTP client를 이용해 후속 스크립트, 스캐너, 웹쉘 또는 봇넷 페이로드를 내려받으려 했다.</td>
+            <td>network event, process event, DNS log</td>
+          </tr>
+          <tr>
+            <td>Enterprise</td>
+            <td class="id-cell">T1071.001</td>
+            <td>Application Layer Protocol: Web Protocols</td>
+            <td>Operation Hanguel Flow 당시 HanguelFlow는 HTTP/HTTPS를 이용해 명령 전달, 페이로드 다운로드, 외부 서버 통신을 수행했다.</td>
+            <td>proxy log, Zeek http.log, firewall log</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2 id="software">Software</h2>
+    <div class="table-wrap medium-table">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Observed Role</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="id-cell">S-SB-006-01</td>
+            <td>Langflow</td>
+            <td>AI workflow와 agentic AI flow를 구성하는 웹 기반 플랫폼이며, 공개 노출된 AI/RAG 업무 자동화 서버로 모델링된다.</td>
+            <td>Public-facing AI workflow application</td>
+          </tr>
+          <tr>
+            <td class="id-cell">S-SB-006-02</td>
+            <td>nginx</td>
+            <td>Langflow 앞단 reverse proxy로 동작하며, 외부 HTTP 요청과 API 접근 로그를 관찰하는 주요 지점이다.</td>
+            <td>HTTP access and routing layer</td>
+          </tr>
+          <tr>
+            <td class="id-cell">S-SB-006-03</td>
+            <td>Internal Docs Server</td>
+            <td>Langflow와 연계된 내부 문서/데이터 서버로, AI workflow에서 참조할 수 있는 내부 업무 자료를 보관하는 시스템이다.</td>
+            <td>Internal data source</td>
+          </tr>
+          <tr>
+            <td class="id-cell">S-SB-006-04</td>
+            <td>Custom IR Agent</td>
+            <td>웹 로그, 컨테이너 로그, 프로세스/파일 이벤트를 정규화해 보안 분석 플랫폼으로 전송하는 침해사고 대응 에이전트다.</td>
+            <td>Endpoint and container telemetry</td>
+          </tr>
+          <tr>
+            <td class="id-cell">S-SB-006-05</td>
+            <td>ELK Stack</td>
+            <td>Elasticsearch, Logstash, Kibana 기반의 수집, 검색, 시각화, 상관분석 환경이다.</td>
+            <td>SIEM and investigation platform</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2 id="detection">Detection Plan</h2>
+    <div class="cards">
+      <article class="card">
+        <h3>1. Exploit Request</h3>
+        <p>인증 없는 <code>/api/v1/validate/code</code> POST, Python code field, 비정상 User-Agent, 외부 IP 접근을 탐지한다.</p>
+      </article>
+      <article class="card">
+        <h3>2. Suspicious Execution</h3>
+        <p>Langflow 프로세스 하위에서 <code>sh</code>, <code>bash</code>, <code>python</code>, <code>curl</code>, <code>wget</code> 실행을 확인한다.</p>
+      </article>
+      <article class="card">
+        <h3>3. Sequential Activity</h3>
+        <p>API exploit 이후 10분 안에 discovery 명령과 tool transfer가 이어지면 하나의 사고 후보로 묶는다.</p>
+      </article>
+    </div>
+
+    <div class="flow" aria-label="Detection flow">
+      <div class="flow-step"><b>HTTP POST</b><span>validate/code exploit request</span></div>
+      <div class="flow-step"><b>Python Exec</b><span>app runtime executes payload</span></div>
+      <div class="flow-step"><b>Discovery</b><span>id, uname, env, ls</span></div>
+      <div class="flow-step"><b>Tool Transfer</b><span>curl/wget external resource</span></div>
+      <div class="flow-step"><b>Alert</b><span>ELK correlation document</span></div>
+    </div>
+
+    <h3>Detection Query Draft</h3>
+    <div class="code-grid">
+      <pre><code>event.dataset: "langflow"
+and http.request.method: "POST"
+and url.path: "/api/v1/validate/code"</code></pre>
+      <pre><code>sequence by host.name, source.ip with maxspan=10m
+  [any where event.action == "langflow_rce_attempt"]
+  [process where process.command_line regex ".*(whoami|id|uname|env|ls).*"]
+  [process where process.name in ("curl", "wget", "python", "bash")]</code></pre>
+    </div>
+
+    <h2 id="infrastructure">Observed Infrastructure</h2>
+    <p>
+      관찰된 환경은 인터넷에 노출된 Langflow 인스턴스, reverse proxy, 컨테이너 기반 실행 환경, 중앙 로그 분석 플랫폼으로 구성된다.
+      공격자는 외부 HTTP 요청을 통해 코드 검증 엔드포인트에 접근하고, 애플리케이션 런타임 권한으로 시스템 정보를 확인한 뒤 추가 도구 다운로드와 외부 통신을 시도할 수 있다.
+    </p>
+
+    <div class="code-grid">
+      <pre><code>Internet
+  -> Reverse Proxy
+  -> Langflow API
+  -> Container Runtime
+  -> Internal Data Sources</code></pre>
+      <pre><code># Analyst KQL
+campaign.id: "HGC-2025-001"
+event.action: "langflow_rce_attempt"
+langflow.classification: "attack"
+rule.id: "langflow-rce-seq-001"</code></pre>
+    </div>
+
+    <h2 id="references">References</h2>
+    <ol>
+      <li>MITRE ATT&amp;CK Campaigns. https://attack.mitre.org/campaigns/</li>
+      <li>MITRE ATT&amp;CK T1190, Exploit Public-Facing Application. https://attack.mitre.org/techniques/T1190/</li>
+      <li>Horizon3.ai, CVE-2025-3248 Langflow unauthenticated RCE vulnerability summary. https://horizon3.ai/attack-research/vulnerabilities/cve-2025-3248/</li>
+      <li>NVD, CVE-2025-3248. https://nvd.nist.gov/vuln/detail/CVE-2025-3248</li>
+      <li>Help Net Security, Langflow CVE-2025-3248 exploited. https://www.helpnetsecurity.com/2025/05/06/langflow-cve-2025-3248-exploited/</li>
+      <li>Spacebar Project local file, Operation Hanguel Flow campaign profile, 2026-05-01.</li>
+    </ol>
+
+    <footer class="footer">
+      Spacebar Project. This page is not affiliated with MITRE ATT&amp;CK.
+    </footer>
+  </main>
+  <script>
+    const techFilter = document.querySelector("#techFilter");
+    const techRows = document.querySelectorAll("#techTable tbody tr");
+
+    if (techFilter) {
+      techFilter.addEventListener("input", () => {
+        const query = techFilter.value.trim().toLowerCase();
+        techRows.forEach((row) => {
+          row.hidden = query !== "" && !row.textContent.toLowerCase().includes(query);
+        });
+      });
+    }
+  </script>
+</body>
+</html>

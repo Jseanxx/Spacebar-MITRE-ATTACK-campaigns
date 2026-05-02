@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PipelineKey | Spacebar Campaigns</title>
+  <link rel="stylesheet" href="../assets/campaign.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="./"><img class="brand-logo" src="../assets/spacebarLogo.png" alt="Spacebar"><span>Spacebar Campaigns</span></a>
+    </div>
+  </header>
+
+  <main class="page">
+    <div class="breadcrumbs"><a href="./">Home</a> / <a href="./">Campaigns</a> / <span>PipelineKey</span></div>
+
+    <h1>PipelineKey</h1>
+    <p class="summary">
+      PipelineKey는 기업 개발망의 Jenkins CI/CD 서버와 Staging Web Server를 대상으로 한 침해 캠페인이다.
+      BreadKimchi는 사전에 확보한 내부 개발망 접근권을 이용해 Jenkins 서버에 접근하고, Jenkins CLI 파일 읽기 취약점과 배포 credential 관리 미흡을 이용해 Job 설정, build log, workspace, 배포 키 단서를 조사했다.
+      이후 Jenkins가 배포하는 Spacebar Cat Cafe Staging 서버에 접근하여 nginx 설정, 배포 스크립트, 고객 정보와 예약 데이터를 수집하고, 수집한 데이터를 archive로 묶어 SSH/SCP를 통해 공격자 서버로 전송했다.
+    </p>
+
+    <div class="meta-grid" aria-label="Campaign metadata">
+      <div class="meta-label">ID:</div>
+      <div class="meta-value">SB-01</div>
+      <div class="meta-label">First Seen:</div>
+      <div class="meta-value">May 2026</div>
+      <div class="meta-label">Last Seen:</div>
+      <div class="meta-value">May 2026</div>
+      <div class="meta-label">Version:</div>
+      <div class="meta-value">0.2</div>
+      <div class="meta-label">Created:</div>
+      <div class="meta-value">01 May 2026</div>
+      <div class="meta-label">Last Modified:</div>
+      <div class="meta-value">01 May 2026</div>
+    </div>
+
+    <h2>Groups</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="id-cell">G-SB-001</td>
+            <td>BreadKimchi</td>
+            <td>PipelineKey 활동과 연결된 공격 그룹이다.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2 id="techniques-used">Techniques Used</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Domain</th>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Use</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Enterprise</td>
+            <td class="id-cell">T1190</td>
+            <td>Exploit Public-Facing Application</td>
+            <td>PipelineKey 당시 BreadKimchi는 내부 개발망에 노출된 Jenkins CLI 기능을 악용하여 Jenkins controller 파일시스템의 파일을 읽었습니다.</td>
+          </tr>
+          <tr>
+            <td>Enterprise</td>
+            <td class="id-cell">T1083</td>
+            <td>File and Directory Discovery</td>
+            <td>PipelineKey 당시 BreadKimchi는 Jenkins home의 jobs, builds, workspace, secrets, users 경로를 탐색하고, 이후 Staging 서버의 웹 루트, 배포 스크립트, nginx 로그 경로를 확인했습니다.</td>
+          </tr>
+          <tr>
+            <td>Enterprise</td>
+            <td class="id-cell">T1552.001</td>
+            <td>Unsecured Credentials: Credentials In Files</td>
+            <td>PipelineKey 당시 BreadKimchi는 Jenkins workspace, Job 설정, Staging .env 파일, 배포 스크립트에서 deploy key, API URL, DB credential 형태의 자격 증명 단서를 찾았습니다.</td>
+          </tr>
+          <tr>
+            <td>Enterprise</td>
+            <td class="id-cell">T1021.004</td>
+            <td>Remote Services: SSH</td>
+            <td>PipelineKey 당시 BreadKimchi는 Jenkins에서 확인한 배포 계정 정보를 사용하여 SSH를 통해 Staging Web Server에 접근했습니다.</td>
+          </tr>
+          <tr>
+            <td>Enterprise</td>
+            <td class="id-cell">T1005</td>
+            <td>Data from Local System</td>
+            <td>PipelineKey 당시 BreadKimchi는 Jenkins Job 설정, build log, workspace 파일을 수집하고, Staging 서버에서 nginx 설정, 배포 스크립트, 고객 정보, 예약 데이터, access log를 수집했습니다.</td>
+          </tr>
+          <tr>
+            <td>Enterprise</td>
+            <td class="id-cell">T1074.001</td>
+            <td>Data Staged: Local Data Staging</td>
+            <td>PipelineKey 당시 BreadKimchi는 Staging 서버에서 수집한 고객 정보, 예약 데이터, 운영 설정을 임시 디렉터리에 모아 전송 준비를 했습니다.</td>
+          </tr>
+          <tr>
+            <td>Enterprise</td>
+            <td class="id-cell">T1048</td>
+            <td>Exfiltration Over Alternative Protocol</td>
+            <td>PipelineKey 당시 BreadKimchi는 수집한 고객 정보, 예약 데이터, 운영 아티팩트를 archive로 묶은 뒤 SSH/SCP를 통해 공격자 서버로 전송했습니다.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2 id="software">Software</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="id-cell">S-SB-001</td>
+            <td>Jenkins</td>
+            <td>기업 개발팀의 빌드, 테스트, 배포 자동화를 담당하는 CI/CD 서버로 모델링된다.</td>
+          </tr>
+          <tr>
+            <td class="id-cell">S-SB-002</td>
+            <td>Jenkins CLI</td>
+            <td>Jenkins controller에 명령을 전달하는 CLI 구성 요소이며, CVE-2024-23897 파일 읽기 검증 경로로 사용된다.</td>
+          </tr>
+          <tr>
+            <td class="id-cell">S-SB-003</td>
+            <td>nginx</td>
+            <td>Spacebar Cat Cafe 예약 서비스가 배포되는 Staging Web Server의 웹 서버다.</td>
+          </tr>
+          <tr>
+            <td class="id-cell">S-SB-004</td>
+            <td>Spacebar Cat Cafe</td>
+            <td>정적 HTML/CSS/JavaScript 기반 예약 서비스로, Jenkins를 통해 Staging 서버에 배포된 피해 서비스다.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2 id="references">References</h2>
+    <ol>
+      <li>MITRE ATT&amp;CK, Campaign C0024 SolarWinds Compromise. https://attack.mitre.org/campaigns/C0024/</li>
+      <li>Jenkins Security Advisory 2024-01-24, CVE-2024-23897. https://www.jenkins.io/security/advisory/2024-01-24/</li>
+      <li>Spacebar Project local lab notes, Jenkins/Staging VM environment, 2026-05-01.</li>
+    </ol>
+
+    <footer class="footer">
+      Spacebar Project. This page is not affiliated with MITRE ATT&amp;CK.
+    </footer>
+  </main>
+</body>
+</html>
