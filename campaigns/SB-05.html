@@ -39,31 +39,140 @@
     <main class="page campaign-content">
       <div class="breadcrumbs"><a href="./">Home</a> / <a href="./">Campaigns</a> / <span>Grafana Dashboard Compromise</span></div>
 <h1>Grafana Dashboard Compromise</h1>
-<p>담당자 분석 후 캠페인 요약을 작성합니다.</p>
-<h2 id="groups">Groups</h2>
+
+<p class="summary">
+  Grafana Dashboard Compromise는 Grafana CVE-2025-4123 XSS를 이용해 로그인된 victim의
+  Grafana 브라우저 컨텍스트에서 API 데이터를 수집하고, 수집 결과를 공격자 인프라로 전송한
+  침해 캠페인이다. 수집 데이터는 localStorage에 임시 저장된 뒤 HTTP로 공격자 서버에 전송되며,
+  공격자 인프라에서 압축 및 Mock Cloud Storage 업로드가 수행된다.
+</p>
+
+<div class="meta-grid" aria-label="Campaign metadata">
+  <div class="meta-label">ID:</div>
+  <div class="meta-value">SB-05</div>
+  <div class="meta-label">First Seen:</div>
+  <div class="meta-value">May 2026</div>
+  <div class="meta-label">Last Seen:</div>
+  <div class="meta-value">May 2026</div>
+  <div class="meta-label">Version:</div>
+  <div class="meta-value">0.2</div>
+  <div class="meta-label">Created:</div>
+  <div class="meta-value">02 May 2026</div>
+  <div class="meta-label">Last Modified:</div>
+  <div class="meta-value">02 May 2026</div>
+</div>
+
+<h2>Groups</h2>
 <div class="table-wrap wide-table">
-<table>
-<thead><tr><th>ID</th><th>Name</th><th>Description</th></tr></thead>
-<tbody>
-<tr><td>G-SB-005</td><td>TBD</td><td>담당자 분석 후 작성.</td></tr>
-</tbody></table></div>
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>G-SB-005</td>
+        <td>YunFlow</td>
+        <td>APT41 DUST Campaign C0040의 데이터 수집 및 유출 흐름에서 착안했으며, Grafana Dashboard Compromise 활동과 연결된 공격 그룹이다.</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
 <h2 id="techniques-used">Techniques Used</h2>
 <div class="table-wrap wide-table">
-<table>
-<thead><tr><th>Domain</th><th>ID</th><th>Name</th><th>Use</th></tr></thead>
-<tbody>
-<tr><td>Enterprise</td><td>TBD</td><td>TBD</td><td>Grafana 피해 환경 분석 후 작성.</td></tr>
-</tbody></table></div>
+  <table>
+    <thead>
+      <tr>
+        <th>Domain</th>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Use</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Enterprise</td>
+        <td>T1119</td>
+        <td>Automated Collection</td>
+        <td>Grafana Dashboard Compromise 당시 악성 JavaScript는 victim의 인증된 Grafana 브라우저 컨텍스트에서 API를 자동 호출하여 사용자, 데이터소스, 대시보드 및 대시보드 상세 JSON을 수집했다.</td>
+      </tr>
+      <tr>
+        <td>Enterprise</td>
+        <td>T1074.001</td>
+        <td>Data Staged: Local Data Staging</td>
+        <td>Grafana Dashboard Compromise 당시 수집된 Grafana API 응답은 victim 브라우저의 Grafana origin <code>localStorage</code>에 <code>paneldust_t1074_*</code> 키로 임시 저장됐다.</td>
+      </tr>
+      <tr>
+        <td>Enterprise</td>
+        <td>T1071.001</td>
+        <td>Application Layer Protocol: Web Protocols</td>
+        <td>Grafana Dashboard Compromise 당시 공격자는 HTTP GET으로 <code>plugin.json</code>과 <code>evil.js</code>를 로드하고, HTTP POST로 수집 데이터를 <code>/collect</code> 엔드포인트에 전송했다.</td>
+      </tr>
+      <tr>
+        <td>Enterprise</td>
+        <td>T1560.001</td>
+        <td>Archive Collected Data: Archive via Utility</td>
+        <td>Grafana Dashboard Compromise 당시 공격자는 공격자 서버에 저장된 <code>grafana_api_collection_*.json</code> 파일을 <code>zip</code> 유틸리티로 압축하여 <code>grafana_api_collection_archive.zip</code>을 생성했다.</td>
+      </tr>
+      <tr>
+        <td>Enterprise</td>
+        <td>T1567.002</td>
+        <td>Exfiltration Over Web Service: Exfiltration to Cloud Storage</td>
+        <td>Grafana Dashboard Compromise 당시 공격자는 압축된 수집 아카이브를 HTTP PUT 요청으로 Mock OneDrive/Cloud Storage 엔드포인트에 업로드했다.</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
 <h2 id="software">Software</h2>
 <div class="table-wrap wide-table">
-<table>
-<thead><tr><th>ID</th><th>Name</th><th>Description</th></tr></thead>
-<tbody>
-<tr><td>S-SB-005</td><td>Grafana</td><td>모니터링 대시보드 및 데이터 소스 관리 서비스. 분석 후 구체화.</td></tr>
-</tbody></table></div>
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>S-SB-011</td>
+        <td>Grafana</td>
+        <td>CVE-2025-4123 XSS 재현 대상이 된 모니터링 및 대시보드 애플리케이션이다.</td>
+      </tr>
+      <tr>
+        <td>S-SB-012</td>
+        <td>ExploitPluginReq</td>
+        <td>공격자 서버가 제공한 악성 frontend plugin metadata 및 JavaScript payload이다.</td>
+      </tr>
+      <tr>
+        <td>S-SB-013</td>
+        <td>Python HTTP Server</td>
+        <td><code>plugin.json</code>, <code>evil.js</code> 제공 및 <code>/collect</code> 데이터 수신에 사용된 공격자 인프라이다.</td>
+      </tr>
+      <tr>
+        <td>S-SB-014</td>
+        <td>zip</td>
+        <td>공격자 서버에 저장된 Grafana API 수집 결과를 압축하는 데 사용된 유틸리티이다.</td>
+      </tr>
+      <tr>
+        <td>S-SB-015</td>
+        <td>Mock Cloud Storage</td>
+        <td>OneDrive와 같은 클라우드 저장소 업로드 흐름을 랩 환경에서 에뮬레이션한 저장소이다.</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
 <h2 id="references">References</h2>
-<ol>
-<li>담당자 자료 추가 예정.</li>
+<ol class="references">
+  <li>MITRE ATT&amp;CK, Campaign C0040 APT41 DUST. <a href="https://attack.mitre.org/campaigns/C0040/">https://attack.mitre.org/campaigns/C0040/</a></li>
+  <li>Grafana Security Advisory, CVE-2025-4123. <a href="https://grafana.com/security/security-advisories/cve-2025-4123/">https://grafana.com/security/security-advisories/cve-2025-4123/</a></li>
+  <li>Spacebar Project local lab notes, Grafana/XSS emulation environment, 2026-05-02.</li>
 </ol>
       <footer class="footer">
         Spacebar Project. This page is not affiliated with MITRE ATT&amp;CK.
