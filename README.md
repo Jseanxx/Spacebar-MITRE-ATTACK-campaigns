@@ -14,6 +14,16 @@ This repository contains static campaign pages created by the Spacebar team. Eac
 Do not edit generated HTML directly. Edit `content/campaigns/SB-XX.md`, then run the build.
 Some existing detailed pages use `format: html` in frontmatter to preserve rich tables and custom blocks. New or rewritten pages can use normal Markdown without that field.
 
+## Authoring Options
+
+Recommended authoring styles:
+
+- Markdown source: edit `content/campaigns/SB-XX.md`. Vercel runs `npm run build`, converts it to `campaigns/SB-XX.html`, and deploys it automatically.
+- HTML body source: keep the file in `content/campaigns/SB-XX.md`, add `format: html` in frontmatter, and write the page body as HTML. The shared header, sidebar, campaign index, and site style still apply.
+- Fully custom HTML: place a standalone `.html` file directly under `campaigns/`. Vercel can serve it, but it will not be managed by the Markdown build or automatically added to the campaign index unless the index/build script is updated.
+
+Avoid editing generated `campaigns/SB-XX.html` directly. Those files can be overwritten the next time `npm run build` runs.
+
 ## Build
 
 ```bash
