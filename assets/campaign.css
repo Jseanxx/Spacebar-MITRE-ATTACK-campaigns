@@ -94,6 +94,71 @@ a:hover {
   padding: 24px;
 }
 
+.page-shell {
+  max-width: var(--sb-width);
+  margin: 0 auto;
+  padding: 0 24px;
+  display: grid;
+  grid-template-columns: 250px minmax(0, 1fr);
+  gap: 28px;
+}
+
+.campaign-content {
+  min-width: 0;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.campaign-sidebar {
+  position: sticky;
+  top: 18px;
+  align-self: start;
+  padding: 24px 0;
+}
+
+.sidebar-block {
+  border-left: 3px solid var(--sb-red);
+  padding-left: 14px;
+  margin-bottom: 22px;
+}
+
+.sidebar-title {
+  margin-bottom: 8px;
+  color: #333;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.sidebar-links {
+  display: grid;
+  gap: 4px;
+}
+
+.sidebar-link {
+  display: block;
+  padding: 7px 8px;
+  border-radius: 4px;
+  color: var(--sb-muted);
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.sidebar-link span {
+  display: inline-block;
+  min-width: 44px;
+  color: #333;
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  font-size: 12px;
+}
+
+.sidebar-link:hover,
+.sidebar-link.active {
+  background: var(--sb-soft);
+  color: var(--sb-ink);
+  text-decoration: none;
+}
+
 .breadcrumbs {
   color: var(--sb-muted);
   font-size: 13px;
@@ -338,8 +403,28 @@ code {
     flex-direction: column;
   }
 
+  .page-shell {
+    grid-template-columns: 1fr;
+    gap: 0;
+    padding: 0 18px;
+  }
+
   .page {
     padding: 18px;
+  }
+
+  .campaign-content {
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .campaign-sidebar {
+    position: static;
+    padding: 18px 0 0;
+  }
+
+  .sidebar-sections {
+    display: none;
   }
 
   h1 {

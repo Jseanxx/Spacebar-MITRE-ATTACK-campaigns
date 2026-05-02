@@ -6,14 +6,24 @@ This repository contains static campaign pages created by the Spacebar team. Eac
 
 ## Pages
 
+- `content/campaigns/SB-01.md`: campaign source files that team members edit
+- `content/campaign-template.md`: copyable writing template
 - `campaigns/index.html`: campaign list
-- `campaigns/SB-01.html`: PipelineKey
-- `campaigns/SB-02.html` ~ `campaigns/SB-06.html`: team member campaign pages
-- `campaigns/template.html`: page template for new campaigns
+- `campaigns/SB-01.html` ~ `campaigns/SB-06.html`: generated campaign pages
+
+Do not edit generated HTML directly. Edit `content/campaigns/SB-XX.md`, then run the build.
+Some existing detailed pages use `format: html` in frontmatter to preserve rich tables and custom blocks. New or rewritten pages can use normal Markdown without that field.
+
+## Build
+
+```bash
+npm run build
+```
 
 ## Local Preview
 
 ```bash
+npm run build
 python3 -m http.server 8091
 ```
 
@@ -31,7 +41,7 @@ Recommended:
 
 - Vercel project name: `spacebar-mitre-attack-campaigns`
 - Root directory: repository root
-- Build command: none
+- Build command: `npm run build`
 - Output directory: none
 
 GitHub Pages alternative:
@@ -42,7 +52,7 @@ GitHub Pages alternative:
 
 ## Collaboration
 
-Each team member owns one `SB-XX.html` page. Keep public pages portfolio-safe:
+Each team member owns one `content/campaigns/SB-XX.md` page. Keep public pages portfolio-safe:
 
 - Do not commit real credentials, SSH keys, tokens, or private IPs that identify a real environment.
 - Use sanitized or lab-only descriptions.
