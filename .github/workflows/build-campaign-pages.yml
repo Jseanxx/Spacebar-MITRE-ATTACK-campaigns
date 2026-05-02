@@ -1,0 +1,45 @@
+name: Build Campaign Pages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "content/campaigns/**"
+      - "tools/build-campaigns.js"
+      - "assets/**"
+      - "package.json"
+      - ".github/workflows/build-campaign-pages.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Build pages
+        run: npm run build
+
+      - name: Commit generated HTML
+        run: |
+          if [ -n "$(git status --porcelain campaigns)" ]; then
+            git config user.name "spacebar-bot"
+            git config user.email "spacebar-bot@users.noreply.github.com"
+            git add campaigns/
+            git commit -m "Build campaign pages"
+            git push
+          else
+            echo "No generated campaign page changes."
+          fi

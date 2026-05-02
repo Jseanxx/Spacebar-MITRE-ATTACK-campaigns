@@ -54,7 +54,6 @@
     </p>
 
     <div class="tag-row" aria-label="Campaign tags">
-      <span class="tag">CVE-2025-55234</span>
       <span class="tag">Supply Chain Focus</span>
       <span class="tag">JBoss AS 6</span>
       <span class="tag">AD Takeover</span>
@@ -85,7 +84,7 @@
     <h2 id="overview">Overview</h2>
     <p>
       Spacebar는 보안 정책상 내부 DC(VM2)의 인터넷 직접 연결을 차단하고, 외부망 JBoss AS 6 서버(VM1)를 통해 패치를 릴레이하는 구조를
-      운용하고 있습니다. CVE-2025-55234는 JBoss AS 6의 인증 없는 원격 코드 실행 취약점으로,
+      운용하고 있습니다. JBoss AS 6의 인증 없는 원격 코드 실행 취약점으로,
       공개 노출된 VM1은 jexboss를 통한 웹쉘 업로드에 취약합니다. VM2는 VM1을 신뢰하여 5분마다 patch.exe를 자동 실행하는 구조이므로,
       공격자가 uploads/ 폴더의 파일을 교체하는 것만으로 인터넷과 완전히 격리된 DC까지 SYSTEM 권한 실행을 달성할 수 있습니다.
     </p>
@@ -93,7 +92,7 @@
     <div class="info-grid" aria-label="Attack chain">
       <div class="info-cell">
         <b>1. JBoss 침해</b>
-        <span>CVE-2025-55234로 외부 노출 서버 장악. 웹쉘로 지속 제어권 확보.</span>
+        <span>JBoss AS 6 원격 코드 실행 취약점으로 외부 노출 서버 장악. 웹쉘로 지속 제어권 확보.</span>
       </div>
       <div class="info-cell">
         <b>2. 릴레이 오염</b>
@@ -160,7 +159,7 @@
             <td>Initial Access</td>
             <td class="id-cell">T1190</td>
             <td>Exploit Public-Facing Application</td>
-            <td>CVE-2025-55234 — JBoss AS 6 역직렬화 취약점으로 외부에서 원격 코드 실행. jexboss 활용.</td>
+            <td>JBoss AS 6 역직렬화 취약점으로 외부에서 원격 코드 실행. jexboss 활용.</td>
           </tr>
           <tr>
             <td>Initial Access</td>
@@ -280,7 +279,7 @@
           <table>
             <tbody>
               <tr><th>OS</th><td>Ubuntu 18.04.6 LTS</td></tr>
-              <tr><th>서버</th><td>JBoss AS 6 (CVE-2025-55234)</td></tr>
+              <tr><th>서버</th><td>JBoss AS 6</td></tr>
               <tr><th>External IP</th><td>192.168.241.10</td></tr>
               <tr><th>Internal IP</th><td>192.168.141.10</td></tr>
               <tr><th>공격 진입</th><td>jexboss → JSP WebShell → patch.exe 교체</td></tr>
