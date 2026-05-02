@@ -7,11 +7,17 @@
   --sb-soft: #f5f6f8;
   --sb-table: #f0f2f5;
   --sb-link: #2b5f7f;
-  --sb-width: 1280px;
+  --sb-width: 1440px;
 }
 
 * {
   box-sizing: border-box;
+}
+
+html,
+body {
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 body {
@@ -97,14 +103,16 @@ a:hover {
 .page-shell {
   max-width: var(--sb-width);
   margin: 0 auto;
-  padding: 0 24px;
+  padding: 0 20px;
   display: grid;
-  grid-template-columns: 250px minmax(0, 1fr);
-  gap: 28px;
+  grid-template-columns: 210px minmax(0, 1fr);
+  gap: 22px;
 }
 
 .campaign-content {
   min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
   padding-left: 0;
   padding-right: 0;
 }
@@ -230,6 +238,9 @@ h3 {
 }
 
 .table-wrap {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
   overflow-x: auto;
   border: 1px solid var(--sb-line);
   margin-bottom: 14px;
@@ -265,11 +276,11 @@ h3 {
 }
 
 .wide-table table {
-  min-width: 1180px;
+  min-width: 980px;
 }
 
 .medium-table table {
-  min-width: 960px;
+  min-width: 820px;
 }
 
 table {
@@ -284,6 +295,7 @@ td {
   border-bottom: 1px solid var(--sb-line);
   vertical-align: top;
   text-align: left;
+  overflow-wrap: anywhere;
 }
 
 th {
@@ -374,6 +386,7 @@ tbody tr:last-child td {
 }
 
 pre {
+  max-width: 100%;
   overflow-x: auto;
   margin: 0;
   padding: 12px;
