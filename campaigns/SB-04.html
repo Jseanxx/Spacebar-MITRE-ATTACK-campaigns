@@ -45,22 +45,35 @@
 <table>
 <thead><tr><th>ID</th><th>Name</th><th>Description</th></tr></thead>
 <tbody>
+<tr><td>G-SB-004</td><td>WIC_Infiltrator</td><td>WIC(Water Infrastructure Center) 포럼의 Next.js 취약점 및 공급망 공격 기법을 활용하여 국가 중요 시설인 정수장 제어망에 침투한 공격 그룹</td></tr>
 </tbody></table></div>
-<p>| G-SB-004 | WIC_Infiltrator |WIC(Water Infrastructure Center) 포럼의 Next.js 취약점 및 공급망 공격 기법을 활용하여 국가 중요 시설인 정수장 제어망에 침투한 공격 그룹</p>
 <h2 id="techniques-used">Techniques Used</h2>
 <div class="table-wrap wide-table">
 <table>
 <thead><tr><th>Domain</th><th>ID</th><th>Name</th><th>Use</th></tr></thead>
 <tbody>
+<tr><td>Enterprise</td><td>T1589.003</td><td>Gather Victim Identity</td><td>WIC 운영진 전용 기술 포럼(Tribune)의  Next-Action 헤더 구조 분석</td></tr>
+<tr><td>Enterprise</td><td>T1190</td><td>Exploit Public-Facing Application</td><td>WIC 포털의 Next.js Server Actions ($K1 필드) 취약점을 이용해 전역 프로토타입 오염 유도</td></tr>
+<tr><td>Enterprise</td><td>T1059.003</td><td>Command and Scripting Interpreter: Unix Shell</td><td>child_process.execSync를 트리거하여 공격자 서버(192.168.219.127)로 리버스 쉘 연결</td></tr>
+<tr><td>Enterprise</td><td>T1505.003</td><td>Server Software Component</td><td>침투한 WIC 웹 서버 내부에 지속적인 원격 제어가 가능하도록 은밀한 백도어 로직 삽입</td></tr>
+<tr><td>Enterprise</td><td>T1548.001</td><td>Abuse Privilege Escalation Mechanism</td><td>WIC 시스템 내 Root 권한으로 자동 실행되는 777 권한 스크립트를 변조하여 최상위 권한 획득</td></tr>
+<tr><td>Enterprise</td><td>T1027</td><td>Obfuscated Files or Information</td><td>__proto__ 오염 페이로드를 Base64로 난독화하여 WMC 내부 보안 장비의 패턴 탐지 회피</td></tr>
+<tr><td>Enterprise</td><td>T1562.001</td><td>Disable or Modify Tools</td><td>침투 흔적 은닉을 위해 WIC 서버의 감사 로그 기록을 강제 중단시키고 실시간 모니터링 경보 차단</td></tr>
+<tr><td>Enterprise</td><td>T1552.001</td><td>Unsecured Credentials: Credentials In Files</td><td>관리 포털 설정 파일(.env)에 노출된 WIC 내부 폐쇄망(SCADA) 접속용 관리자 인증 정보 탈취</td></tr>
+<tr><td>Enterprise</td><td>T1083</td><td>File and Directory Discovery</td><td>ls -al 명령으로 WIC 서버 내 정수장 밸브 제어 프로토콜 및 약품 투입 자동화 스케줄 파일 식별</td></tr>
+<tr><td>Enterprise</td><td>T1021.004</td><td>Remote Services: SSH</td><td>탈취한 Root 권한을 이용해 웹 서버망을 넘어 실제 정수장 제어망 게이트웨이로 SSH 침투 수행</td></tr>
+<tr><td>Enterprise</td><td>T1005</td><td>Data from Local System</td><td>WIC가 관리하는 실시간 수전망 운영 데이터 및 정수장 약품 투입 로그 수집</td></tr>
+<tr><td>Enterprise</td><td>T1071.001</td><td>Application Layer Protocol: Web Protocols</td><td>Tribune 서버를 C2 채널로 활용하여 암호화된 통신을 통해 시설 파괴 및 제어 명령 하달</td></tr>
+<tr><td>Enterprise</td><td>T1041</td><td>Exfiltration Over C2 Channel</td><td>수집한 WIC의 국가 기밀 운영 데이터를 외부의 Tribune 기밀 저장소로 안전하게 유출</td></tr>
+<tr><td>Enterprise</td><td>T1489</td><td>Service Stop</td><td>정수장 밸브 강제 차단 및 약품 투입량 오작동 유발을 통해 도시 전체 물 공급 마비 및 사회적 패닉 야기</td></tr>
 </tbody></table></div>
-<p>| Enterprise |T1589.003|Gather Victim Identity|WIC 운영진 전용 기술 포럼(Tribune)의  Next-Action 헤더 구조 분석 | Enterprise |T1190|Exploit Public-Facing Application|WIC 포털의 Next.js Server Actions ($K1 필드) 취약점을 이용해 전역 프로토타입 오염 유도 | Enterprise |T1059.003|Command and Scripting Interpreter: Unix Shell|child_process.execSync를 트리거하여 공격자 서버(192.168.219.127)로 리버스 쉘 연결 | Enterprise |T1505.003|Server Software Component|침투한 WIC 웹 서버 내부에 지속적인 원격 제어가 가능하도록 은밀한 백도어 로직 삽입 | Enterprise |T1548.001|Abuse Privilege Escalation Mechanism|WIC 시스템 내 Root 권한으로 자동 실행되는 777 권한 스크립트를 변조하여 최상위 권한 획득 | Enterprise |T1027|Obfuscated Files or Information|__proto__ 오염 페이로드를 Base64로 난독화하여 WMC 내부 보안 장비의 패턴 탐지 회피 | Enterprise |T1562.001|Disable or Modify Tools|침투 흔적 은닉을 위해 WIC 서버의 감사 로그 기록을 강제 중단시키고 실시간 모니터링 경보 차단 | Enterprise |T1552.001|Unsecured Credentials: Credentials In Files|관리 포털 설정 파일(.env)에 노출된 WIC 내부 폐쇄망(SCADA) 접속용 관리자 인증 정보 탈취 | Enterprise |T1083|File and Directory Discovery|ls -al 명령으로 WIC 서버 내 정수장 밸브 제어 프로토콜 및 약품 투입 자동화 스케줄 파일 식별 | Enterprise |T1021.004|Remote Services: SSH|탈취한 Root 권한을 이용해 웹 서버망을 넘어 실제 정수장 제어망 게이트웨이로 SSH 침투 수행 | Enterprise |T1005|Data from Local System|WIC가 관리하는 실시간 수전망 운영 데이터 및 정수장 약품 투입 로그 수집 | Enterprise |T1071.001|Application Layer Protocol: Web Protocols|Tribune 서버를 C2 채널로 활용하여 암호화된 통신을 통해 시설 파괴 및 제어 명령 하달 | Enterprise |T1041|Exfiltration Over C2 Channel|수집한 WIC의 국가 기밀 운영 데이터를 외부의 Tribune 기밀 저장소로 안전하게 유출 | Enterprise |T1489|Service Stop|정수장 밸브 강제 차단 및 약품 투입량 오작동 유발을 통해 도시 전체 물 공급 마비 및 사회적 패닉 야기</p>
 <h2 id="software">Software</h2>
 <div class="table-wrap wide-table">
 <table>
 <thead><tr><th>ID</th><th>Name</th><th>Description</th></tr></thead>
 <tbody>
+<tr><td>S-SB-004</td><td>BurpSuite</td><td>프로토타입 오염을 통한 리버스 쉘 확보에 활용</td></tr>
 </tbody></table></div>
-<p>| S-SB-004 | BurpSuite | 프로토타입 오염을 통한 리버스 쉘 확보에 활용</p>
 <h2 id="references">References</h2>
 <p>https://github.com/hidden-investigations/react2shell-vulnlab.git</p>
 <p>https://download.ahnlab.com/kr/site/brochure/React2Shell_Analysis_Report_kr.pdf</p>
