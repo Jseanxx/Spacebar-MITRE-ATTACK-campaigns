@@ -38,14 +38,16 @@
     </aside>
     <main class="page campaign-content">
       <div class="breadcrumbs"><a href="./">Home</a> / <a href="./">Campaigns</a> / <span>Operation Hanguel Flow</span></div>
+<div class="campaign-hero">
+  <div class="campaign-description">
 <h1>Operation Hanguel Flow</h1>
-    <p class="summary">
+<p class="summary">
       Operation Hanguel Flow는 공개 노출된 Langflow 기반 AI/RAG 워크플로 서버를 대상으로 한 침해 캠페인이다.
       HanguelFlow는 Langflow CVE-2025-3248을 악용해 비인증 코드 검증 API에 접근하고, 애플리케이션 런타임 권한에서 Python 실행, 시스템 정보 확인, 파일 경로 탐색, credential 단서 수집, 후속 도구 전송과 HTTP 기반 외부 통신으로 이어지는 활동을 수행했다.
       피해 환경은 nginx reverse proxy, Langflow 애플리케이션, 내부 문서 서버, Custom IR Agent, ELK Stack으로 구성된 기업형 AI 서비스 운영 환경으로 모델링된다.
     </p>
-
-    <div class="meta-grid" aria-label="Campaign metadata">
+  </div>
+<div class="meta-grid" aria-label="Campaign metadata">
       <div class="meta-label">ID:</div>
       <div class="meta-value">SB-06</div>
       <div class="meta-label">Name:</div>
@@ -67,6 +69,7 @@
       <div class="meta-label">Objective:</div>
       <div class="meta-value">External access, execution, discovery, tool transfer</div>
     </div>
+</div>
 
     <div class="tag-row" aria-label="Campaign tags">
       <span class="tag">CVE-2025-3248</span>

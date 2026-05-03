@@ -230,6 +230,50 @@ function markdownToHtml(markdown) {
   return out.join("\n");
 }
 
+function findClosingDiv(html, start) {
+  const token = /<\/?div\b[^>]*>/gi;
+  token.lastIndex = start;
+  let depth = 0;
+  let match;
+
+  while ((match = token.exec(html))) {
+    if (match[0].startsWith("</")) {
+      depth -= 1;
+      if (depth === 0) return token.lastIndex;
+    } else {
+      depth += 1;
+    }
+  }
+
+  return -1;
+}
+
+function wrapCampaignHero(html) {
+  const h1Start = html.indexOf("<h1");
+  const metaStart = html.indexOf('<div class="meta-grid"');
+  if (h1Start === -1 || metaStart === -1 || metaStart < h1Start) return html;
+
+  const h1End = html.indexOf("</h1>", h1Start);
+  if (h1End === -1) return html;
+
+  const metaEnd = findClosingDiv(html, metaStart);
+  if (metaEnd === -1) return html;
+
+  const before = html.slice(0, h1Start);
+  const heading = html.slice(h1Start, h1End + 5);
+  const description = html.slice(h1End + 5, metaStart).trim();
+  const metadata = html.slice(metaStart, metaEnd);
+  const after = html.slice(metaEnd);
+
+  return `${before}<div class="campaign-hero">
+  <div class="campaign-description">
+${heading}
+${description}
+  </div>
+${metadata}
+</div>${after}`;
+}
+
 function readCampaigns() {
   return fs
     .readdirSync(contentDir)
@@ -290,7 +334,7 @@ function renderHeader(title, cssHref = assetHref, logo = logoSrc) {
 
 function renderCampaignPage(campaigns, campaign) {
   const { data, body } = campaign;
-  const bodyHtml = data.format === "html" ? body : markdownToHtml(body);
+  const bodyHtml = wrapCampaignHero(data.format === "html" ? body : markdownToHtml(body));
   return `${renderHeader(`${data.name} | Spacebar Campaigns`)}
 
   <div class="page-shell">
