@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>React2Shell Public Portal Compromise | Spacebar Campaigns</title>
+  <title>React2Shell WIC_Infiltrator | Spacebar Campaigns</title>
   <link rel="stylesheet" href="../assets/campaign.css">
 </head>
 <body>
@@ -22,7 +22,7 @@
           <a class="sidebar-link" href="SB-01.html"><span>SB-01</span>2024 PipelineKey</a>
           <a class="sidebar-link" href="SB-02.html"><span>SB-02</span>Operation Poisoned Relay</a>
           <a class="sidebar-link" href="SB-03.html"><span>SB-03</span>2026 Seoul Dental BookingPress Intrusion</a>
-          <a class="sidebar-link active" href="SB-04.html"><span>SB-04</span>React2Shell Public Portal Compromise</a>
+          <a class="sidebar-link active" href="SB-04.html"><span>SB-04</span>React2Shell WIC_Infiltrator</a>
           <a class="sidebar-link" href="SB-05.html"><span>SB-05</span>Grafana Dashboard Compromise</a>
           <a class="sidebar-link" href="SB-06.html"><span>SB-06</span>Operation Hanguel Flow</a>
         </nav>
@@ -37,7 +37,7 @@
       </div>
     </aside>
     <main class="page campaign-content">
-      <div class="breadcrumbs"><a href="./">Home</a> / <a href="./">Campaigns</a> / <span>React2Shell Public Portal Compromise</span></div>
+      <div class="breadcrumbs"><a href="./">Home</a> / <a href="./">Campaigns</a> / <span>React2Shell WIC_Infiltrator</span></div>
 <h1>React2Shell Public Portal Compromise</h1>
 <p>담당자 분석 후 캠페인 요약을 작성합니다.</p>
 <h2 id="groups">Groups</h2>
@@ -52,8 +52,8 @@
 <table>
 <thead><tr><th>Domain</th><th>ID</th><th>Name</th><th>Use</th></tr></thead>
 <tbody>
-<tr><td>Enterprise</td><td>TBD</td><td>TBD</td><td>React2Shell 피해 환경 분석 후 작성.</td></tr>
 </tbody></table></div>
+<p>| Enterprise |T1589.003|Gather Victim Identity|WIC 운영진 전용 기술 포럼(Tribune)의  Next-Action 헤더 구조 분석 | Enterprise |T1190|Exploit Public-Facing Application|WIC 포털의 Next.js Server Actions ($K1 필드) 취약점을 이용해 전역 프로토타입 오염 유도 | Enterprise |T1059.003|Command and Scripting Interpreter: Unix Shell|child_process.execSync를 트리거하여 공격자 서버(192.168.219.127)로 리버스 쉘 연결 | Enterprise |T1505.003|Server Software Component|침투한 WIC 웹 서버 내부에 지속적인 원격 제어가 가능하도록 은밀한 백도어 로직 삽입 | Enterprise |T1548.001|Abuse Privilege Escalation Mechanism|WIC 시스템 내 Root 권한으로 자동 실행되는 777 권한 스크립트를 변조하여 최상위 권한 획득 | Enterprise |T1027|Obfuscated Files or Information|__proto__ 오염 페이로드를 Base64로 난독화하여 WMC 내부 보안 장비의 패턴 탐지 회피 | Enterprise |T1562.001|Disable or Modify Tools|침투 흔적 은닉을 위해 WIC 서버의 감사 로그 기록을 강제 중단시키고 실시간 모니터링 경보 차단 | Enterprise |T1552.001|Unsecured Credentials: Credentials In Files|관리 포털 설정 파일(.env)에 노출된 WIC 내부 폐쇄망(SCADA) 접속용 관리자 인증 정보 탈취 | Enterprise |T1083|File and Directory Discovery|ls -al 명령으로 WIC 서버 내 정수장 밸브 제어 프로토콜 및 약품 투입 자동화 스케줄 파일 식별 | Enterprise |T1021.004|Remote Services: SSH|탈취한 Root 권한을 이용해 웹 서버망을 넘어 실제 정수장 제어망 게이트웨이로 SSH 침투 수행 | Enterprise |T1005|Data from Local System|WIC가 관리하는 실시간 수전망 운영 데이터 및 정수장 약품 투입 로그 수집 | Enterprise |T1071.001|Application Layer Protocol: Web Protocols|Tribune 서버를 C2 채널로 활용하여 암호화된 통신을 통해 시설 파괴 및 제어 명령 하달 | Enterprise |T1041|Exfiltration Over C2 Channel|수집한 WIC의 국가 기밀 운영 데이터를 외부의 Tribune 기밀 저장소로 안전하게 유출 | Enterprise |T1489|Service Stop|정수장 밸브 강제 차단 및 약품 투입량 오작동 유발을 통해 도시 전체 물 공급 마비 및 사회적 패닉 야기</p>
 <h2 id="software">Software</h2>
 <div class="table-wrap wide-table">
 <table>
@@ -62,9 +62,7 @@
 <tr><td>S-SB-004</td><td>React / Node runtime</td><td>분석 후 구체화.</td></tr>
 </tbody></table></div>
 <h2 id="references">References</h2>
-<ol>
-<li>담당자 자료 추가 예정.</li>
-</ol>
+<p>https://github.com/hidden-investigations/react2shell-vulnlab.git https://download.ahnlab.com/kr/site/brochure/React2Shell_Analysis_Report_kr.pdf</p>
       <footer class="footer">
         Spacebar Project. This page is not affiliated with MITRE ATT&amp;CK.
       </footer>
