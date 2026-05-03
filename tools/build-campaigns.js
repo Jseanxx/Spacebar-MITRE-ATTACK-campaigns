@@ -67,6 +67,20 @@ function renderInline(text) {
     .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');
 }
 
+function renderMetadataGrid(rows) {
+  const body = rows
+    .map(([label, value]) => {
+      const normalizedLabel = label.endsWith(":") ? label : `${label}:`;
+      return [
+        `<div class="meta-label">${renderInline(normalizedLabel)}</div>`,
+        `<div class="meta-value">${renderInline(value)}</div>`,
+      ].join("\n");
+    })
+    .join("\n");
+
+  return `<div class="meta-grid" aria-label="Campaign metadata">\n${body}\n</div>`;
+}
+
 function headingId(text) {
   const known = {
     overview: "overview",
@@ -147,6 +161,14 @@ function markdownToHtml(markdown) {
         i += 1;
       }
       i -= 1;
+      if (
+        headers.length === 2 &&
+        headers[0].trim().toLowerCase() === "field" &&
+        headers[1].trim().toLowerCase() === "value"
+      ) {
+        out.push(renderMetadataGrid(rows));
+        continue;
+      }
       out.push('<div class="table-wrap wide-table">');
       out.push("<table>");
       out.push(`<thead><tr>${headers.map((h) => `<th>${renderInline(h)}</th>`).join("")}</tr></thead>`);

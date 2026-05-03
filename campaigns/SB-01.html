@@ -40,17 +40,20 @@
       <div class="breadcrumbs"><a href="./">Home</a> / <a href="./">Campaigns</a> / <span>PipelineKey</span></div>
 <h1>PipelineKey</h1>
 <p>PipelineKey는 기업 개발망의 Jenkins CI/CD 서버와 Staging Web Server를 대상으로 한 침해 캠페인이다. BreadKimchi는 유출된 개발자 VPN 계정 또는 협력사 접근권을 통해 내부 개발망에 진입한 뒤 Jenkins 서버를 식별했다. 이후 Jenkins CLI 파일 읽기 취약점과 배포 credential 관리 미흡을 이용해 Job 설정, build log, workspace, 배포 키 단서를 조사했다. BreadKimchi는 Jenkins가 배포하는 Cat Cafe Staging 서버에 접근하여 nginx 설정, 배포 스크립트, 고객 정보와 예약 데이터를 수집하고, 수집한 데이터를 archive로 묶어 SSH/SCP를 통해 공격자 서버로 전송했다.</p>
-<div class="table-wrap wide-table">
-<table>
-<thead><tr><th>Field</th><th>Value</th></tr></thead>
-<tbody>
-<tr><td>ID</td><td>SB-01</td></tr>
-<tr><td>First Seen</td><td>January 2024</td></tr>
-<tr><td>Last Seen</td><td>May 2024</td></tr>
-<tr><td>Version</td><td>0.3</td></tr>
-<tr><td>Created</td><td>01 May 2026</td></tr>
-<tr><td>Last Modified</td><td>02 May 2026</td></tr>
-</tbody></table></div>
+<div class="meta-grid" aria-label="Campaign metadata">
+<div class="meta-label">ID:</div>
+<div class="meta-value">SB-01</div>
+<div class="meta-label">First Seen:</div>
+<div class="meta-value">January 2024</div>
+<div class="meta-label">Last Seen:</div>
+<div class="meta-value">May 2024</div>
+<div class="meta-label">Version:</div>
+<div class="meta-value">0.3</div>
+<div class="meta-label">Created:</div>
+<div class="meta-value">01 May 2026</div>
+<div class="meta-label">Last Modified:</div>
+<div class="meta-value">02 May 2026</div>
+</div>
 <h2 id="groups">Groups</h2>
 <div class="table-wrap wide-table">
 <table>
