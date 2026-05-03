@@ -38,15 +38,15 @@
     </aside>
     <main class="page campaign-content">
       <div class="breadcrumbs"><a href="./">Home</a> / <a href="./">Campaigns</a> / <span>React2Shell WIC_Infiltrator</span></div>
-<h1>React2Shell Public Portal Compromise</h1>
-<p>담당자 분석 후 캠페인 요약을 작성합니다.</p>
+<h1>React2Shell WIC_Infiltrator</h1>
+<p>본 캠페인은 WIC(Water Infrastructure Center) 포럼 포털의 Next.js Server Actions에서 발생하는 취약점을 거점으로 합니다. 공격자는 전역 프로토타입 오염 기법을 통해 초기 침투에 성공한 후, Node.js 런타임의 http 모듈을 가로채는 방식으로 은밀한 웹쉘을 구축했습니다. 이후 Docker 환경의 설정 미비(Root 권한 실행)를 악용하여 컨테이너 제어권을 완전히 장악하였으며, 이를 통해 정수장 제어망 및 SCADA 시스템으로의 측면 이동(Lateral Movement)을 시도한 고도화된 공급망 침해 시나리오를 포함합니다.</p>
 <h2 id="groups">Groups</h2>
 <div class="table-wrap wide-table">
 <table>
 <thead><tr><th>ID</th><th>Name</th><th>Description</th></tr></thead>
 <tbody>
-<tr><td>G-SB-004</td><td>TBD</td><td>담당자 분석 후 작성.</td></tr>
 </tbody></table></div>
+<p>| G-SB-004 | WIC_Infiltrator |WIC(Water Infrastructure Center) 포럼의 Next.js 취약점 및 공급망 공격 기법을 활용하여 국가 중요 시설인 정수장 제어망에 침투한 공격 그룹</p>
 <h2 id="techniques-used">Techniques Used</h2>
 <div class="table-wrap wide-table">
 <table>
@@ -59,8 +59,8 @@
 <table>
 <thead><tr><th>ID</th><th>Name</th><th>Description</th></tr></thead>
 <tbody>
-<tr><td>S-SB-004</td><td>React / Node runtime</td><td>분석 후 구체화.</td></tr>
 </tbody></table></div>
+<p>| S-SB-004 | BurpSuite | 프로토타입 오염을 통한 리버스 쉘 확보에 활용</p>
 <h2 id="references">References</h2>
 <p>https://github.com/hidden-investigations/react2shell-vulnlab.git</p>
 <p>https://download.ahnlab.com/kr/site/brochure/React2Shell_Analysis_Report_kr.pdf</p>
