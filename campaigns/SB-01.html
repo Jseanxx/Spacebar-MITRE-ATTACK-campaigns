@@ -39,7 +39,7 @@
     <main class="page campaign-content">
       <div class="breadcrumbs"><a href="./">Home</a> / <a href="./">Campaigns</a> / <span>2024 PipelineKey</span></div>
 <h1>2024 PipelineKey</h1>
-<p>2024 PipelineKey는 기업 개발망의 Jenkins CI/CD 서버와 Staging Web Server를 대상으로 한 침해 캠페인이다. BreadKimchi는 유출된 개발자 VPN 계정 또는 협력사 접근권을 통해 내부 개발망에 진입한 뒤 Jenkins 서버를 식별했다. 이후 Jenkins CLI 파일 읽기 취약점과 배포 credential 관리 미흡을 이용해 Job 설정, build log, workspace, 배포 키 단서를 조사했다. BreadKimchi는 Jenkins가 배포하는 Cat Cafe Staging 서버에 접근하여 nginx 설정, 배포 스크립트, 고객 정보와 예약 데이터를 수집하고, 수집한 데이터를 archive로 묶어 SSH/SCP를 통해 공격자 서버로 전송했다.</p>
+<p>2024 PipelineKey는 침해된 개발자 단말 또는 탈취된 개발자 VPN 세션을 통해 내부 개발망에 접근한 뒤, Jenkins CI/CD 서버와 Staging Web Server를 대상으로 전개된 침해 캠페인이다. BreadKimchi는 개발자 단말에서 Jenkins Web UI와 CLI 접근 가능성을 확인하고 Jenkins 서버를 식별했다. 이후 Jenkins CLI 파일 읽기 취약점과 배포 credential 관리 미흡을 이용해 Job 설정, build log, workspace, 배포 키 단서를 조사했다. BreadKimchi는 Jenkins가 배포하는 Cat Cafe Staging 서버에 접근하여 nginx 설정, 배포 스크립트, 고객 정보와 예약 데이터를 수집하고, 수집한 데이터를 archive로 묶어 SSH/SCP를 통해 공격자 서버로 전송했다.</p>
 <div class="meta-grid" aria-label="Campaign metadata">
 <div class="meta-label">ID:</div>
 <div class="meta-value">SB-01</div>
@@ -66,7 +66,7 @@
 <table>
 <thead><tr><th>Domain</th><th>ID</th><th>Name</th><th>Use</th></tr></thead>
 <tbody>
-<tr><td>Enterprise</td><td>T1592</td><td>Gather Victim Host Information</td><td>2024 PipelineKey 당시 BreadKimchi는 내부 개발망에서 Jenkins 응답 헤더, CLI jar 노출 여부, 서비스 포트, Jenkins UI 정보를 수집하여 CI/CD 서버의 역할과 취약 버전 여부를 식별했다.</td></tr>
+<tr><td>Enterprise</td><td>T1592</td><td>Gather Victim Host Information</td><td>2024 PipelineKey 당시 BreadKimchi는 침해된 개발자 단말에서 내부 개발망의 Jenkins 응답 헤더, CLI jar 노출 여부, 서비스 포트, Jenkins UI 정보를 수집하여 CI/CD 서버의 역할과 취약 버전 여부를 식별했다.</td></tr>
 <tr><td>Enterprise</td><td>T1190</td><td>Exploit Public-Facing Application</td><td>2024 PipelineKey 당시 BreadKimchi는 기업 개발망에 노출된 Jenkins CLI 기능을 악용하여 Jenkins controller 파일시스템의 파일을 읽었다.</td></tr>
 <tr><td>Enterprise</td><td>T1213</td><td>Data from Information Repositories</td><td>2024 PipelineKey 당시 BreadKimchi는 Jenkins를 CI/CD 정보 저장소로 활용하여 Job 설정, build log, workspace, 배포 대상 정보, credential metadata를 조사했다.</td></tr>
 <tr><td>Enterprise</td><td>T1083</td><td>File and Directory Discovery</td><td>2024 PipelineKey 당시 BreadKimchi는 Jenkins home의 jobs, builds, workspace, secrets, users 경로를 탐색하고, 이후 Staging 서버의 웹 루트, 배포 스크립트, nginx 로그 경로를 확인했다.</td></tr>
