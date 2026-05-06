@@ -16,6 +16,7 @@ function escapeHtml(value) {
 }
 
 function parseFrontmatter(source, file) {
+  source = source.replace(/^\uFEFF/, '').replace(/\r\n/g, '\n').replace(/\r/g, '\n');
   if (!source.startsWith("---\n")) {
     throw new Error(`${file} is missing frontmatter.`);
   }
@@ -92,7 +93,7 @@ function headingId(text) {
     "observed infrastructure": "infrastructure",
   };
   const key = text.trim().toLowerCase();
-  return known[key] || key.replace(/[^a-z0-9가-힣]+/gi, "-").replace(/^-|-$/g, "").toLowerCase();
+  return known[key] || key.replace(/[^a-z0-9\uAC00-\uD7A3]+/gi, "-").replace(/^-|-$/g, "").toLowerCase();
 }
 
 function markdownToHtml(markdown) {
@@ -372,8 +373,8 @@ function renderIndex(campaigns) {
     <div class="breadcrumbs"><a href="./">Home</a> / <span>Campaigns</span></div>
     <h1>Campaigns</h1>
     <p class="summary">
-      Spacebar 팀은 기업형 피해 시스템을 모델링한 뒤 각 환경에서 발생 가능한 공격 방식과 침해 흐름을 분석했다.
-      각 캠페인은 공통 목표와 대상 시스템을 기준으로 공격자의 TTPs를 정리하고, 이를 MITRE ATT&amp;CK Campaign 페이지 형식에 맞춰 구성한 결과물이다.
+      Spacebar ?? 湲곗뾽???쇳빐 ?쒖뒪?쒖쓣 紐⑤뜽留곹븳 ??媛??섍꼍?먯꽌 諛쒖깮 媛?ν븳 怨듦꺽 諛⑹떇怨?移⑦빐 ?먮쫫??遺꾩꽍?덈떎.
+      媛?罹좏럹?몄? 怨듯넻 紐⑺몴? ????쒖뒪?쒖쓣 湲곗??쇰줈 怨듦꺽?먯쓽 TTPs瑜??뺣━?섍퀬, ?대? MITRE ATT&amp;CK Campaign ?섏씠吏 ?뺤떇??留욎떠 援ъ꽦??寃곌낵臾쇱씠??
     </p>
 
     <h2>Campaign List</h2>
@@ -419,3 +420,4 @@ function main() {
 }
 
 main();
+
