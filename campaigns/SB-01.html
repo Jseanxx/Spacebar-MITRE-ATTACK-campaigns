@@ -51,11 +51,11 @@
 <div class="meta-label">Last Seen:</div>
 <div class="meta-value">May 2024</div>
 <div class="meta-label">Version:</div>
-<div class="meta-value">0.5</div>
+<div class="meta-value">0.6</div>
 <div class="meta-label">Created:</div>
 <div class="meta-value">01 May 2026</div>
 <div class="meta-label">Last Modified:</div>
-<div class="meta-value">06 May 2026</div>
+<div class="meta-value">07 May 2026</div>
 </div>
 </div>
 <h2 id="groups">Groups</h2>
@@ -74,11 +74,12 @@
 <tr><td>Enterprise</td><td>T1552.001</td><td>Unsecured Credentials: Credentials In Files</td><td>2024 PipelineKey 당시 BreadKimchi는 침해된 개발자 단말의 자동화 스크립트와 설정 파일에 남아 있던 Jenkins API Token을 수집했다.</td></tr>
 <tr><td>Enterprise</td><td>T1078</td><td>Valid Accounts</td><td>2024 PipelineKey 당시 BreadKimchi는 수집한 Jenkins API Token을 이용해 Jenkins CLI에 인증하고, 개발자 계정 권한으로 Jenkins controller와 상호작용했다.</td></tr>
 <tr><td>Enterprise</td><td>T1190</td><td>Exploit Public-Facing Application</td><td>2024 PipelineKey 당시 BreadKimchi는 Jenkins CLI의 CVE-2024-23897 파일 읽기 취약점을 악용하여 Jenkins controller 내부 파일을 읽었다.</td></tr>
-<tr><td>Enterprise</td><td>T1213</td><td>Data from Information Repositories</td><td>2024 PipelineKey 당시 BreadKimchi는 Jenkins를 CI/CD 정보 저장소로 활용하여 Job 설정, build log, workspace, 배포 대상 정보, credential metadata를 조사했다.</td></tr>
-<tr><td>Enterprise</td><td>T1552.004</td><td>Unsecured Credentials: Private Keys</td><td>2024 PipelineKey 당시 BreadKimchi는 Jenkins controller 내부에서 App 서버 배포에 사용되는 SSH private key를 수집했다.</td></tr>
+<tr><td>Enterprise</td><td>T1213</td><td>Data from Information Repositories</td><td>2024 PipelineKey 당시 BreadKimchi는 Jenkins를 CI/CD 정보 저장소로 활용하여 배포 대상, Job 실행 이력, workspace, credential metadata 등 App 서버 접근에 필요한 단서를 조사했다.</td></tr>
+<tr><td>Enterprise</td><td>T1552.004</td><td>Unsecured Credentials: Private Keys</td><td>2024 PipelineKey 당시 BreadKimchi는 Jenkins 내부의 배포 credential 및 관련 단서에서 App 서버 접근에 사용되는 SSH private key를 수집했다.</td></tr>
 <tr><td>Enterprise</td><td>T1021.004</td><td>Remote Services: SSH</td><td>2024 PipelineKey 당시 BreadKimchi는 Jenkins에서 확보한 배포 키와 deploy 계정을 사용하여 SSH를 통해 App 서버에 접근했다.</td></tr>
 <tr><td>Enterprise</td><td>T1083</td><td>File and Directory Discovery</td><td>2024 PipelineKey 당시 BreadKimchi는 App 서버의 애플리케이션 경로, 컨테이너 구성, 환경 설정 파일, DB 연결 정보를 탐색했다.</td></tr>
-<tr><td>Enterprise</td><td>T1005</td><td>Data from Local System</td><td>2024 PipelineKey 당시 BreadKimchi는 App 서버에서 확인한 PostgreSQL 접속 정보를 사용하여 DB 서버의 고객 예약 데이터를 수집했다.</td></tr>
+<tr><td>Enterprise</td><td>T1213.006</td><td>Data from Information Repositories: Databases</td><td>2024 PipelineKey 당시 BreadKimchi는 App 서버에서 확인한 PostgreSQL 접속 정보를 사용하여 DB 서버의 고객 예약 데이터베이스를 조회하고 고객/예약 데이터를 수집했다.</td></tr>
+<tr><td>Enterprise</td><td>T1074.001</td><td>Data Staged: Local Data Staging</td><td>2024 PipelineKey 당시 BreadKimchi는 수집한 고객 예약 데이터를 App 서버의 임시 경로에 모아 archive로 묶어 외부 전송을 준비했다.</td></tr>
 <tr><td>Enterprise</td><td>T1048.002</td><td>Exfiltration Over Alternative Protocol: Exfiltration Over Asymmetric Encrypted Non-C2 Protocol</td><td>2024 PipelineKey 당시 BreadKimchi는 수집한 고객 예약 데이터를 압축 및 암호화한 뒤 HTTPS 또는 SSH 기반 채널을 통해 외부 인프라로 전송했다.</td></tr>
 </tbody></table></div>
 <h2 id="software">Software</h2>
