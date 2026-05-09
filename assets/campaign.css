@@ -404,6 +404,68 @@ tbody tr:last-child td {
   margin-top: 0;
 }
 
+.concept-banner {
+  display: grid;
+  gap: 4px;
+  margin: 18px 0 22px;
+  padding: 14px 16px;
+  border-left: 4px solid var(--sb-red);
+  background: var(--sb-soft);
+}
+
+.concept-banner span {
+  color: var(--sb-muted);
+}
+
+.technique-panel {
+  margin: 12px 0;
+  border: 1px solid var(--sb-line);
+  border-radius: 4px;
+  background: #fff;
+}
+
+.technique-panel summary {
+  cursor: pointer;
+  padding: 14px 16px;
+  background: var(--sb-table);
+  font-weight: 650;
+}
+
+.technique-panel summary::marker {
+  color: var(--sb-link);
+}
+
+.technique-body {
+  padding: 16px;
+}
+
+.technique-body > :first-child {
+  margin-top: 0;
+}
+
+.mapping-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+  margin: 14px 0;
+}
+
+.mapping-grid > div {
+  border: 1px solid var(--sb-line);
+  border-radius: 4px;
+  background: var(--sb-soft);
+  padding: 12px;
+}
+
+.mapping-grid h3 {
+  margin: 0 0 6px;
+  font-size: 14px;
+}
+
+.mapping-grid p {
+  margin: 0;
+}
+
 pre {
   max-width: 100%;
   overflow-x: auto;
@@ -468,14 +530,15 @@ code {
     margin: 16px 0 18px;
   }
 
-  .campaign-hero,
-  .meta-grid,
-  .two-col,
-  .info-grid,
-  .phase-grid,
-  .cards,
-  .flow,
-  .code-grid {
+    .campaign-hero,
+    .meta-grid,
+    .two-col,
+    .info-grid,
+    .phase-grid,
+    .cards,
+    .flow,
+    .code-grid,
+    .mapping-grid {
     grid-template-columns: 1fr;
   }
 

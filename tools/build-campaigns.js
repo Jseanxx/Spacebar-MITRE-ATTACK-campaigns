@@ -3,7 +3,10 @@ const path = require("path");
 
 const root = path.resolve(__dirname, "..");
 const contentDir = path.join(root, "content", "campaigns");
+const detectionDir = path.join(root, "content", "detections");
+const logCatalogDir = path.join(root, "content", "log-catalog");
 const outDir = path.join(root, "campaigns");
+const logsOutDir = path.join(root, "logs");
 const assetHref = "../assets/campaign.css";
 const logoSrc = "../assets/spacebarLogo.png";
 
@@ -291,7 +294,25 @@ function readCampaigns() {
     });
 }
 
-function renderSidebar(campaigns, currentId) {
+function readContentCollection(dir, pattern, slugFactory) {
+  if (!fs.existsSync(dir)) return [];
+  return fs
+    .readdirSync(dir)
+    .filter((file) => pattern.test(file))
+    .sort()
+    .map((file) => {
+      const source = fs.readFileSync(path.join(dir, file), "utf8");
+      const parsed = parseFrontmatter(source, file);
+      return {
+        file,
+        slug: slugFactory(file, parsed.data),
+        ...parsed,
+      };
+    });
+}
+
+function renderSidebar(campaigns, currentId, options = {}) {
+  const { detectionSlug, logIndexHref = "../logs/" } = options;
   return `
     <aside class="campaign-sidebar" aria-label="Campaign navigation">
       <div class="sidebar-block">
@@ -308,9 +329,11 @@ function renderSidebar(campaigns, currentId) {
       <div class="sidebar-block sidebar-sections">
         <div class="sidebar-title">On This Page</div>
         <nav class="sidebar-links">
+          ${detectionSlug ? `<a class="sidebar-link" href="${detectionSlug}">Detection Map</a>` : ""}
           <a class="sidebar-link" href="#techniques-used">Techniques Used</a>
           <a class="sidebar-link" href="#software">Software</a>
           <a class="sidebar-link" href="#references">References</a>
+          <a class="sidebar-link" href="${logIndexHref}">Log Catalog</a>
         </nav>
       </div>
     </aside>`;
@@ -333,13 +356,14 @@ function renderHeader(title, cssHref = assetHref, logo = logoSrc) {
   </header>`;
 }
 
-function renderCampaignPage(campaigns, campaign) {
+function renderCampaignPage(campaigns, campaign, detectionByCampaign = new Map()) {
   const { data, body } = campaign;
   const bodyHtml = wrapCampaignHero(data.format === "html" ? body : markdownToHtml(body));
+  const detectionSlug = detectionByCampaign.get(data.id)?.slug;
   return `${renderHeader(`${data.name} | Spacebar Campaigns`)}
 
   <div class="page-shell">
-${renderSidebar(campaigns, data.id)}
+${renderSidebar(campaigns, data.id, { detectionSlug })}
     <main class="page campaign-content">
       <div class="breadcrumbs"><a href="./">Home</a> / <a href="./">Campaigns</a> / <span>${escapeHtml(data.name)}</span></div>
 ${bodyHtml}
@@ -366,7 +390,108 @@ ${bodyHtml}
 `;
 }
 
-function renderIndex(campaigns) {
+function renderDetectionPage(campaigns, detection) {
+  const { data, body } = detection;
+  const bodyHtml = data.format === "html" ? body : markdownToHtml(body);
+  const campaign = campaigns.find((item) => item.data.id === data.campaign);
+  const campaignName = campaign ? campaign.data.name : data.campaign;
+  return `${renderHeader(`${data.name} | Spacebar Detection Map`)}
+
+  <div class="page-shell">
+${renderSidebar(campaigns, data.campaign, { logIndexHref: "../logs/" })}
+    <main class="page campaign-content">
+      <div class="breadcrumbs"><a href="./">Home</a> / <a href="./">Campaigns</a> / <a href="${data.campaign}.html">${escapeHtml(campaignName)}</a> / <span>Detection Map</span></div>
+${bodyHtml}
+      <footer class="footer">
+        Spacebar Project. This detection map is an educational analysis artifact.
+      </footer>
+    </main>
+  </div>
+</body>
+</html>
+`;
+}
+
+function renderLogSidebar(logs, currentId) {
+  return `
+    <aside class="campaign-sidebar" aria-label="Log catalog navigation">
+      <div class="sidebar-block">
+        <div class="sidebar-title">Log Catalog</div>
+        <nav class="sidebar-links">
+          <a class="sidebar-link" href="./">Index</a>
+          ${logs
+            .map((log) => {
+              const active = log.data.id === currentId ? " active" : "";
+              return `<a class="sidebar-link${active}" href="${log.slug}"><span>${escapeHtml(log.data.id)}</span>${escapeHtml(log.data.name)}</a>`;
+            })
+            .join("\n          ")}
+        </nav>
+      </div>
+      <div class="sidebar-block">
+        <div class="sidebar-title">Campaigns</div>
+        <nav class="sidebar-links">
+          <a class="sidebar-link" href="../campaigns/">Campaign Index</a>
+          <a class="sidebar-link" href="../campaigns/SB-01-detection-map.html">SB-01 Detection Map</a>
+        </nav>
+      </div>
+    </aside>`;
+}
+
+function renderLogPage(logs, log) {
+  const { data, body } = log;
+  const bodyHtml = data.format === "html" ? body : markdownToHtml(body);
+  return `${renderHeader(`${data.id} ${data.name} | Spacebar Log Catalog`, "../assets/campaign.css", "../assets/spacebarLogo.png")}
+
+  <div class="page-shell">
+${renderLogSidebar(logs, data.id)}
+    <main class="page campaign-content">
+      <div class="breadcrumbs"><a href="../campaigns/">Home</a> / <a href="./">Log Catalog</a> / <span>${escapeHtml(data.id)}</span></div>
+${bodyHtml}
+      <footer class="footer">
+        Spacebar Project. Log IDs are project-defined analysis identifiers, not MITRE ATT&amp;CK IDs.
+      </footer>
+    </main>
+  </div>
+</body>
+</html>
+`;
+}
+
+function renderLogIndex(logs) {
+  return `${renderHeader("Spacebar Log Catalog", "../assets/campaign.css", "../assets/spacebarLogo.png")}
+
+  <main class="page">
+    <div class="breadcrumbs"><a href="../campaigns/">Home</a> / <span>Log Catalog</span></div>
+    <h1>Log Catalog</h1>
+    <p class="summary">
+      각 로그 문서는 원본 위치, 수집 방식, 로그 포맷, 주요 필드 의미, 커버 가능한 Technique을 분리해 정리한다.
+      Campaign Detection Map은 이 Log ID를 참조하고, Log Catalog는 어떤 Technique과 연결되는지 역매핑한다.
+    </p>
+    <div class="cards">
+${logs
+  .map(
+    (log) => `      <article class="card">
+        <h3><a href="${log.slug}">${escapeHtml(log.data.id)} ${escapeHtml(log.data.name)}</a></h3>
+        <p>${escapeHtml(log.data.description || "")}</p>
+        <div class="tag-row">
+          ${(log.data.techniques || "")
+            .split(",")
+            .map((item) => item.trim())
+            .filter(Boolean)
+            .map((item) => `<span class="tag">${escapeHtml(item)}</span>`)
+            .join("\n          ")}
+        </div>
+      </article>`
+  )
+  .join("\n")}
+    </div>
+  </main>
+</body>
+</html>
+`;
+}
+
+function renderIndex(campaigns, detectionByCampaign = new Map()) {
   return `${renderHeader("Spacebar Campaigns")}
 
   <main class="page">
@@ -390,14 +515,18 @@ function renderIndex(campaigns) {
         </thead>
         <tbody>
 ${campaigns
-  .map(
-    (campaign) => `          <tr>
+  .map((campaign) => {
+    const detection = detectionByCampaign.get(campaign.data.id);
+    const ownerCell = detection
+      ? `${escapeHtml(campaign.data.owner || "")}<br><a href="${detection.slug}">Detection Map</a>`
+      : escapeHtml(campaign.data.owner || "");
+    return `          <tr>
             <td class="id-cell">${escapeHtml(campaign.data.id)}</td>
             <td><a href="${campaign.slug}">${escapeHtml(campaign.data.name)}</a></td>
             <td>${escapeHtml(campaign.data.description || "")}</td>
-            <td>${escapeHtml(campaign.data.owner || "")}</td>
-          </tr>`
-  )
+            <td>${ownerCell}</td>
+          </tr>`;
+  })
   .join("\n")}
         </tbody>
       </table>
@@ -410,13 +539,30 @@ ${campaigns
 
 function main() {
   const campaigns = readCampaigns();
+  const detections = readContentCollection(detectionDir, /^SB-\d+\.md$/, (file) =>
+    file.replace(/\.md$/, "-detection-map.html")
+  );
+  const detectionByCampaign = new Map(detections.map((detection) => [detection.data.campaign, detection]));
+  const logs = readContentCollection(logCatalogDir, /^[A-Z]+-\d+\.md$/, (file) =>
+    file.replace(/\.md$/, ".html")
+  );
   fs.mkdirSync(outDir, { recursive: true });
+  fs.mkdirSync(logsOutDir, { recursive: true });
 
   campaigns.forEach((campaign) => {
-    fs.writeFileSync(path.join(outDir, campaign.slug), renderCampaignPage(campaigns, campaign));
+    fs.writeFileSync(path.join(outDir, campaign.slug), renderCampaignPage(campaigns, campaign, detectionByCampaign));
   });
 
-  fs.writeFileSync(path.join(outDir, "index.html"), renderIndex(campaigns));
+  detections.forEach((detection) => {
+    fs.writeFileSync(path.join(outDir, detection.slug), renderDetectionPage(campaigns, detection));
+  });
+
+  logs.forEach((log) => {
+    fs.writeFileSync(path.join(logsOutDir, log.slug), renderLogPage(logs, log));
+  });
+
+  fs.writeFileSync(path.join(outDir, "index.html"), renderIndex(campaigns, detectionByCampaign));
+  fs.writeFileSync(path.join(logsOutDir, "index.html"), renderLogIndex(logs));
 }
 
 main();

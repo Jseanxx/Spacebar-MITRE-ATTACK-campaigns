@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Spacebar Log Catalog</title>
+  <link rel="stylesheet" href="../assets/campaign.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="./"><img class="brand-logo" src="../assets/spacebarLogo.png" alt="Spacebar"><span>Spacebar Campaigns</span></a>
+    </div>
+  </header>
+
+  <main class="page">
+    <div class="breadcrumbs"><a href="../campaigns/">Home</a> / <span>Log Catalog</span></div>
+    <h1>Log Catalog</h1>
+    <p class="summary">
+      각 로그 문서는 원본 위치, 수집 방식, 로그 포맷, 주요 필드 의미, 커버 가능한 Technique을 분리해 정리한다.
+      Campaign Detection Map은 이 Log ID를 참조하고, Log Catalog는 어떤 Technique과 연결되는지 역매핑한다.
+    </p>
+    <div class="cards">
+      <article class="card">
+        <h3><a href="AWSL-001.html">AWSL-001 AWS VPC Flow Log</a></h3>
+        <p>AWS VPC 네트워크 흐름에서 외부 전송과 서버 간 통신을 확인하는 로그.</p>
+        <div class="tag-row">
+          <span class="tag">T1048.002</span>
+          <span class="tag">T1021.004</span>
+        </div>
+      </article>
+      <article class="card">
+        <h3><a href="DBL-001.html">DBL-001 PostgreSQL Connection and Query Log</a></h3>
+        <p>PostgreSQL 접속과 쿼리 실행 흔적을 확인하는 데이터베이스 로그.</p>
+        <div class="tag-row">
+          <span class="tag">T1213.006</span>
+          <span class="tag">T1078</span>
+        </div>
+      </article>
+      <article class="card">
+        <h3><a href="JL-001.html">JL-001 Jenkins HTTP Access Log</a></h3>
+        <p>Jenkins Web UI와 CLI jar 접근 흔적을 확인하는 HTTP access log.</p>
+        <div class="tag-row">
+          <span class="tag">T1592</span>
+          <span class="tag">T1190</span>
+          <span class="tag">T1213</span>
+        </div>
+      </article>
+      <article class="card">
+        <h3><a href="JL-002.html">JL-002 Jenkins Docker and System Log</a></h3>
+        <p>Jenkins 컨테이너 표준 출력과 내부 시스템 이벤트를 확인하는 로그.</p>
+        <div class="tag-row">
+          <span class="tag">T1078</span>
+          <span class="tag">T1190</span>
+          <span class="tag">T1213</span>
+          <span class="tag">T1552.004</span>
+        </div>
+      </article>
+      <article class="card">
+        <h3><a href="LL-001.html">LL-001 Linux SSH Auth Log</a></h3>
+        <p>Linux SSH 인증 성공/실패와 세션 이벤트를 확인하는 로그.</p>
+        <div class="tag-row">
+          <span class="tag">T1021.004</span>
+          <span class="tag">T1078</span>
+          <span class="tag">T1110</span>
+        </div>
+      </article>
+      <article class="card">
+        <h3><a href="LL-002.html">LL-002 Linux auditd File Access Log</a></h3>
+        <p>Linux auditd로 민감 경로 접근과 명령 실행을 추적하는 로그.</p>
+        <div class="tag-row">
+          <span class="tag">T1083</span>
+          <span class="tag">T1074.001</span>
+          <span class="tag">T1552.001</span>
+        </div>
+      </article>
+    </div>
+  </main>
+</body>
+</html>
