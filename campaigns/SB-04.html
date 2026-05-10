@@ -41,13 +41,13 @@
     <main class="page campaign-content">
       <div class="breadcrumbs"><a href="./">Home</a> / <a href="./">Campaigns</a> / <span>NodeFall</span></div>
 <h1>NodeFall</h1>
-<p>NodeFall은 퍼블릭 인터넷에 노출된 AWS EKS 클러스터 내부의 React 19 / Next.js 15 애플리케이션을 최초 타겟으로 삼는 공급망 및 클라우드 인프라 침해 캠페인이다. 공격자는 RSC(React Server Components) 역직렬화 취약점(CVE-2025-55182)을 악용하여 컨테이너 내부에 초기 거점을 확보한 뒤, 클러스터에 기본 마운트된 ServiceAccount 토큰을 수집하여 K8s API 서버를 정찰했다. 이후 논리적인 권한 통제(RBAC)를 물리적으로 우회하기 위해 워커 노드의 공유 리눅스 커널 취약점(CVE-2026-31431, Copy Fail)을 직접 타격하는 방식을 취했다. 이를 통해 파드 내부에서 커널 레벨의 제어권을 획득한 공격자는 특권(Privileged) 데몬셋을 강제 생성하여 컨테이너 격리 환경을 완전히 탈출(Escape)하는 데 성공했다. 최종적으로 장악된 워커 노드(EC2)에 부여된 AWS 인스턴스 프로파일(IAM Role)을 탈취하고, 클라우드 내부망으로 피벗(Pivot)하여 프라이빗 서브넷에 위치한 RDS 데이터베이스의 고객 정보(PII)를 대량으로 유출했다.</p>
+<p>NodeFall은 퍼블릭 인터넷에 노출된 AWS K8s 클러스터 내부의 React 19 / Next.js 15 애플리케이션을 최초 타겟으로 삼는 공급망 및 클라우드 인프라 침해 캠페인이다. 공격자는 RSC(React Server Components) 역직렬화 취약점(CVE-2025-55182)을 악용하여 컨테이너 내부에 초기 거점을 확보한 뒤, 클러스터에 기본 마운트된 ServiceAccount 토큰을 수집하여 K8s API 서버를 정찰했다. 이후 논리적인 권한 통제(RBAC)를 물리적으로 우회하기 위해 워커 노드의 공유 리눅스 커널 취약점(CVE-2026-31431, Copy Fail)을 직접 타격하는 방식을 취했다. 이를 통해 파드 내부에서 커널 레벨의 제어권을 획득한 공격자는 특권(Privileged) 데몬셋을 강제 생성하여 컨테이너 격리 환경을 완전히 탈출(Escape)하는 데 성공했다. 최종적으로 장악된 워커 노드(EC2)에 부여된 AWS 인스턴스 프로파일(IAM Role)을 탈취하고, 클라우드 내부망으로 피벗(Pivot)하여 프라이빗 서브넷에 위치한 RDS 데이터베이스의 고객 정보(PII)를 대량으로 유출했다.</p>
 <h2 id="groups">Groups</h2>
 <div class="table-wrap wide-table">
 <table>
 <thead><tr><th>ID</th><th>Name</th><th>Description</th></tr></thead>
 <tbody>
-<tr><td>G-SB-004</td><td>WIC_Infiltrator</td><td>WIC(Water Infrastructure Center) 포럼의 Next.js 취약점 및 공급망 공격 기법을 활용하여 국가 중요 시설인 정수장 제어망에 침투한 공격 그룹</td></tr>
+<tr><td>G-SB-004</td><td>KubeSyndicate</td><td>K8s 환경에 초기 침투한 뒤, 워커 노드의 공유 커널 취약점(Copy Fail)을 타격하여 컨테이너를 탈출하고 클라우드 인프라(AWS IAM, RDS) 자원을 전문적으로 탈취하는 지능형 지속 위협(APT) 그룹.</td></tr>
 </tbody></table></div>
 <h2 id="techniques-used">Techniques Used</h2>
 <div class="table-wrap wide-table">
