@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>JL-001 Jenkins HTTP Access Log | Spacebar Log Catalog</title>
+  <title>HFL-004 Linux SSH Auth Log | Spacebar Log Catalog</title>
   <link rel="stylesheet" href="../assets/campaign.css">
 </head>
 <body>
@@ -32,10 +32,10 @@
           <a class="sidebar-link" href="HFL-001.html"><span>HFL-001</span>Langflow/Nginx Access Log</a>
           <a class="sidebar-link" href="HFL-002.html"><span>HFL-002</span>Langflow App Container Log</a>
           <a class="sidebar-link" href="HFL-003.html"><span>HFL-003</span>Hanguel IR Agent Enriched Event</a>
-          <a class="sidebar-link" href="HFL-004.html"><span>HFL-004</span>Linux SSH Auth Log</a>
+          <a class="sidebar-link active" href="HFL-004.html"><span>HFL-004</span>Linux SSH Auth Log</a>
           <a class="sidebar-link" href="HFW-001.html"><span>HFW-001</span>AWS WAF Log</a>
           <a class="sidebar-link" href="HFW-002.html"><span>HFW-002</span>VPC Flow Log</a>
-          <a class="sidebar-link active" href="JL-001.html"><span>JL-001</span>Jenkins HTTP Access Log</a>
+          <a class="sidebar-link" href="JL-001.html"><span>JL-001</span>Jenkins HTTP Access Log</a>
           <a class="sidebar-link" href="JL-002.html"><span>JL-002</span>Jenkins Docker and System Log</a>
           <a class="sidebar-link" href="LL-001.html"><span>LL-001</span>Linux SSH Auth Log</a>
           <a class="sidebar-link" href="LL-002.html"><span>LL-002</span>Linux auditd File Access Log</a>
@@ -51,48 +51,29 @@
       </div>
     </aside>
     <main class="page campaign-content">
-      <div class="breadcrumbs"><a href="../campaigns/">Home</a> / <a href="./">Log Catalog</a> / <span>JL-001</span></div>
-<h1>JL-001 Jenkins HTTP Access Log</h1>
+      <div class="breadcrumbs"><a href="../campaigns/">Home</a> / <a href="./">Log Catalog</a> / <span>HFL-004</span></div>
+<h1>HFL-004 Linux SSH Auth Log</h1>
 <div class="meta-grid" aria-label="Campaign metadata">
-<div class="meta-label">Log ID:</div>
-<div class="meta-value">JL-001</div>
-<div class="meta-label">Source:</div>
-<div class="meta-value">Jenkins controller</div>
-<div class="meta-label">Representative Path:</div>
-<div class="meta-value"><code>/var/jenkins_home/logs/access_log</code></div>
-<div class="meta-label">Collection:</div>
-<div class="meta-value">Filebeat custom log input</div>
-<div class="meta-label">Primary Use:</div>
-<div class="meta-value">Jenkins UI/CLI 접근, 스캔성 요청, HTTP status 확인</div>
+<div class="meta-label">Source Alias:</div>
+<div class="meta-value">LL-001</div>
+<div class="meta-label">원본 경로:</div>
+<div class="meta-value"><code>/var/log/auth.log</code></div>
+<div class="meta-label">수집 방식:</div>
+<div class="meta-value"><code>hanguel-ir-agent</code> host log polling</div>
+<div class="meta-label">현재 탐지:</div>
+<div class="meta-value"><code>Failed password</code>, <code>authentication failure</code>, <code>Invalid user</code></div>
+<div class="meta-label">주요 event.action:</div>
+<div class="meta-value"><code>ssh_authentication_failure</code></div>
+<div class="meta-label">커버 Technique:</div>
+<div class="meta-value">T1110, T1021.004, T1078</div>
 </div>
-<h2 id="log-structure">Log Structure</h2>
-<p>Jenkins access log는 웹 서버 access log와 유사하게 source IP, timestamp, HTTP method, URI, status, response size, referrer, user-agent를 포함한다. CLI jar 다운로드나 Jenkins UI 경로 접근을 시간순으로 확인할 때 유용하다.</p>
-<h2 id="important-fields">Important Fields</h2>
-<div class="table-wrap wide-table">
-<table>
-<thead><tr><th>Field</th><th>Meaning</th></tr></thead>
-<tbody>
-<tr><td><code>@timestamp</code></td><td>HTTP 요청 시간</td></tr>
-<tr><td><code>source.ip</code></td><td>요청 출발지</td></tr>
-<tr><td><code>http.request.method</code></td><td>GET, POST, HEAD 등 요청 메서드</td></tr>
-<tr><td><code>url.path</code></td><td>요청 URI</td></tr>
-<tr><td><code>http.response.status_code</code></td><td>응답 코드</td></tr>
-<tr><td><code>user_agent.original</code></td><td>요청 도구 또는 브라우저 정보</td></tr>
-<tr><td><code>message</code></td><td>원본 access log</td></tr>
-</tbody></table></div>
-<h2 id="mapped-techniques">Mapped Techniques</h2>
-<div class="table-wrap wide-table">
-<table>
-<thead><tr><th>Technique</th><th>Mapping Reason</th></tr></thead>
-<tbody>
-<tr><td>T1592 Gather Victim Host Information</td><td>Jenkins UI, CLI jar, 응답 확인</td></tr>
-<tr><td>T1190 Exploit Public-Facing Application</td><td>Jenkins CLI 취약점 악용 전후 접근 흐름 확인</td></tr>
-<tr><td>T1213 Data from Information Repositories</td><td>Jenkins 정보 저장소 접근 흐름의 HTTP 흔적 확인</td></tr>
-</tbody></table></div>
-<h2 id="kql-draft">KQL Draft</h2>
-<pre><code>sb01_server: &quot;jenkins&quot; and sb01_log_type: &quot;jenkins_access&quot; and message: &quot;jenkins-cli.jar&quot;</code></pre>
-<h2 id="investigation-pivot">Investigation Pivot</h2>
-<p><code>url.path</code>와 <code>user_agent.original</code>에서 시작해 같은 source IP의 Jenkins Docker/System 로그와 App SSH 로그로 확장한다.</p>
+<h2 id="현재-상태">현재 상태</h2>
+<ul>
+<li>SSH 실패는 suspicious로 태깅 가능하다.</li>
+<li>SSH 성공(<code>Accepted publickey</code>)과 valid account 사용 탐지는 문서화 가능하지만, agent 룰은 확장 필요하다.</li>
+</ul>
+<h2 id="kql">KQL</h2>
+<pre><code>event.action : &quot;ssh_authentication_failure&quot;</code></pre>
       <footer class="footer">
         Spacebar Project. Log IDs are project-defined analysis identifiers, not MITRE ATT&amp;CK IDs.
       </footer>

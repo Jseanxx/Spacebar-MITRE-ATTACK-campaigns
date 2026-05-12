@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>LL-002 Linux auditd File Access Log | Spacebar Log Catalog</title>
+  <title>HFL-003 Hanguel IR Agent Enriched Event | Spacebar Log Catalog</title>
   <link rel="stylesheet" href="../assets/campaign.css">
 </head>
 <body>
@@ -31,14 +31,14 @@
           <a class="sidebar-link" href="HFE-002.html"><span>HFE-002</span>Sequential Correlator Alert</a>
           <a class="sidebar-link" href="HFL-001.html"><span>HFL-001</span>Langflow/Nginx Access Log</a>
           <a class="sidebar-link" href="HFL-002.html"><span>HFL-002</span>Langflow App Container Log</a>
-          <a class="sidebar-link" href="HFL-003.html"><span>HFL-003</span>Hanguel IR Agent Enriched Event</a>
+          <a class="sidebar-link active" href="HFL-003.html"><span>HFL-003</span>Hanguel IR Agent Enriched Event</a>
           <a class="sidebar-link" href="HFL-004.html"><span>HFL-004</span>Linux SSH Auth Log</a>
           <a class="sidebar-link" href="HFW-001.html"><span>HFW-001</span>AWS WAF Log</a>
           <a class="sidebar-link" href="HFW-002.html"><span>HFW-002</span>VPC Flow Log</a>
           <a class="sidebar-link" href="JL-001.html"><span>JL-001</span>Jenkins HTTP Access Log</a>
           <a class="sidebar-link" href="JL-002.html"><span>JL-002</span>Jenkins Docker and System Log</a>
           <a class="sidebar-link" href="LL-001.html"><span>LL-001</span>Linux SSH Auth Log</a>
-          <a class="sidebar-link active" href="LL-002.html"><span>LL-002</span>Linux auditd File Access Log</a>
+          <a class="sidebar-link" href="LL-002.html"><span>LL-002</span>Linux auditd File Access Log</a>
         </nav>
       </div>
       <div class="sidebar-block">
@@ -51,58 +51,44 @@
       </div>
     </aside>
     <main class="page campaign-content">
-      <div class="breadcrumbs"><a href="../campaigns/">Home</a> / <a href="./">Log Catalog</a> / <span>LL-002</span></div>
-<h1>LL-002 Linux auditd File Access Log</h1>
+      <div class="breadcrumbs"><a href="../campaigns/">Home</a> / <a href="./">Log Catalog</a> / <span>HFL-003</span></div>
+<h1>HFL-003 Hanguel IR Agent Enriched Event</h1>
 <div class="meta-grid" aria-label="Campaign metadata">
-<div class="meta-label">Log ID:</div>
-<div class="meta-value">LL-002</div>
-<div class="meta-label">Source:</div>
-<div class="meta-value">Linux App host</div>
-<div class="meta-label">Representative Path:</div>
-<div class="meta-value"><code>/var/log/audit/audit.log</code></div>
-<div class="meta-label">Collection:</div>
-<div class="meta-value">Filebeat auditd module</div>
-<div class="meta-label">Primary Use:</div>
-<div class="meta-value">민감 경로 접근, 파일 탐색, staging 경로 접근 확인</div>
+<div class="meta-label">Source Alias:</div>
+<div class="meta-value">HL-003</div>
+<div class="meta-label">발생 위치:</div>
+<div class="meta-value">App 서버 <code>hanguel-ir-agent</code></div>
+<div class="meta-label">원본 위치:</div>
+<div class="meta-value">Docker log + <code>/var/log</code> + <code>/var/log/audit/audit.log</code></div>
+<div class="meta-label">수집 방식:</div>
+<div class="meta-value">Python agent가 원시 로그를 읽고 ECS 유사 JSON으로 enrich 후 Logstash <code>8088</code>로 전송</div>
+<div class="meta-label">ELK index:</div>
+<div class="meta-value"><code>langflow-agent-*</code></div>
+<div class="meta-label">분류:</div>
+<div class="meta-value"><code>normal</code>, <code>suspicious</code>, <code>attack</code></div>
+<div class="meta-label">커버 Technique:</div>
+<div class="meta-value">Operation Hanguel Flow 대부분의 Campaign Technique</div>
 </div>
-<h2 id="log-structure">Log Structure</h2>
-<p>auditd 로그는 하나의 행위를 여러 record로 나누어 남긴다. 예를 들어 파일 접근 이벤트는 <code>SYSCALL</code>, <code>PATH</code>, <code>CWD</code>, <code>PROCTITLE</code> record가 같은 sequence로 묶인다. 분석할 때는 단일 줄만 보지 말고 같은 sequence의 record를 함께 읽어야 한다.</p>
-<h2 id="representative-events">Representative Events</h2>
-<div class="table-wrap wide-table">
-<table>
-<thead><tr><th>Record</th><th>Meaning</th></tr></thead>
-<tbody>
-<tr><td><code>SYSCALL</code></td><td>어떤 시스템 호출이 실행되었는지</td></tr>
-<tr><td><code>PATH</code></td><td>접근한 파일 또는 디렉터리 경로</td></tr>
-<tr><td><code>CWD</code></td><td>명령 실행 당시 작업 디렉터리</td></tr>
-<tr><td><code>PROCTITLE</code></td><td>실제 실행 명령어</td></tr>
-<tr><td><code>CONFIG_CHANGE</code></td><td>audit rule 추가/변경</td></tr>
-</tbody></table></div>
-<h2 id="important-fields">Important Fields</h2>
+<h2 id="주요-필드">주요 필드</h2>
 <div class="table-wrap wide-table">
 <table>
 <thead><tr><th>Field</th><th>Meaning</th></tr></thead>
 <tbody>
-<tr><td><code>auditd.log.name</code></td><td>접근 대상 파일/디렉터리</td></tr>
-<tr><td><code>process.executable</code></td><td>실행 파일 경로</td></tr>
-<tr><td><code>user.name</code></td><td>프로세스 실행 사용자</td></tr>
-<tr><td><code>user.audit.name</code></td><td>로그인 기준 audit 사용자</td></tr>
-<tr><td><code>auditd.log.key</code></td><td>audit rule key</td></tr>
-<tr><td><code>event.action</code></td><td>auditd 이벤트 동작</td></tr>
+<tr><td><code>event.action</code></td><td>정규화된 행위 이름</td></tr>
+<tr><td><code>hanguel.classification</code></td><td>normal/suspicious/attack 분류</td></tr>
+<tr><td><code>hanguel.risk_score</code></td><td>위험 점수</td></tr>
+<tr><td><code>hanguel.detection_stage</code></td><td>탐지 단계</td></tr>
+<tr><td><code>hanguel.evidence</code></td><td>룰 근거</td></tr>
+<tr><td><code>threat.technique</code></td><td>연결된 ATT&amp;CK Technique</td></tr>
+<tr><td><code>vulnerability.id</code></td><td>취약점 ID</td></tr>
 </tbody></table></div>
-<h2 id="mapped-techniques">Mapped Techniques</h2>
-<div class="table-wrap wide-table">
-<table>
-<thead><tr><th>Technique</th><th>Mapping Reason</th></tr></thead>
-<tbody>
-<tr><td>T1083 File and Directory Discovery</td><td><code>ls</code>, <code>find</code>, 민감 경로 탐색 확인</td></tr>
-<tr><td>T1074.001 Local Data Staging</td><td>임시 경로에 데이터 모으기 확인</td></tr>
-<tr><td>T1552.001 Credentials in Files</td><td>설정 파일, 환경 파일 접근 확인</td></tr>
-</tbody></table></div>
-<h2 id="kql-draft">KQL Draft</h2>
-<pre><code>event.module: &quot;auditd&quot; and auditd.log.name: /opt/spacebar-booking*</code></pre>
-<h2 id="investigation-pivot">Investigation Pivot</h2>
-<p><code>auditd.log.name</code>에서 시작해 <code>process.executable</code>, <code>user.audit.name</code>, 같은 시간대의 SSH 로그인 이벤트로 연결한다.</p>
+<h2 id="대표-분류-정책">대표 분류 정책</h2>
+<pre><code>normal: Langflow UI build request, host process telemetry
+suspicious: direct validate API, container shell without strong exploit context
+attack: suspicious validate API 이후 container shell, sensitive file access, tool transfer, Docker socket access</code></pre>
+<h2 id="kql">KQL</h2>
+<pre><code>campaign.id : &quot;HGC-2025-001&quot; and hanguel.classification : *</code></pre>
+<pre><code>hanguel.classification : (&quot;normal&quot; or &quot;suspicious&quot; or &quot;attack&quot;)</code></pre>
       <footer class="footer">
         Spacebar Project. Log IDs are project-defined analysis identifiers, not MITRE ATT&amp;CK IDs.
       </footer>

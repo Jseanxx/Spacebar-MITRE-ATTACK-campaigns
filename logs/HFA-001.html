@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>LL-002 Linux auditd File Access Log | Spacebar Log Catalog</title>
+  <title>HFA-001 Linux auditd Execve Log | Spacebar Log Catalog</title>
   <link rel="stylesheet" href="../assets/campaign.css">
 </head>
 <body>
@@ -22,7 +22,7 @@
           <a class="sidebar-link" href="./">Index</a>
           <a class="sidebar-link" href="AWSL-001.html"><span>AWSL-001</span>AWS VPC Flow Log</a>
           <a class="sidebar-link" href="DBL-001.html"><span>DBL-001</span>PostgreSQL Connection and Query Log</a>
-          <a class="sidebar-link" href="HFA-001.html"><span>HFA-001</span>Linux auditd Execve Log</a>
+          <a class="sidebar-link active" href="HFA-001.html"><span>HFA-001</span>Linux auditd Execve Log</a>
           <a class="sidebar-link" href="HFA-002.html"><span>HFA-002</span>Linux auditd Sensitive File Access Log</a>
           <a class="sidebar-link" href="HFA-003.html"><span>HFA-003</span>Linux auditd Docker Socket Access Log</a>
           <a class="sidebar-link" href="HFA-004.html"><span>HFA-004</span>Linux auditd Tool Transfer Log</a>
@@ -38,7 +38,7 @@
           <a class="sidebar-link" href="JL-001.html"><span>JL-001</span>Jenkins HTTP Access Log</a>
           <a class="sidebar-link" href="JL-002.html"><span>JL-002</span>Jenkins Docker and System Log</a>
           <a class="sidebar-link" href="LL-001.html"><span>LL-001</span>Linux SSH Auth Log</a>
-          <a class="sidebar-link active" href="LL-002.html"><span>LL-002</span>Linux auditd File Access Log</a>
+          <a class="sidebar-link" href="LL-002.html"><span>LL-002</span>Linux auditd File Access Log</a>
         </nav>
       </div>
       <div class="sidebar-block">
@@ -51,58 +51,47 @@
       </div>
     </aside>
     <main class="page campaign-content">
-      <div class="breadcrumbs"><a href="../campaigns/">Home</a> / <a href="./">Log Catalog</a> / <span>LL-002</span></div>
-<h1>LL-002 Linux auditd File Access Log</h1>
+      <div class="breadcrumbs"><a href="../campaigns/">Home</a> / <a href="./">Log Catalog</a> / <span>HFA-001</span></div>
+<h1>HFA-001 Linux auditd Execve Log</h1>
 <div class="meta-grid" aria-label="Campaign metadata">
-<div class="meta-label">Log ID:</div>
-<div class="meta-value">LL-002</div>
-<div class="meta-label">Source:</div>
-<div class="meta-value">Linux App host</div>
-<div class="meta-label">Representative Path:</div>
+<div class="meta-label">Source Alias:</div>
+<div class="meta-value">AUD-001</div>
+<div class="meta-label">발생 위치:</div>
+<div class="meta-value">App 서버 host</div>
+<div class="meta-label">원본 경로:</div>
 <div class="meta-value"><code>/var/log/audit/audit.log</code></div>
-<div class="meta-label">Collection:</div>
-<div class="meta-value">Filebeat auditd module</div>
-<div class="meta-label">Primary Use:</div>
-<div class="meta-value">민감 경로 접근, 파일 탐색, staging 경로 접근 확인</div>
+<div class="meta-label">auditd key:</div>
+<div class="meta-value"><code>hanguel_shell_exec</code></div>
+<div class="meta-label">수집 방식:</div>
+<div class="meta-value"><code>hanguel-ir-agent</code>가 host <code>/var/log/audit/audit.log</code>를 읽음</div>
+<div class="meta-label">ELK dataset:</div>
+<div class="meta-value"><code>auditd.log</code></div>
+<div class="meta-label">커버 Technique:</div>
+<div class="meta-value">T1059, T1059.004, T1059.006, T1082, T1083, T1105</div>
 </div>
-<h2 id="log-structure">Log Structure</h2>
-<p>auditd 로그는 하나의 행위를 여러 record로 나누어 남긴다. 예를 들어 파일 접근 이벤트는 <code>SYSCALL</code>, <code>PATH</code>, <code>CWD</code>, <code>PROCTITLE</code> record가 같은 sequence로 묶인다. 분석할 때는 단일 줄만 보지 말고 같은 sequence의 record를 함께 읽어야 한다.</p>
-<h2 id="representative-events">Representative Events</h2>
-<div class="table-wrap wide-table">
-<table>
-<thead><tr><th>Record</th><th>Meaning</th></tr></thead>
-<tbody>
-<tr><td><code>SYSCALL</code></td><td>어떤 시스템 호출이 실행되었는지</td></tr>
-<tr><td><code>PATH</code></td><td>접근한 파일 또는 디렉터리 경로</td></tr>
-<tr><td><code>CWD</code></td><td>명령 실행 당시 작업 디렉터리</td></tr>
-<tr><td><code>PROCTITLE</code></td><td>실제 실행 명령어</td></tr>
-<tr><td><code>CONFIG_CHANGE</code></td><td>audit rule 추가/변경</td></tr>
-</tbody></table></div>
-<h2 id="important-fields">Important Fields</h2>
+<h2 id="주요-필드">주요 필드</h2>
 <div class="table-wrap wide-table">
 <table>
 <thead><tr><th>Field</th><th>Meaning</th></tr></thead>
 <tbody>
-<tr><td><code>auditd.log.name</code></td><td>접근 대상 파일/디렉터리</td></tr>
-<tr><td><code>process.executable</code></td><td>실행 파일 경로</td></tr>
-<tr><td><code>user.name</code></td><td>프로세스 실행 사용자</td></tr>
-<tr><td><code>user.audit.name</code></td><td>로그인 기준 audit 사용자</td></tr>
-<tr><td><code>auditd.log.key</code></td><td>audit rule key</td></tr>
-<tr><td><code>event.action</code></td><td>auditd 이벤트 동작</td></tr>
+<tr><td><code>log.original</code></td><td>auditd 원본 이벤트</td></tr>
+<tr><td><code>comm</code></td><td>command name</td></tr>
+<tr><td><code>exe</code></td><td>실행 파일 경로</td></tr>
+<tr><td><code>subj</code></td><td>AppArmor/SELinux subject. 예: <code>docker-default</code></td></tr>
+<tr><td><code>pid</code>, <code>ppid</code></td><td>process id / parent process id</td></tr>
+<tr><td><code>uid</code></td><td>실행 사용자</td></tr>
+<tr><td><code>key</code></td><td>audit rule key</td></tr>
 </tbody></table></div>
-<h2 id="mapped-techniques">Mapped Techniques</h2>
-<div class="table-wrap wide-table">
-<table>
-<thead><tr><th>Technique</th><th>Mapping Reason</th></tr></thead>
-<tbody>
-<tr><td>T1083 File and Directory Discovery</td><td><code>ls</code>, <code>find</code>, 민감 경로 탐색 확인</td></tr>
-<tr><td>T1074.001 Local Data Staging</td><td>임시 경로에 데이터 모으기 확인</td></tr>
-<tr><td>T1552.001 Credentials in Files</td><td>설정 파일, 환경 파일 접근 확인</td></tr>
-</tbody></table></div>
-<h2 id="kql-draft">KQL Draft</h2>
-<pre><code>event.module: &quot;auditd&quot; and auditd.log.name: /opt/spacebar-booking*</code></pre>
+<h2 id="분석-포인트">분석 포인트</h2>
+<ul>
+<li><code>subj=docker-default</code> 또는 Docker 경로가 있으면 컨테이너 내부 실행 가능성이 있다.</li>
+<li>직전 5분 내 <code>validate_api_suspicious</code>가 있으면 <code>hanguel_shell_exec</code>는 attack으로 승격된다.</li>
+<li>공격 예시: <code>bash -c</code>, <code>sh -c</code>, <code>python -c</code>, <code>os.system</code>, <code>/tmp/hanguel</code>, <code>internal-docs</code>, <code>curl</code>, <code>wget</code>.</li>
+</ul>
+<h2 id="kql">KQL</h2>
+<pre><code>event.dataset : &quot;auditd.log&quot; and event.action : (&quot;container_shell_exec&quot; or &quot;hanguel_shell_exec&quot;)</code></pre>
 <h2 id="investigation-pivot">Investigation Pivot</h2>
-<p><code>auditd.log.name</code>에서 시작해 <code>process.executable</code>, <code>user.audit.name</code>, 같은 시간대의 SSH 로그인 이벤트로 연결한다.</p>
+<p><code>log.original</code> -&gt; <code>comm</code> -&gt; <code>exe</code> -&gt; <code>subj=docker-default</code> -&gt; 직전 <code>langflow_rce_attempt</code>.</p>
       <footer class="footer">
         Spacebar Project. Log IDs are project-defined analysis identifiers, not MITRE ATT&amp;CK IDs.
       </footer>

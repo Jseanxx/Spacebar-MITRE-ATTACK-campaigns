@@ -412,7 +412,7 @@ ${bodyHtml}
 `;
 }
 
-function renderLogSidebar(logs, currentId) {
+function renderLogSidebar(logs, currentId, detections = []) {
   return `
     <aside class="campaign-sidebar" aria-label="Log catalog navigation">
       <div class="sidebar-block">
@@ -431,19 +431,24 @@ function renderLogSidebar(logs, currentId) {
         <div class="sidebar-title">Campaigns</div>
         <nav class="sidebar-links">
           <a class="sidebar-link" href="../campaigns/">Campaign Index</a>
-          <a class="sidebar-link" href="../campaigns/SB-01-detection-map.html">SB-01 Detection Map</a>
+          ${detections
+            .map(
+              (detection) =>
+                `<a class="sidebar-link" href="../campaigns/${detection.slug}"><span>${escapeHtml(detection.data.campaign)}</span>${escapeHtml(detection.data.name)}</a>`
+            )
+            .join("\n          ")}
         </nav>
       </div>
     </aside>`;
 }
 
-function renderLogPage(logs, log) {
+function renderLogPage(logs, log, detections = []) {
   const { data, body } = log;
   const bodyHtml = data.format === "html" ? body : markdownToHtml(body);
   return `${renderHeader(`${data.id} ${data.name} | Spacebar Log Catalog`, "../assets/campaign.css", "../assets/spacebarLogo.png")}
 
   <div class="page-shell">
-${renderLogSidebar(logs, data.id)}
+${renderLogSidebar(logs, data.id, detections)}
     <main class="page campaign-content">
       <div class="breadcrumbs"><a href="../campaigns/">Home</a> / <a href="./">Log Catalog</a> / <span>${escapeHtml(data.id)}</span></div>
 ${bodyHtml}
@@ -558,7 +563,7 @@ function main() {
   });
 
   logs.forEach((log) => {
-    fs.writeFileSync(path.join(logsOutDir, log.slug), renderLogPage(logs, log));
+    fs.writeFileSync(path.join(logsOutDir, log.slug), renderLogPage(logs, log, detections));
   });
 
   fs.writeFileSync(path.join(outDir, "index.html"), renderIndex(campaigns, detectionByCampaign));
