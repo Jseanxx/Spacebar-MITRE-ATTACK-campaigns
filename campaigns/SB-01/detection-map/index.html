@@ -19,6 +19,7 @@
       <div class="sidebar-block">
         <div class="sidebar-title">Campaigns</div>
         <nav class="sidebar-links">
+          <a class="sidebar-link" href="/campaigns/SB-00/"><span>SB-00</span>SB-01 Demo</a>
           <a class="sidebar-link active" href="/campaigns/SB-01/"><span>SB-01</span>2024 PipelineKey</a>
           <a class="sidebar-link" href="/campaigns/SB-02/"><span>SB-02</span>Operation Poisoned Relay</a>
           <a class="sidebar-link" href="/campaigns/SB-03/"><span>SB-03</span>Operation MyCompany Dominance</a>
@@ -31,10 +32,11 @@
         <div class="sidebar-title">On This Page</div>
         <nav class="sidebar-links">
           
+          <a class="sidebar-link" href="/campaigns/SB-01/logs/">Campaign Logs</a>
           <a class="sidebar-link" href="#techniques-used">Techniques Used</a>
           <a class="sidebar-link" href="#software">Software</a>
           <a class="sidebar-link" href="#references">References</a>
-          <a class="sidebar-link" href="/logs/">Log Catalog</a>
+          <a class="sidebar-link" href="/logs/">Global Log Catalog</a>
         </nav>
       </div>
     </aside>
@@ -68,43 +70,43 @@
       <tr>
         <td class="id-cell">T1592</td>
         <td>Jenkins 응답 헤더, CLI jar, UI 노출 여부 확인</td>
-        <td><a href="/logs/JL-001/">JL-001</a></td>
+        <td><a href="/campaigns/SB-01/logs/JL-001/">JL-001</a></td>
         <td>Jenkins access log에서 CLI jar 요청, 비정상 User-Agent, 반복 스캔 패턴 확인</td>
       </tr>
       <tr>
         <td class="id-cell">T1078</td>
         <td>탈취한 Jenkins API Token으로 Jenkins에 인증</td>
-        <td><a href="/logs/JL-002/">JL-002</a></td>
+        <td><a href="/campaigns/SB-01/logs/JL-002/">JL-002</a></td>
         <td>Jenkins 시스템/컨테이너 로그에서 사용자 인증, CLI 사용 흔적, 평소와 다른 시간대 확인</td>
       </tr>
       <tr>
         <td class="id-cell">T1190</td>
         <td>Jenkins CLI CVE-2024-23897 파일 읽기 취약점 악용</td>
-        <td><a href="/logs/JL-001/">JL-001</a>, <a href="/logs/JL-002/">JL-002</a></td>
+        <td><a href="/campaigns/SB-01/logs/JL-001/">JL-001</a>, <a href="/campaigns/SB-01/logs/JL-002/">JL-002</a></td>
         <td>CLI jar 접근 후 Jenkins 내부 파일 탐색 정황을 시간순으로 연결</td>
       </tr>
       <tr>
         <td class="id-cell">T1021.004</td>
         <td>Jenkins 배포 키로 App 서버 deploy 계정 SSH 접근</td>
-        <td><a href="/logs/LL-001/">LL-001</a></td>
+        <td><a href="/campaigns/SB-01/logs/LL-001/">LL-001</a></td>
         <td>Accepted publickey, user.name, source.ip, 접속 시간대를 배포 이력과 비교</td>
       </tr>
       <tr>
         <td class="id-cell">T1083</td>
         <td>App 서버에서 애플리케이션 경로와 설정 파일 탐색</td>
-        <td><a href="/logs/LL-002/">LL-002</a></td>
+        <td><a href="/campaigns/SB-01/logs/LL-002/">LL-002</a></td>
         <td>auditd에서 민감 경로 접근, 실행 프로세스, 실제 로그인 사용자 확인</td>
       </tr>
       <tr>
         <td class="id-cell">T1213.006</td>
         <td>PostgreSQL 고객/예약 데이터 조회</td>
-        <td><a href="/logs/DBL-001/">DBL-001</a></td>
+        <td><a href="/campaigns/SB-01/logs/DBL-001/">DBL-001</a></td>
         <td>DB 접속 계정, source.ip, 쿼리 대상 테이블, 대량 조회 시점 확인</td>
       </tr>
       <tr>
         <td class="id-cell">T1048.002</td>
         <td>압축/암호화된 데이터 외부 전송</td>
-        <td><a href="/logs/AWSL-001/">AWSL-001</a></td>
+        <td><a href="/campaigns/SB-01/logs/AWSL-001/">AWSL-001</a></td>
         <td>사설 서버에서 외부 IP로 향하는 HTTPS/SSH egress, 전송량, 시간대 확인</td>
       </tr>
     </tbody>
@@ -120,7 +122,7 @@
     <div class="mapping-grid">
       <div>
         <h3>Log IDs</h3>
-        <p><a href="/logs/LL-001/">LL-001 Linux SSH Auth Log</a></p>
+        <p><a href="/campaigns/SB-01/logs/LL-001/">LL-001 Linux SSH Auth Log</a></p>
       </div>
       <div>
         <h3>Representative Path</h3>
@@ -151,7 +153,7 @@
     <div class="mapping-grid">
       <div>
         <h3>Log IDs</h3>
-        <p><a href="/logs/LL-002/">LL-002 Linux auditd File Access Log</a></p>
+        <p><a href="/campaigns/SB-01/logs/LL-002/">LL-002 Linux auditd File Access Log</a></p>
       </div>
       <div>
         <h3>Representative Path</h3>
@@ -182,7 +184,7 @@
     <div class="mapping-grid">
       <div>
         <h3>Log IDs</h3>
-        <p><a href="/logs/DBL-001/">DBL-001 PostgreSQL Connection and Query Log</a></p>
+        <p><a href="/campaigns/SB-01/logs/DBL-001/">DBL-001 PostgreSQL Connection and Query Log</a></p>
       </div>
       <div>
         <h3>Representative Path</h3>
@@ -210,19 +212,19 @@
 
 <div class="cards">
   <article class="card">
-    <h3><a href="/logs/LL-001/">LL-001 Linux SSH Auth Log</a></h3>
+    <h3><a href="/campaigns/SB-01/logs/LL-001/">LL-001 Linux SSH Auth Log</a></h3>
     <p>SSH 인증 성공/실패, 세션 시작/종료, 접속 계정과 출발지 IP를 확인한다.</p>
   </article>
   <article class="card">
-    <h3><a href="/logs/LL-002/">LL-002 Linux auditd File Access Log</a></h3>
+    <h3><a href="/campaigns/SB-01/logs/LL-002/">LL-002 Linux auditd File Access Log</a></h3>
     <p>민감 경로 접근, 실행 프로세스, 실제 로그인 사용자와 audit key를 확인한다.</p>
   </article>
   <article class="card">
-    <h3><a href="/logs/JL-001/">JL-001 Jenkins HTTP Access Log</a></h3>
+    <h3><a href="/campaigns/SB-01/logs/JL-001/">JL-001 Jenkins HTTP Access Log</a></h3>
     <p>Jenkins UI/CLI jar 접근, HTTP 메서드, URI, status, User-Agent를 확인한다.</p>
   </article>
   <article class="card">
-    <h3><a href="/logs/DBL-001/">DBL-001 PostgreSQL Connection and Query Log</a></h3>
+    <h3><a href="/campaigns/SB-01/logs/DBL-001/">DBL-001 PostgreSQL Connection and Query Log</a></h3>
     <p>DB 접속 계정, 출발지, 대상 DB, 쿼리 또는 statement 로그를 확인한다.</p>
   </article>
 </div>

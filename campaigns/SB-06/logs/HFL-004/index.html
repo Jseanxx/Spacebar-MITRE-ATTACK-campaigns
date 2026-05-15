@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SB-06 HFL-004 Linux SSH Auth Log | Spacebar Campaign Logs</title>
+  <link rel="stylesheet" href="/assets/campaign.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="/campaigns/"><img class="brand-logo" src="/assets/spacebarLogo.png" alt="Spacebar"><span>Spacebar Campaigns</span></a>
+    </div>
+  </header>
+
+  <div class="page-shell">
+
+    <aside class="campaign-sidebar" aria-label="Campaign log navigation">
+      <div class="sidebar-block">
+        <div class="sidebar-title">SB-06 Logs</div>
+        <nav class="sidebar-links">
+          <a class="sidebar-link" href="/campaigns/SB-06/">Campaign Page</a>
+          <a class="sidebar-link" href="/campaigns/SB-06/detection-map/">Detection Map</a>
+          <a class="sidebar-link" href="/campaigns/SB-06/logs/">Campaign Logs</a>
+          <a class="sidebar-link" href="/campaigns/SB-06/logs/HFA-001/"><span>HFA-001</span>Linux auditd Execve Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-06/logs/HFA-002/"><span>HFA-002</span>Linux auditd Sensitive File Access Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-06/logs/HFA-003/"><span>HFA-003</span>Linux auditd Docker Socket Access Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-06/logs/HFA-004/"><span>HFA-004</span>Linux auditd Tool Transfer Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-06/logs/HFC-001/"><span>HFC-001</span>CloudTrail Management Event</a>
+          <a class="sidebar-link" href="/campaigns/SB-06/logs/HFE-002/"><span>HFE-002</span>Sequential Correlator Alert</a>
+          <a class="sidebar-link" href="/campaigns/SB-06/logs/HFL-001/"><span>HFL-001</span>Langflow/Nginx Access Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-06/logs/HFL-002/"><span>HFL-002</span>Langflow App Container Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-06/logs/HFL-003/"><span>HFL-003</span>Hanguel IR Agent Enriched Event</a>
+          <a class="sidebar-link active" href="/campaigns/SB-06/logs/HFL-004/"><span>HFL-004</span>Linux SSH Auth Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-06/logs/HFW-001/"><span>HFW-001</span>AWS WAF Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-06/logs/HFW-002/"><span>HFW-002</span>VPC Flow Log</a>
+        </nav>
+      </div>
+      <div class="sidebar-block">
+        <div class="sidebar-title">Global Catalog</div>
+        <nav class="sidebar-links">
+          <a class="sidebar-link" href="/logs/">All Logs</a>
+        </nav>
+      </div>
+    </aside>
+    <main class="page campaign-content">
+      <div class="breadcrumbs"><a href="/campaigns/">Home</a> / <a href="/campaigns/SB-06/">Operation Hanguel Flow</a> / <a href="/campaigns/SB-06/logs/">Campaign Logs</a> / <span>HFL-004</span></div>
+      <div class="concept-banner">
+        <b>Campaign-scoped Log</b>
+        <span>이 페이지는 SB-06 기준으로 보는 로그 설명이다. 공통 원본은 <a href="/logs/HFL-004/">Global Log Catalog</a>에서도 확인할 수 있다.</span>
+      </div>
+<h1>HFL-004 Linux SSH Auth Log</h1>
+<div class="meta-grid" aria-label="Campaign metadata">
+<div class="meta-label">Source Alias:</div>
+<div class="meta-value">LL-001</div>
+<div class="meta-label">원본 경로:</div>
+<div class="meta-value"><code>/var/log/auth.log</code></div>
+<div class="meta-label">수집 방식:</div>
+<div class="meta-value"><code>hanguel-ir-agent</code> host log polling</div>
+<div class="meta-label">현재 탐지:</div>
+<div class="meta-value"><code>Failed password</code>, <code>authentication failure</code>, <code>Invalid user</code></div>
+<div class="meta-label">주요 event.action:</div>
+<div class="meta-value"><code>ssh_authentication_failure</code></div>
+<div class="meta-label">커버 Technique:</div>
+<div class="meta-value">T1110, T1021.004, T1078</div>
+</div>
+<h2 id="현재-상태">현재 상태</h2>
+<ul>
+<li>SSH 실패는 suspicious로 태깅 가능하다.</li>
+<li>SSH 성공(<code>Accepted publickey</code>)과 valid account 사용 탐지는 문서화 가능하지만, agent 룰은 확장 필요하다.</li>
+</ul>
+<h2 id="kql">KQL</h2>
+<pre><code>event.action : &quot;ssh_authentication_failure&quot;</code></pre>
+      <footer class="footer">
+        Spacebar Project. This campaign log page is scoped to SB-06.
+      </footer>
+    </main>
+  </div>
+</body>
+</html>

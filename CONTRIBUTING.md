@@ -25,6 +25,8 @@
 /campaigns/                       # Campaign 목록
 /campaigns/SB-01/                 # Campaign Page 1
 /campaigns/SB-01/detection-map/   # Campaign Page 2
+/campaigns/SB-01/logs/            # Campaign에서 쓰는 로그 묶음
+/campaigns/SB-01/logs/LL-001/     # Campaign 기준 로그 상세
 /logs/                            # Log Catalog 목록
 /logs/LL-001/                     # 로그 상세 페이지
 ```

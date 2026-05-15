@@ -272,6 +272,116 @@ h3 {
   margin: -4px 0 10px;
 }
 
+.view-switch {
+  display: inline-flex;
+  margin: 18px 0 20px;
+  overflow: hidden;
+  border: 1px solid var(--sb-line);
+  border-radius: 4px;
+  background: #fff;
+}
+
+.view-switch button {
+  min-height: 40px;
+  padding: 0 14px;
+  border: 0;
+  border-right: 1px solid var(--sb-line);
+  appearance: none;
+  background: #fff;
+  color: #333;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 650;
+}
+
+.view-switch button:last-child {
+  border-right: 0;
+}
+
+.view-switch button.active {
+  background: var(--sb-red-dark);
+  color: #fff;
+}
+
+.view-panel {
+  display: none;
+}
+
+.view-panel.active {
+  display: block;
+}
+
+.matrix-scroll {
+  max-width: 100%;
+  overflow-x: auto;
+  border: 1px solid var(--sb-line);
+  border-radius: 4px;
+  background: var(--sb-soft);
+  -webkit-overflow-scrolling: touch;
+}
+
+.attack-matrix {
+  min-width: 2240px;
+  display: grid;
+  grid-template-columns: repeat(14, minmax(150px, 1fr));
+  gap: 1px;
+  background: var(--sb-line);
+}
+
+.tactic {
+  min-height: 390px;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+}
+
+.tactic-header {
+  min-height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  border-bottom: 1px solid var(--sb-line);
+  background: var(--sb-table);
+  color: #222831;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.25;
+  text-align: center;
+  overflow-wrap: anywhere;
+  word-break: keep-all;
+}
+
+.technique-card {
+  min-height: 82px;
+  margin: 8px;
+  padding: 10px;
+  border: 1px solid var(--sb-line);
+  border-radius: 4px;
+  background: #fff;
+  color: var(--sb-muted);
+}
+
+.technique-card.used {
+  border-color: #606975;
+  background: #f8fafc;
+  box-shadow: inset 4px 0 0 #606975;
+}
+
+.technique-card strong {
+  display: block;
+  margin-bottom: 6px;
+  color: #222831;
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.technique-card span {
+  display: block;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
 .searchbox {
   display: flex;
   align-items: center;

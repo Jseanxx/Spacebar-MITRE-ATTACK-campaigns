@@ -19,6 +19,7 @@
       <div class="sidebar-block">
         <div class="sidebar-title">Campaigns</div>
         <nav class="sidebar-links">
+          <a class="sidebar-link" href="/campaigns/SB-00/"><span>SB-00</span>SB-01 Demo</a>
           <a class="sidebar-link active" href="/campaigns/SB-01/"><span>SB-01</span>2024 PipelineKey</a>
           <a class="sidebar-link" href="/campaigns/SB-02/"><span>SB-02</span>Operation Poisoned Relay</a>
           <a class="sidebar-link" href="/campaigns/SB-03/"><span>SB-03</span>Operation MyCompany Dominance</a>
@@ -31,10 +32,11 @@
         <div class="sidebar-title">On This Page</div>
         <nav class="sidebar-links">
           <a class="sidebar-link" href="/campaigns/SB-01/detection-map/">Detection Map</a>
+          <a class="sidebar-link" href="/campaigns/SB-01/logs/">Campaign Logs</a>
           <a class="sidebar-link" href="#techniques-used">Techniques Used</a>
           <a class="sidebar-link" href="#software">Software</a>
           <a class="sidebar-link" href="#references">References</a>
-          <a class="sidebar-link" href="/logs/">Log Catalog</a>
+          <a class="sidebar-link" href="/logs/">Global Log Catalog</a>
         </nav>
       </div>
     </aside>
@@ -43,63 +45,162 @@
 <div class="campaign-hero">
   <div class="campaign-description">
 <h1>2024 PipelineKey</h1>
-<p>2024 PipelineKey는 침해된 개발자 단말 또는 탈취된 개발자 VPN 세션을 통해 내부 개발망에 접근한 뒤, Jenkins CI/CD 서버와 App 서버, PostgreSQL DB 서버를 대상으로 전개된 침해 캠페인이다. 공격 그룹 BreadKimchi는 개발자 단말에서 Jenkins Web UI와 CLI 접근 가능성을 확인하고, 개발자 단말에 저장되어 있던 Jenkins API Token을 확보했다. BreadKimchi는 해당 토큰으로 Jenkins CLI에 인증한 뒤 CVE-2024-23897 파일 읽기 취약점을 악용하여 Jenkins controller 내부의 Job 설정, build log, workspace, 배포 credential 단서를 조사했다. 이후 Jenkins에서 확인한 배포 자격 증명을 이용해 App 서버에 접근하고, 애플리케이션 환경 설정에 포함된 PostgreSQL 접속 정보를 확인하여 DB 서버에 연결했다. BreadKimchi는 고객 예약 데이터를 수집한 뒤 압축 및 암호화하여 HTTPS 또는 SSH 기반 채널을 통해 외부 인프라로 전송했다.</p>
+<p class="summary">
+  2024 PipelineKey는 침해된 개발자 단말 또는 탈취된 개발자 VPN 세션을 통해 내부 개발망에 접근한 뒤,
+  Jenkins CI/CD 서버와 App 서버, PostgreSQL DB 서버로 전개되는 CI/CD 침해 캠페인이다.
+  이 페이지는 캠페인 개요와 ATT&amp;CK Technique 분포를 보여주고, 각 Technique에서 확인해야 할 Primary Log로 연결한다.
+</p>
   </div>
 <div class="meta-grid" aria-label="Campaign metadata">
-<div class="meta-label">ID:</div>
-<div class="meta-value">SB-01</div>
-<div class="meta-label">First Seen:</div>
-<div class="meta-value">January 2024</div>
-<div class="meta-label">Last Seen:</div>
-<div class="meta-value">May 2024</div>
-<div class="meta-label">Version:</div>
-<div class="meta-value">0.6</div>
-<div class="meta-label">Created:</div>
-<div class="meta-value">01 May 2026</div>
-<div class="meta-label">Last Modified:</div>
-<div class="meta-value">07 May 2026</div>
+  <div class="meta-label">ID:</div><div class="meta-value">SB-01</div>
+  <div class="meta-label">First Seen:</div><div class="meta-value">January 2024</div>
+  <div class="meta-label">Last Seen:</div><div class="meta-value">May 2024</div>
+  <div class="meta-label">Version:</div><div class="meta-value">0.7</div>
+  <div class="meta-label">Owner:</div><div class="meta-value">임준서</div>
+  <div class="meta-label">Focus:</div><div class="meta-value">CI/CD 침해, Jenkins, App 서버 lateral movement, DB data collection</div>
 </div>
 </div>
+
 <h2 id="groups">Groups</h2>
-<div class="table-wrap wide-table">
-<table>
-<thead><tr><th>ID</th><th>Name</th><th>Description</th></tr></thead>
-<tbody>
-<tr><td>G-SB-001</td><td>BreadKimchi</td><td>2024 PipelineKey 활동과 연결된 공격 그룹이다.</td></tr>
-</tbody></table></div>
-<h2 id="techniques-used">Techniques Used</h2>
-<div class="table-wrap wide-table">
-<table>
-<thead><tr><th>Domain</th><th>ID</th><th>Name</th><th>Use</th></tr></thead>
-<tbody>
-<tr><td>Enterprise</td><td>T1592</td><td>Gather Victim Host Information</td><td>2024 PipelineKey 당시 BreadKimchi는 침해된 개발자 단말에서 내부 개발망의 Jenkins 응답 헤더, CLI jar 노출 여부, 서비스 포트, Jenkins UI 정보를 수집하여 CI/CD 서버의 역할과 취약 버전 여부를 식별했다.</td></tr>
-<tr><td>Enterprise</td><td>T1552.001</td><td>Unsecured Credentials: Credentials In Files</td><td>2024 PipelineKey 당시 BreadKimchi는 침해된 개발자 단말의 자동화 스크립트와 설정 파일에 남아 있던 Jenkins API Token을 수집했다.</td></tr>
-<tr><td>Enterprise</td><td>T1078</td><td>Valid Accounts</td><td>2024 PipelineKey 당시 BreadKimchi는 수집한 Jenkins API Token을 이용해 Jenkins CLI에 인증하고, 개발자 계정 권한으로 Jenkins controller와 상호작용했다.</td></tr>
-<tr><td>Enterprise</td><td>T1190</td><td>Exploit Public-Facing Application</td><td>2024 PipelineKey 당시 BreadKimchi는 Jenkins CLI의 CVE-2024-23897 파일 읽기 취약점을 악용하여 Jenkins controller 내부 파일을 읽었다.</td></tr>
-<tr><td>Enterprise</td><td>T1213</td><td>Data from Information Repositories</td><td>2024 PipelineKey 당시 BreadKimchi는 Jenkins를 CI/CD 정보 저장소로 활용하여 배포 대상, Job 실행 이력, workspace, credential metadata 등 App 서버 접근에 필요한 단서를 조사했다.</td></tr>
-<tr><td>Enterprise</td><td>T1552.004</td><td>Unsecured Credentials: Private Keys</td><td>2024 PipelineKey 당시 BreadKimchi는 Jenkins 내부의 배포 credential 및 관련 단서에서 App 서버 접근에 사용되는 SSH private key를 수집했다.</td></tr>
-<tr><td>Enterprise</td><td>T1021.004</td><td>Remote Services: SSH</td><td>2024 PipelineKey 당시 BreadKimchi는 Jenkins에서 확보한 배포 키와 deploy 계정을 사용하여 SSH를 통해 App 서버에 접근했다.</td></tr>
-<tr><td>Enterprise</td><td>T1083</td><td>File and Directory Discovery</td><td>2024 PipelineKey 당시 BreadKimchi는 App 서버의 애플리케이션 경로, 컨테이너 구성, 환경 설정 파일, DB 연결 정보를 탐색했다.</td></tr>
-<tr><td>Enterprise</td><td>T1213.006</td><td>Data from Information Repositories: Databases</td><td>2024 PipelineKey 당시 BreadKimchi는 App 서버에서 확인한 PostgreSQL 접속 정보를 사용하여 DB 서버의 고객 예약 데이터베이스를 조회하고 고객/예약 데이터를 수집했다.</td></tr>
-<tr><td>Enterprise</td><td>T1074.001</td><td>Data Staged: Local Data Staging</td><td>2024 PipelineKey 당시 BreadKimchi는 수집한 고객 예약 데이터를 App 서버의 임시 경로에 모아 archive로 묶어 외부 전송을 준비했다.</td></tr>
-<tr><td>Enterprise</td><td>T1048.002</td><td>Exfiltration Over Alternative Protocol: Exfiltration Over Asymmetric Encrypted Non-C2 Protocol</td><td>2024 PipelineKey 당시 BreadKimchi는 수집한 고객 예약 데이터를 압축 및 암호화한 뒤 HTTPS 또는 SSH 기반 채널을 통해 외부 인프라로 전송했다.</td></tr>
-</tbody></table></div>
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr><th>ID</th><th>Name</th><th>Description</th></tr>
+    </thead>
+    <tbody>
+      <tr><td class="id-cell">G-SB-001</td><td>BreadKimchi</td><td>2024 PipelineKey 활동과 연결된 가상 공격 그룹이다.</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="view-switch" role="tablist" aria-label="ATT&CK view switch">
+  <button class="active" type="button" data-view="table">Table View</button>
+  <button type="button" data-view="matrix">Matrix View</button>
+</div>
+
+<section id="table" class="view-panel active">
+  <h2 id="techniques-used">Techniques Used</h2>
+  <div class="table-wrap wide-table">
+    <table>
+      <thead>
+        <tr><th>Phase</th><th>Technique</th><th>Use in SB-01</th><th>Primary Logs</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Recon</td><td class="id-cell"><a href="https://attack.mitre.org/techniques/T1592/" target="_blank" rel="noopener noreferrer">T1592</a></td><td>Jenkins 응답 헤더, CLI jar, UI 노출 여부 확인</td><td><a href="/campaigns/SB-01/logs/JL-001/">JL-001</a></td></tr>
+        <tr><td>Credential Access</td><td class="id-cell"><a href="https://attack.mitre.org/techniques/T1552/001/" target="_blank" rel="noopener noreferrer">T1552.001</a></td><td>개발자 단말 설정/스크립트에서 Jenkins API Token 확인</td><td>확장 필요</td></tr>
+        <tr><td>Initial Access</td><td class="id-cell"><a href="https://attack.mitre.org/techniques/T1078/" target="_blank" rel="noopener noreferrer">T1078</a></td><td>탈취한 Jenkins API Token으로 Jenkins CLI 인증</td><td><a href="/campaigns/SB-01/logs/JL-002/">JL-002</a></td></tr>
+        <tr><td>Initial Access</td><td class="id-cell"><a href="https://attack.mitre.org/techniques/T1190/" target="_blank" rel="noopener noreferrer">T1190</a></td><td>Jenkins CLI CVE-2024-23897 파일 읽기 악용</td><td><a href="/campaigns/SB-01/logs/JL-001/">JL-001</a>, <a href="/campaigns/SB-01/logs/JL-002/">JL-002</a></td></tr>
+        <tr><td>Collection</td><td class="id-cell"><a href="https://attack.mitre.org/techniques/T1213/" target="_blank" rel="noopener noreferrer">T1213</a></td><td>Jenkins job, build log, workspace, credential metadata 조사</td><td><a href="/campaigns/SB-01/logs/JL-001/">JL-001</a>, <a href="/campaigns/SB-01/logs/JL-002/">JL-002</a></td></tr>
+        <tr><td>Credential Access</td><td class="id-cell"><a href="https://attack.mitre.org/techniques/T1552/004/" target="_blank" rel="noopener noreferrer">T1552.004</a></td><td>Jenkins 배포 credential에서 SSH private key 단서 확인</td><td><a href="/campaigns/SB-01/logs/JL-002/">JL-002</a></td></tr>
+        <tr><td>Lateral Movement</td><td class="id-cell"><a href="https://attack.mitre.org/techniques/T1021/004/" target="_blank" rel="noopener noreferrer">T1021.004</a></td><td>배포 키와 deploy 계정으로 App 서버 SSH 접근</td><td><a href="/campaigns/SB-01/logs/LL-001/">LL-001</a></td></tr>
+        <tr><td>Discovery</td><td class="id-cell"><a href="https://attack.mitre.org/techniques/T1083/" target="_blank" rel="noopener noreferrer">T1083</a></td><td>App 운영 경로와 환경 설정 파일 탐색</td><td><a href="/campaigns/SB-01/logs/LL-002/">LL-002</a></td></tr>
+        <tr><td>Collection</td><td class="id-cell"><a href="https://attack.mitre.org/techniques/T1213/006/" target="_blank" rel="noopener noreferrer">T1213.006</a></td><td>PostgreSQL 고객/예약 데이터 조회</td><td><a href="/campaigns/SB-01/logs/DBL-001/">DBL-001</a></td></tr>
+        <tr><td>Collection</td><td class="id-cell"><a href="https://attack.mitre.org/techniques/T1074/001/" target="_blank" rel="noopener noreferrer">T1074.001</a></td><td>수집 데이터를 App 서버 임시 경로에 staging</td><td><a href="/campaigns/SB-01/logs/LL-002/">LL-002</a></td></tr>
+        <tr><td>Exfiltration</td><td class="id-cell"><a href="https://attack.mitre.org/techniques/T1048/002/" target="_blank" rel="noopener noreferrer">T1048.002</a></td><td>HTTPS 또는 SSH 기반 채널로 압축/암호화 데이터 전송</td><td><a href="/campaigns/SB-01/logs/AWSL-001/">AWSL-001</a></td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="matrix" class="view-panel">
+  <h2>Matrix View</h2>
+  <div class="matrix-scroll">
+    <section class="attack-matrix" aria-label="SB-01 ATT&CK matrix">
+      <div class="tactic">
+        <div class="tactic-header">Reconnaissance</div>
+        <div class="technique-card used"><strong><a href="https://attack.mitre.org/techniques/T1592/" target="_blank" rel="noopener noreferrer"><code>T1592</code></a> Gather Victim Host Information</strong><span>Jenkins 응답, CLI jar, UI 정보 확인</span></div>
+      </div>
+      <div class="tactic">
+        <div class="tactic-header">Resource Development</div>
+        <div class="technique-card"><strong>No SB-01 Technique</strong><span>이번 캠페인에서는 별도 인프라 준비 행위를 모델링하지 않음</span></div>
+      </div>
+      <div class="tactic">
+        <div class="tactic-header">Initial Access</div>
+        <div class="technique-card used"><strong><a href="https://attack.mitre.org/techniques/T1078/" target="_blank" rel="noopener noreferrer"><code>T1078</code></a> Valid Accounts</strong><span>Jenkins API Token으로 CLI 인증</span></div>
+        <div class="technique-card used"><strong><a href="https://attack.mitre.org/techniques/T1190/" target="_blank" rel="noopener noreferrer"><code>T1190</code></a> Exploit Public-Facing Application</strong><span>Jenkins CLI 파일 읽기 취약점 악용</span></div>
+      </div>
+      <div class="tactic">
+        <div class="tactic-header">Execution</div>
+        <div class="technique-card"><strong>No SB-01 Technique</strong><span>Jenkins/App 내 명령 실행은 후속 확장 후보</span></div>
+      </div>
+      <div class="tactic">
+        <div class="tactic-header">Persistence</div>
+        <div class="technique-card"><strong>No SB-01 Technique</strong><span>지속성 확보 단계는 이번 캠페인 범위 밖</span></div>
+      </div>
+      <div class="tactic">
+        <div class="tactic-header">Privilege Escalation</div>
+        <div class="technique-card"><strong>No SB-01 Technique</strong><span>권한 상승은 별도 단계로 모델링하지 않음</span></div>
+      </div>
+      <div class="tactic">
+        <div class="tactic-header">Defense Evasion</div>
+        <div class="technique-card"><strong>No SB-01 Technique</strong><span>로그 삭제/탐지 회피는 이번 버전에서 제외</span></div>
+      </div>
+      <div class="tactic">
+        <div class="tactic-header">Credential Access</div>
+        <div class="technique-card used"><strong><a href="https://attack.mitre.org/techniques/T1552/001/" target="_blank" rel="noopener noreferrer"><code>T1552.001</code></a> Credentials in Files</strong><span>저장된 Jenkins API Token 확인</span></div>
+        <div class="technique-card used"><strong><a href="https://attack.mitre.org/techniques/T1552/004/" target="_blank" rel="noopener noreferrer"><code>T1552.004</code></a> Private Keys</strong><span>배포 private key 단서 확보</span></div>
+      </div>
+      <div class="tactic">
+        <div class="tactic-header">Discovery</div>
+        <div class="technique-card used"><strong><a href="https://attack.mitre.org/techniques/T1083/" target="_blank" rel="noopener noreferrer"><code>T1083</code></a> File and Directory Discovery</strong><span>App 경로와 설정 파일 탐색</span></div>
+      </div>
+      <div class="tactic">
+        <div class="tactic-header">Lateral Movement</div>
+        <div class="technique-card used"><strong><a href="https://attack.mitre.org/techniques/T1021/004/" target="_blank" rel="noopener noreferrer"><code>T1021.004</code></a> Remote Services: SSH</strong><span>deploy 계정으로 App 서버 접근</span></div>
+      </div>
+      <div class="tactic">
+        <div class="tactic-header">Collection</div>
+        <div class="technique-card used"><strong><a href="https://attack.mitre.org/techniques/T1213/" target="_blank" rel="noopener noreferrer"><code>T1213</code></a> Data from Information Repositories</strong><span>Jenkins job/build/workspace 정보 조사</span></div>
+        <div class="technique-card used"><strong><a href="https://attack.mitre.org/techniques/T1213/006/" target="_blank" rel="noopener noreferrer"><code>T1213.006</code></a> Databases</strong><span>PostgreSQL 예약 데이터 조회</span></div>
+        <div class="technique-card used"><strong><a href="https://attack.mitre.org/techniques/T1074/001/" target="_blank" rel="noopener noreferrer"><code>T1074.001</code></a> Local Data Staging</strong><span>데이터를 임시 경로에 staging</span></div>
+      </div>
+      <div class="tactic">
+        <div class="tactic-header">Command and Control</div>
+        <div class="technique-card"><strong>Not emphasized</strong><span>SB-01에서는 주요 강조 영역 아님</span></div>
+      </div>
+      <div class="tactic">
+        <div class="tactic-header">Exfiltration</div>
+        <div class="technique-card used"><strong><a href="https://attack.mitre.org/techniques/T1048/002/" target="_blank" rel="noopener noreferrer"><code>T1048.002</code></a> Exfiltration Over Asymmetric Encrypted Non-C2 Protocol</strong><span>HTTPS/SSH 기반 외부 전송</span></div>
+      </div>
+      <div class="tactic">
+        <div class="tactic-header">Impact</div>
+        <div class="technique-card"><strong>No SB-01 Technique</strong><span>데이터 파괴/서비스 중단은 이번 캠페인 목표가 아님</span></div>
+      </div>
+    </section>
+  </div>
+</section>
+
 <h2 id="software">Software</h2>
-<div class="table-wrap wide-table">
-<table>
-<thead><tr><th>ID</th><th>Name</th><th>Description</th></tr></thead>
-<tbody>
-<tr><td>S-SB-001</td><td>Jenkins</td><td>기업 개발팀의 빌드, 테스트, 배포 자동화를 담당하는 CI/CD 서버다.</td></tr>
-<tr><td>S-SB-002</td><td>Jenkins CLI</td><td>Jenkins controller에 명령을 전달하는 CLI 구성 요소이며, CVE-2024-23897 파일 읽기 취약점의 악용 경로로 사용되었다.</td></tr>
-<tr><td>S-SB-003</td><td>Spacebar Booking App</td><td>Jenkins를 통해 App 서버에 배포되는 예약 서비스다.</td></tr>
-<tr><td>S-SB-004</td><td>PostgreSQL</td><td>고객 및 예약 데이터를 저장하는 내부 DB 서버다.</td></tr>
-</tbody></table></div>
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr><th>ID</th><th>Name</th><th>Description</th></tr>
+    </thead>
+    <tbody>
+      <tr><td class="id-cell">S-SB-001</td><td>Jenkins</td><td>기업 개발팀의 빌드, 테스트, 배포 자동화를 담당하는 CI/CD 서버다.</td></tr>
+      <tr><td class="id-cell">S-SB-002</td><td>Jenkins CLI</td><td>Jenkins controller에 명령을 전달하는 CLI 구성 요소이며, CVE-2024-23897 파일 읽기 취약점의 악용 경로로 사용되었다.</td></tr>
+      <tr><td class="id-cell">S-SB-003</td><td>Spacebar Booking App</td><td>Jenkins를 통해 App 서버에 배포되는 예약 서비스다.</td></tr>
+      <tr><td class="id-cell">S-SB-004</td><td>PostgreSQL</td><td>고객 및 예약 데이터를 저장하는 내부 DB 서버다.</td></tr>
+    </tbody>
+  </table>
+</div>
+
 <h2 id="references">References</h2>
 <ol>
-<li><a href="https://attack.mitre.org/matrices/enterprise/">MITRE ATT&amp;CK Enterprise Matrix</a></li>
-<li><a href="https://attack.mitre.org/campaigns/C0024/">MITRE ATT&amp;CK, Campaign C0024 SolarWinds Compromise</a></li>
-<li><a href="https://www.jenkins.io/security/advisory/2024-01-24/">Jenkins Security Advisory 2024-01-24, CVE-2024-23897</a></li>
+  <li><a href="https://attack.mitre.org/matrices/enterprise/" target="_blank" rel="noopener noreferrer">MITRE ATT&amp;CK Enterprise Matrix</a></li>
+  <li><a href="https://attack.mitre.org/campaigns/C0024/" target="_blank" rel="noopener noreferrer">MITRE ATT&amp;CK, Campaign C0024 SolarWinds Compromise</a></li>
+  <li><a href="https://www.jenkins.io/security/advisory/2024-01-24/" target="_blank" rel="noopener noreferrer">Jenkins Security Advisory 2024-01-24, CVE-2024-23897</a></li>
 </ol>
+
+<script>
+  document.querySelectorAll("[data-view]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const target = button.dataset.view;
+      document.querySelectorAll("[data-view]").forEach((item) => item.classList.toggle("active", item === button));
+      document.querySelectorAll(".view-panel").forEach((panel) => panel.classList.toggle("active", panel.id === target));
+    });
+  });
+</script>
       <footer class="footer">
         Spacebar Project. This page is not affiliated with MITRE ATT&amp;CK.
       </footer>

@@ -19,6 +19,7 @@
       <div class="sidebar-block">
         <div class="sidebar-title">Campaigns</div>
         <nav class="sidebar-links">
+          <a class="sidebar-link" href="/campaigns/SB-00/"><span>SB-00</span>SB-01 Demo</a>
           <a class="sidebar-link" href="/campaigns/SB-01/"><span>SB-01</span>2024 PipelineKey</a>
           <a class="sidebar-link" href="/campaigns/SB-02/"><span>SB-02</span>Operation Poisoned Relay</a>
           <a class="sidebar-link" href="/campaigns/SB-03/"><span>SB-03</span>Operation MyCompany Dominance</a>
@@ -31,10 +32,11 @@
         <div class="sidebar-title">On This Page</div>
         <nav class="sidebar-links">
           
+          <a class="sidebar-link" href="/campaigns/SB-06/logs/">Campaign Logs</a>
           <a class="sidebar-link" href="#techniques-used">Techniques Used</a>
           <a class="sidebar-link" href="#software">Software</a>
           <a class="sidebar-link" href="#references">References</a>
-          <a class="sidebar-link" href="/logs/">Log Catalog</a>
+          <a class="sidebar-link" href="/logs/">Global Log Catalog</a>
         </nav>
       </div>
     </aside>
@@ -80,18 +82,18 @@
       </tr>
     </thead>
     <tbody>
-      <tr><td>1</td><td class="id-cell">T1595</td><td>Active Scanning</td><td>관측 가능</td><td><a href="/logs/HFL-001/">HFL-001</a>, <a href="/logs/HFL-003/">HFL-003</a></td><td><code>web_scanner</code></td></tr>
-      <tr><td>2</td><td class="id-cell">T1190</td><td>Exploit Public-Facing Application</td><td>핵심 Technique</td><td><a href="/logs/HFL-001/">HFL-001</a>, <a href="/logs/HFL-003/">HFL-003</a>, <a href="/logs/HFW-001/">HFW-001</a>, <a href="/logs/HFE-002/">HFE-002</a></td><td><code>langflow_rce_attempt</code>, <code>web_ssrf</code>, <code>web_file_inclusion</code></td></tr>
-      <tr><td>3</td><td class="id-cell">T1059.006</td><td>Command and Scripting Interpreter: Python</td><td>핵심 Technique</td><td><a href="/logs/HFL-003/">HFL-003</a>, <a href="/logs/HFA-001/">HFA-001</a></td><td><code>langflow_rce_attempt</code></td></tr>
-      <tr><td>4</td><td class="id-cell">T1059.004</td><td>Unix Shell</td><td>핵심 Technique</td><td><a href="/logs/HFA-001/">HFA-001</a>, <a href="/logs/HFL-003/">HFL-003</a>, <a href="/logs/HFE-002/">HFE-002</a></td><td><code>hanguel_shell_exec</code>, <code>container_shell_exec</code></td></tr>
-      <tr><td>5</td><td class="id-cell">T1082</td><td>System Information Discovery</td><td>관측 가능</td><td><a href="/logs/HFA-001/">HFA-001</a>, <a href="/logs/HFL-002/">HFL-002</a>, <a href="/logs/HFL-003/">HFL-003</a></td><td><code>command_discovery</code></td></tr>
-      <tr><td>6</td><td class="id-cell">T1083</td><td>File and Directory Discovery</td><td>관측 가능</td><td><a href="/logs/HFA-001/">HFA-001</a>, <a href="/logs/HFL-002/">HFL-002</a>, <a href="/logs/HFL-003/">HFL-003</a></td><td><code>command_discovery</code></td></tr>
-      <tr><td>7</td><td class="id-cell">T1005</td><td>Data from Local System</td><td>관측 가능</td><td><a href="/logs/HFL-001/">HFL-001</a>, <a href="/logs/HFA-002/">HFA-002</a>, <a href="/logs/HFL-003/">HFL-003</a></td><td><code>web_path_traversal</code>, <code>hanguel_sensitive_file_access</code></td></tr>
-      <tr><td>8</td><td class="id-cell">T1003</td><td>OS Credential Dumping</td><td>조건부 관측</td><td><a href="/logs/HFA-002/">HFA-002</a>, <a href="/logs/HFL-003/">HFL-003</a></td><td><code>hanguel_sensitive_file_access</code></td></tr>
-      <tr><td>9</td><td class="id-cell">T1105</td><td>Ingress Tool Transfer</td><td>관측 가능</td><td><a href="/logs/HFA-001/">HFA-001</a>, <a href="/logs/HFA-004/">HFA-004</a>, <a href="/logs/HFL-003/">HFL-003</a></td><td><code>hanguel_tool_transfer</code>, <code>tool_transfer</code></td></tr>
-      <tr><td>10</td><td class="id-cell">T1611</td><td>Escape to Host</td><td>조건부 관측</td><td><a href="/logs/HFA-003/">HFA-003</a>, <a href="/logs/HFL-003/">HFL-003</a></td><td><code>hanguel_docker_socket_access</code></td></tr>
-      <tr><td>11</td><td class="id-cell">T1078</td><td>Valid Accounts</td><td>확장 필요</td><td><a href="/logs/HFL-004/">HFL-004</a>, <a href="/logs/HFC-001/">HFC-001</a></td><td>SSH 성공 탐지 룰 확장 필요</td></tr>
-      <tr><td>12</td><td class="id-cell">T1110</td><td>Brute Force</td><td>관측 가능</td><td><a href="/logs/HFL-004/">HFL-004</a>, <a href="/logs/HFL-003/">HFL-003</a></td><td><code>ssh_authentication_failure</code></td></tr>
+      <tr><td>1</td><td class="id-cell">T1595</td><td>Active Scanning</td><td>관측 가능</td><td><a href="/campaigns/SB-06/logs/HFL-001/">HFL-001</a>, <a href="/campaigns/SB-06/logs/HFL-003/">HFL-003</a></td><td><code>web_scanner</code></td></tr>
+      <tr><td>2</td><td class="id-cell">T1190</td><td>Exploit Public-Facing Application</td><td>핵심 Technique</td><td><a href="/campaigns/SB-06/logs/HFL-001/">HFL-001</a>, <a href="/campaigns/SB-06/logs/HFL-003/">HFL-003</a>, <a href="/campaigns/SB-06/logs/HFW-001/">HFW-001</a>, <a href="/campaigns/SB-06/logs/HFE-002/">HFE-002</a></td><td><code>langflow_rce_attempt</code>, <code>web_ssrf</code>, <code>web_file_inclusion</code></td></tr>
+      <tr><td>3</td><td class="id-cell">T1059.006</td><td>Command and Scripting Interpreter: Python</td><td>핵심 Technique</td><td><a href="/campaigns/SB-06/logs/HFL-003/">HFL-003</a>, <a href="/campaigns/SB-06/logs/HFA-001/">HFA-001</a></td><td><code>langflow_rce_attempt</code></td></tr>
+      <tr><td>4</td><td class="id-cell">T1059.004</td><td>Unix Shell</td><td>핵심 Technique</td><td><a href="/campaigns/SB-06/logs/HFA-001/">HFA-001</a>, <a href="/campaigns/SB-06/logs/HFL-003/">HFL-003</a>, <a href="/campaigns/SB-06/logs/HFE-002/">HFE-002</a></td><td><code>hanguel_shell_exec</code>, <code>container_shell_exec</code></td></tr>
+      <tr><td>5</td><td class="id-cell">T1082</td><td>System Information Discovery</td><td>관측 가능</td><td><a href="/campaigns/SB-06/logs/HFA-001/">HFA-001</a>, <a href="/campaigns/SB-06/logs/HFL-002/">HFL-002</a>, <a href="/campaigns/SB-06/logs/HFL-003/">HFL-003</a></td><td><code>command_discovery</code></td></tr>
+      <tr><td>6</td><td class="id-cell">T1083</td><td>File and Directory Discovery</td><td>관측 가능</td><td><a href="/campaigns/SB-06/logs/HFA-001/">HFA-001</a>, <a href="/campaigns/SB-06/logs/HFL-002/">HFL-002</a>, <a href="/campaigns/SB-06/logs/HFL-003/">HFL-003</a></td><td><code>command_discovery</code></td></tr>
+      <tr><td>7</td><td class="id-cell">T1005</td><td>Data from Local System</td><td>관측 가능</td><td><a href="/campaigns/SB-06/logs/HFL-001/">HFL-001</a>, <a href="/campaigns/SB-06/logs/HFA-002/">HFA-002</a>, <a href="/campaigns/SB-06/logs/HFL-003/">HFL-003</a></td><td><code>web_path_traversal</code>, <code>hanguel_sensitive_file_access</code></td></tr>
+      <tr><td>8</td><td class="id-cell">T1003</td><td>OS Credential Dumping</td><td>조건부 관측</td><td><a href="/campaigns/SB-06/logs/HFA-002/">HFA-002</a>, <a href="/campaigns/SB-06/logs/HFL-003/">HFL-003</a></td><td><code>hanguel_sensitive_file_access</code></td></tr>
+      <tr><td>9</td><td class="id-cell">T1105</td><td>Ingress Tool Transfer</td><td>관측 가능</td><td><a href="/campaigns/SB-06/logs/HFA-001/">HFA-001</a>, <a href="/campaigns/SB-06/logs/HFA-004/">HFA-004</a>, <a href="/campaigns/SB-06/logs/HFL-003/">HFL-003</a></td><td><code>hanguel_tool_transfer</code>, <code>tool_transfer</code></td></tr>
+      <tr><td>10</td><td class="id-cell">T1611</td><td>Escape to Host</td><td>조건부 관측</td><td><a href="/campaigns/SB-06/logs/HFA-003/">HFA-003</a>, <a href="/campaigns/SB-06/logs/HFL-003/">HFL-003</a></td><td><code>hanguel_docker_socket_access</code></td></tr>
+      <tr><td>11</td><td class="id-cell">T1078</td><td>Valid Accounts</td><td>확장 필요</td><td><a href="/campaigns/SB-06/logs/HFL-004/">HFL-004</a>, <a href="/campaigns/SB-06/logs/HFC-001/">HFC-001</a></td><td>SSH 성공 탐지 룰 확장 필요</td></tr>
+      <tr><td>12</td><td class="id-cell">T1110</td><td>Brute Force</td><td>관측 가능</td><td><a href="/campaigns/SB-06/logs/HFL-004/">HFL-004</a>, <a href="/campaigns/SB-06/logs/HFL-003/">HFL-003</a></td><td><code>ssh_authentication_failure</code></td></tr>
     </tbody>
   </table>
 </div>
@@ -108,7 +110,7 @@
   <div class="technique-body">
     <p>외부 공개 Langflow 서비스의 <code>/api/v1/validate/code</code> API를 직접 호출하고, CVE-2025-3248 맥락에서 Python code validation 경로를 악용해 명령 실행을 유도하는 단계다.</p>
     <div class="mapping-grid">
-      <div><h3>Log IDs</h3><p><a href="/logs/HFL-001/">HFL-001</a>, <a href="/logs/HFL-003/">HFL-003</a>, <a href="/logs/HFW-001/">HFW-001</a>, <a href="/logs/HFE-002/">HFE-002</a></p></div>
+      <div><h3>Log IDs</h3><p><a href="/campaigns/SB-06/logs/HFL-001/">HFL-001</a>, <a href="/campaigns/SB-06/logs/HFL-003/">HFL-003</a>, <a href="/campaigns/SB-06/logs/HFW-001/">HFW-001</a>, <a href="/campaigns/SB-06/logs/HFE-002/">HFE-002</a></p></div>
       <div><h3>Detection Point</h3><p><code>url.original</code>, <code>user_agent.original</code>, <code>event.action</code>, <code>vulnerability.id</code></p></div>
       <div><h3>KQL Draft</h3><p><code>event.action : "langflow_rce_attempt"</code></p></div>
     </div>
@@ -121,7 +123,7 @@
   <div class="technique-body">
     <p>validate API 악용 이후 Langflow 컨테이너 내부에서 <code>bash</code>, <code>sh</code>, <code>python</code>, <code>os.system</code>을 실행하는 단계다.</p>
     <div class="mapping-grid">
-      <div><h3>Log IDs</h3><p><a href="/logs/HFA-001/">HFA-001</a>, <a href="/logs/HFL-003/">HFL-003</a>, <a href="/logs/HFE-002/">HFE-002</a></p></div>
+      <div><h3>Log IDs</h3><p><a href="/campaigns/SB-06/logs/HFA-001/">HFA-001</a>, <a href="/campaigns/SB-06/logs/HFL-003/">HFL-003</a>, <a href="/campaigns/SB-06/logs/HFE-002/">HFE-002</a></p></div>
       <div><h3>Detection Point</h3><p><code>subj=docker-default</code>, <code>comm="bash"</code>, <code>comm="sh"</code>, <code>comm="python3"</code></p></div>
       <div><h3>KQL Draft</h3><p><code>event.action : ("hanguel_shell_exec" or "container_shell_exec")</code></p></div>
     </div>
@@ -133,7 +135,7 @@
   <div class="technique-body">
     <p>공격자가 컨테이너 내부에서 <code>whoami</code>, <code>id</code>, <code>hostname</code>, <code>uname -a</code>, <code>pwd</code>, <code>ls -la</code> 등으로 환경 정보를 확인하는 단계다.</p>
     <div class="mapping-grid">
-      <div><h3>Log IDs</h3><p><a href="/logs/HFL-002/">HFL-002</a>, <a href="/logs/HFA-001/">HFA-001</a>, <a href="/logs/HFL-003/">HFL-003</a></p></div>
+      <div><h3>Log IDs</h3><p><a href="/campaigns/SB-06/logs/HFL-002/">HFL-002</a>, <a href="/campaigns/SB-06/logs/HFA-001/">HFA-001</a>, <a href="/campaigns/SB-06/logs/HFL-003/">HFL-003</a></p></div>
       <div><h3>Detection Point</h3><p><code>event.action: command_discovery</code>, RCE 이후 발생 시 <code>attack</code> 승격</p></div>
       <div><h3>KQL Draft</h3><p><code>event.action : "command_discovery"</code></p></div>
     </div>
@@ -145,7 +147,7 @@
   <div class="technique-body">
     <p><code>/etc/passwd</code>, <code>/etc/shadow</code>, internal-docs, fake secret 등 내부 정보나 credential 단서에 접근하는 단계다.</p>
     <div class="mapping-grid">
-      <div><h3>Log IDs</h3><p><a href="/logs/HFL-001/">HFL-001</a>, <a href="/logs/HFA-002/">HFA-002</a>, <a href="/logs/HFL-003/">HFL-003</a>, <a href="/logs/HFE-002/">HFE-002</a></p></div>
+      <div><h3>Log IDs</h3><p><a href="/campaigns/SB-06/logs/HFL-001/">HFL-001</a>, <a href="/campaigns/SB-06/logs/HFA-002/">HFA-002</a>, <a href="/campaigns/SB-06/logs/HFL-003/">HFL-003</a>, <a href="/campaigns/SB-06/logs/HFE-002/">HFE-002</a></p></div>
       <div><h3>Detection Point</h3><p><code>web_path_traversal</code>, <code>web_ssrf</code>, <code>hanguel_sensitive_file_access</code></p></div>
       <div><h3>KQL Draft</h3><p><code>event.action : ("web_path_traversal" or "web_ssrf" or "hanguel_sensitive_file_access")</code></p></div>
     </div>
@@ -157,7 +159,7 @@
   <div class="technique-body">
     <p>RCE 이후 <code>curl</code> 또는 <code>wget</code>으로 외부 도구를 가져오는 단계다.</p>
     <div class="mapping-grid">
-      <div><h3>Log IDs</h3><p><a href="/logs/HFA-001/">HFA-001</a>, <a href="/logs/HFA-004/">HFA-004</a>, <a href="/logs/HFL-003/">HFL-003</a></p></div>
+      <div><h3>Log IDs</h3><p><a href="/campaigns/SB-06/logs/HFA-001/">HFA-001</a>, <a href="/campaigns/SB-06/logs/HFA-004/">HFA-004</a>, <a href="/campaigns/SB-06/logs/HFL-003/">HFL-003</a></p></div>
       <div><h3>Detection Point</h3><p>auditd <code>comm="curl"</code> 또는 <code>comm="wget"</code>, URL 포함 command output</p></div>
       <div><h3>KQL Draft</h3><p><code>event.action : ("hanguel_tool_transfer" or "tool_transfer")</code></p></div>
     </div>
@@ -169,7 +171,7 @@
   <div class="technique-body">
     <p>컨테이너에서 host Docker socket에 접근해 host 제어 또는 container escape를 시도하는 단계다.</p>
     <div class="mapping-grid">
-      <div><h3>Log IDs</h3><p><a href="/logs/HFA-003/">HFA-003</a>, <a href="/logs/HFL-003/">HFL-003</a></p></div>
+      <div><h3>Log IDs</h3><p><a href="/campaigns/SB-06/logs/HFA-003/">HFA-003</a>, <a href="/campaigns/SB-06/logs/HFL-003/">HFL-003</a></p></div>
       <div><h3>Detection Point</h3><p><code>/var/run/docker.sock</code> 접근, <code>hanguel_docker_socket_access</code></p></div>
       <div><h3>KQL Draft</h3><p><code>event.action : "hanguel_docker_socket_access"</code></p></div>
     </div>
@@ -203,10 +205,10 @@
 
 <h2 id="referenced-log-catalog">Referenced Log Catalog</h2>
 <div class="cards">
-  <article class="card"><h3><a href="/logs/HFL-001/">HFL-001 Langflow/Nginx Access Log</a></h3><p>Langflow API 접근, direct validate API, web attack, scanner 흔적을 확인한다.</p></article>
-  <article class="card"><h3><a href="/logs/HFL-003/">HFL-003 Hanguel IR Agent Enriched Event</a></h3><p>normal/suspicious/attack 분류와 risk score, evidence, threat.technique을 확인한다.</p></article>
-  <article class="card"><h3><a href="/logs/HFA-001/">HFA-001 Linux auditd Execve Log</a></h3><p>컨테이너/host 명령 실행, discovery, shell execution, tool transfer를 확인한다.</p></article>
-  <article class="card"><h3><a href="/logs/HFE-002/">HFE-002 Sequential Correlator Alert</a></h3><p>단일 이벤트가 아니라 시간창 내 복수 이벤트를 묶어 incident 후보로 판단한다.</p></article>
+  <article class="card"><h3><a href="/campaigns/SB-06/logs/HFL-001/">HFL-001 Langflow/Nginx Access Log</a></h3><p>Langflow API 접근, direct validate API, web attack, scanner 흔적을 확인한다.</p></article>
+  <article class="card"><h3><a href="/campaigns/SB-06/logs/HFL-003/">HFL-003 Hanguel IR Agent Enriched Event</a></h3><p>normal/suspicious/attack 분류와 risk score, evidence, threat.technique을 확인한다.</p></article>
+  <article class="card"><h3><a href="/campaigns/SB-06/logs/HFA-001/">HFA-001 Linux auditd Execve Log</a></h3><p>컨테이너/host 명령 실행, discovery, shell execution, tool transfer를 확인한다.</p></article>
+  <article class="card"><h3><a href="/campaigns/SB-06/logs/HFE-002/">HFE-002 Sequential Correlator Alert</a></h3><p>단일 이벤트가 아니라 시간창 내 복수 이벤트를 묶어 incident 후보로 판단한다.</p></article>
 </div>
 
 <h2 id="next-improvements">Current Gaps</h2>

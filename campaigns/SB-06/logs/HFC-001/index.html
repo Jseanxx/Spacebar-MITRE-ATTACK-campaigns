@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SB-06 HFC-001 CloudTrail Management Event | Spacebar Campaign Logs</title>
+  <link rel="stylesheet" href="/assets/campaign.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="/campaigns/"><img class="brand-logo" src="/assets/spacebarLogo.png" alt="Spacebar"><span>Spacebar Campaigns</span></a>
+    </div>
+  </header>
+
+  <div class="page-shell">
+
+    <aside class="campaign-sidebar" aria-label="Campaign log navigation">
+      <div class="sidebar-block">
+        <div class="sidebar-title">SB-06 Logs</div>
+        <nav class="sidebar-links">
+          <a class="sidebar-link" href="/campaigns/SB-06/">Campaign Page</a>
+          <a class="sidebar-link" href="/campaigns/SB-06/detection-map/">Detection Map</a>
+          <a class="sidebar-link" href="/campaigns/SB-06/logs/">Campaign Logs</a>
+          <a class="sidebar-link" href="/campaigns/SB-06/logs/HFA-001/"><span>HFA-001</span>Linux auditd Execve Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-06/logs/HFA-002/"><span>HFA-002</span>Linux auditd Sensitive File Access Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-06/logs/HFA-003/"><span>HFA-003</span>Linux auditd Docker Socket Access Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-06/logs/HFA-004/"><span>HFA-004</span>Linux auditd Tool Transfer Log</a>
+          <a class="sidebar-link active" href="/campaigns/SB-06/logs/HFC-001/"><span>HFC-001</span>CloudTrail Management Event</a>
+          <a class="sidebar-link" href="/campaigns/SB-06/logs/HFE-002/"><span>HFE-002</span>Sequential Correlator Alert</a>
+          <a class="sidebar-link" href="/campaigns/SB-06/logs/HFL-001/"><span>HFL-001</span>Langflow/Nginx Access Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-06/logs/HFL-002/"><span>HFL-002</span>Langflow App Container Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-06/logs/HFL-003/"><span>HFL-003</span>Hanguel IR Agent Enriched Event</a>
+          <a class="sidebar-link" href="/campaigns/SB-06/logs/HFL-004/"><span>HFL-004</span>Linux SSH Auth Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-06/logs/HFW-001/"><span>HFW-001</span>AWS WAF Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-06/logs/HFW-002/"><span>HFW-002</span>VPC Flow Log</a>
+        </nav>
+      </div>
+      <div class="sidebar-block">
+        <div class="sidebar-title">Global Catalog</div>
+        <nav class="sidebar-links">
+          <a class="sidebar-link" href="/logs/">All Logs</a>
+        </nav>
+      </div>
+    </aside>
+    <main class="page campaign-content">
+      <div class="breadcrumbs"><a href="/campaigns/">Home</a> / <a href="/campaigns/SB-06/">Operation Hanguel Flow</a> / <a href="/campaigns/SB-06/logs/">Campaign Logs</a> / <span>HFC-001</span></div>
+      <div class="concept-banner">
+        <b>Campaign-scoped Log</b>
+        <span>이 페이지는 SB-06 기준으로 보는 로그 설명이다. 공통 원본은 <a href="/logs/HFC-001/">Global Log Catalog</a>에서도 확인할 수 있다.</span>
+      </div>
+<h1>HFC-001 CloudTrail Management Event</h1>
+<div class="meta-grid" aria-label="Campaign metadata">
+<div class="meta-label">Source Alias:</div>
+<div class="meta-value">AWSL-003</div>
+<div class="meta-label">Trail:</div>
+<div class="meta-value"><code>hanguel-management-trail</code></div>
+<div class="meta-label">S3 bucket:</div>
+<div class="meta-value"><code>hanguel-cloudtrail-589138971978-apne2</code></div>
+<div class="meta-label">현재 상태:</div>
+<div class="meta-value">Multi-region trail</div>
+<div class="meta-label">ELK 연동:</div>
+<div class="meta-value">현재 핵심 대시보드에는 직접 ingest되지 않음</div>
+<div class="meta-label">커버 Technique:</div>
+<div class="meta-value">T1078, T1098, T1562, Cloud account activity</div>
+</div>
+<h2 id="분석-포인트">분석 포인트</h2>
+<ul>
+<li>AWS API 사용, IAM/보안그룹 변경, EC2 start/stop, CloudTrail/WAF/GuardDuty 설정 변경을 추적할 수 있다.</li>
+<li>본 시나리오에서는 Cloud 침해 확장 단계의 증거로 사용한다.</li>
+</ul>
+      <footer class="footer">
+        Spacebar Project. This campaign log page is scoped to SB-06.
+      </footer>
+    </main>
+  </div>
+</body>
+</html>

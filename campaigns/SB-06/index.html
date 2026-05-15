@@ -19,6 +19,7 @@
       <div class="sidebar-block">
         <div class="sidebar-title">Campaigns</div>
         <nav class="sidebar-links">
+          <a class="sidebar-link" href="/campaigns/SB-00/"><span>SB-00</span>SB-01 Demo</a>
           <a class="sidebar-link" href="/campaigns/SB-01/"><span>SB-01</span>2024 PipelineKey</a>
           <a class="sidebar-link" href="/campaigns/SB-02/"><span>SB-02</span>Operation Poisoned Relay</a>
           <a class="sidebar-link" href="/campaigns/SB-03/"><span>SB-03</span>Operation MyCompany Dominance</a>
@@ -31,10 +32,11 @@
         <div class="sidebar-title">On This Page</div>
         <nav class="sidebar-links">
           <a class="sidebar-link" href="/campaigns/SB-06/detection-map/">Detection Map</a>
+          <a class="sidebar-link" href="/campaigns/SB-06/logs/">Campaign Logs</a>
           <a class="sidebar-link" href="#techniques-used">Techniques Used</a>
           <a class="sidebar-link" href="#software">Software</a>
           <a class="sidebar-link" href="#references">References</a>
-          <a class="sidebar-link" href="/logs/">Log Catalog</a>
+          <a class="sidebar-link" href="/logs/">Global Log Catalog</a>
         </nav>
       </div>
     </aside>
@@ -164,63 +166,63 @@
             <td class="id-cell">T1590</td>
             <td>Gather Victim Network Information</td>
             <td>Operation Hanguel Flow 당시 HanguelFlow는 공개 서비스 배너, URL 구조, reverse proxy 응답을 바탕으로 Langflow 운영 인프라 정보를 수집했다.</td>
-            <td><a href="/logs/HFL-001/">HFL-001</a>, <a href="/logs/HFW-001/">HFW-001</a>, <a href="/logs/HFW-002/">HFW-002</a></td>
+            <td><a href="/campaigns/SB-06/logs/HFL-001/">HFL-001</a>, <a href="/campaigns/SB-06/logs/HFW-001/">HFW-001</a>, <a href="/campaigns/SB-06/logs/HFW-002/">HFW-002</a></td>
           </tr>
           <tr>
             <td>Enterprise</td>
             <td class="id-cell">T1595</td>
             <td>Active Scanning</td>
             <td>Operation Hanguel Flow 당시 HanguelFlow는 공개 노출된 Langflow 웹 서비스와 API 포트를 식별하기 위해 HTTP 스캔을 수행했다.</td>
-            <td><a href="/logs/HFL-001/">HFL-001</a>, <a href="/logs/HFL-003/">HFL-003</a>, <a href="/logs/HFW-001/">HFW-001</a></td>
+            <td><a href="/campaigns/SB-06/logs/HFL-001/">HFL-001</a>, <a href="/campaigns/SB-06/logs/HFL-003/">HFL-003</a>, <a href="/campaigns/SB-06/logs/HFW-001/">HFW-001</a></td>
           </tr>
           <tr>
             <td>Enterprise</td>
             <td class="id-cell">T1190</td>
             <td>Exploit Public-Facing Application</td>
             <td>Operation Hanguel Flow 당시 HanguelFlow는 Langflow CVE-2025-3248의 비인증 코드 검증 API를 악용하여 외부에서 원격 코드 실행을 시도했다.</td>
-            <td><a href="/logs/HFL-001/">HFL-001</a>, <a href="/logs/HFL-003/">HFL-003</a>, <a href="/logs/HFE-002/">HFE-002</a></td>
+            <td><a href="/campaigns/SB-06/logs/HFL-001/">HFL-001</a>, <a href="/campaigns/SB-06/logs/HFL-003/">HFL-003</a>, <a href="/campaigns/SB-06/logs/HFE-002/">HFE-002</a></td>
           </tr>
           <tr>
             <td>Enterprise</td>
             <td class="id-cell">T1059.006</td>
             <td>Command and Scripting Interpreter: Python</td>
             <td>Operation Hanguel Flow 당시 HanguelFlow는 취약한 코드 검증 경로에서 Python 코드 또는 Python을 통한 시스템 명령 호출을 실행했다.</td>
-            <td><a href="/logs/HFA-001/">HFA-001</a>, <a href="/logs/HFL-002/">HFL-002</a>, <a href="/logs/HFL-003/">HFL-003</a></td>
+            <td><a href="/campaigns/SB-06/logs/HFA-001/">HFA-001</a>, <a href="/campaigns/SB-06/logs/HFL-002/">HFL-002</a>, <a href="/campaigns/SB-06/logs/HFL-003/">HFL-003</a></td>
           </tr>
           <tr>
             <td>Enterprise</td>
             <td class="id-cell">T1082</td>
             <td>System Information Discovery</td>
             <td>Operation Hanguel Flow 당시 HanguelFlow는 애플리케이션 런타임 권한에서 계정, 호스트명, 커널, 컨테이너 실행 환경과 같은 시스템 정보를 확인했다.</td>
-            <td><a href="/logs/HFA-001/">HFA-001</a>, <a href="/logs/HFL-002/">HFL-002</a>, <a href="/logs/HFL-003/">HFL-003</a></td>
+            <td><a href="/campaigns/SB-06/logs/HFA-001/">HFA-001</a>, <a href="/campaigns/SB-06/logs/HFL-002/">HFL-002</a>, <a href="/campaigns/SB-06/logs/HFL-003/">HFL-003</a></td>
           </tr>
           <tr>
             <td>Enterprise</td>
             <td class="id-cell">T1083</td>
             <td>File and Directory Discovery</td>
             <td>Operation Hanguel Flow 당시 HanguelFlow는 Langflow 설정, 업로드 디렉터리, workspace, 내부 문서 서버 연결 정보, secret 파일 위치를 탐색했다.</td>
-            <td><a href="/logs/HFA-001/">HFA-001</a>, <a href="/logs/HFL-002/">HFL-002</a>, <a href="/logs/HFL-003/">HFL-003</a></td>
+            <td><a href="/campaigns/SB-06/logs/HFA-001/">HFA-001</a>, <a href="/campaigns/SB-06/logs/HFL-002/">HFL-002</a>, <a href="/campaigns/SB-06/logs/HFL-003/">HFL-003</a></td>
           </tr>
           <tr>
             <td>Enterprise</td>
             <td class="id-cell">T1552.001</td>
             <td>Unsecured Credentials: Credentials In Files</td>
             <td>Operation Hanguel Flow 당시 HanguelFlow는 .env, 설정 파일, API key 파일에서 LLM provider token, DB credential, 내부 문서 서버 접근 단서를 찾으려 했다.</td>
-            <td><a href="/logs/HFA-002/">HFA-002</a>, <a href="/logs/HFL-003/">HFL-003</a></td>
+            <td><a href="/campaigns/SB-06/logs/HFA-002/">HFA-002</a>, <a href="/campaigns/SB-06/logs/HFL-003/">HFL-003</a></td>
           </tr>
           <tr>
             <td>Enterprise</td>
             <td class="id-cell">T1105</td>
             <td>Ingress Tool Transfer</td>
             <td>Operation Hanguel Flow 당시 HanguelFlow는 curl, wget, Python HTTP client를 이용해 후속 스크립트, 스캐너, 웹쉘 또는 봇넷 페이로드를 내려받으려 했다.</td>
-            <td><a href="/logs/HFA-004/">HFA-004</a>, <a href="/logs/HFL-003/">HFL-003</a>, <a href="/logs/HFW-002/">HFW-002</a></td>
+            <td><a href="/campaigns/SB-06/logs/HFA-004/">HFA-004</a>, <a href="/campaigns/SB-06/logs/HFL-003/">HFL-003</a>, <a href="/campaigns/SB-06/logs/HFW-002/">HFW-002</a></td>
           </tr>
           <tr>
             <td>Enterprise</td>
             <td class="id-cell">T1071.001</td>
             <td>Application Layer Protocol: Web Protocols</td>
             <td>Operation Hanguel Flow 당시 HanguelFlow는 HTTP/HTTPS를 이용해 명령 전달, 페이로드 다운로드, 외부 서버 통신을 수행했다.</td>
-            <td><a href="/logs/HFL-001/">HFL-001</a>, <a href="/logs/HFW-002/">HFW-002</a></td>
+            <td><a href="/campaigns/SB-06/logs/HFL-001/">HFL-001</a>, <a href="/campaigns/SB-06/logs/HFW-002/">HFW-002</a></td>
           </tr>
         </tbody>
       </table>

@@ -45,6 +45,7 @@
         <div class="sidebar-title">Campaigns</div>
         <nav class="sidebar-links">
           <a class="sidebar-link" href="/campaigns/">Campaign Index</a>
+          <a class="sidebar-link" href="/campaigns/SB-00/detection-map/"><span>SB-00</span>SB-00 Demo Detection Map</a>
           <a class="sidebar-link" href="/campaigns/SB-01/detection-map/"><span>SB-01</span>SB-01 Detection Map</a>
           <a class="sidebar-link" href="/campaigns/SB-06/detection-map/"><span>SB-06</span>SB-06 Detection Map</a>
         </nav>
@@ -95,9 +96,9 @@
 <table>
 <thead><tr><th>Technique</th><th>Mapping Reason</th></tr></thead>
 <tbody>
-<tr><td>T1083 File and Directory Discovery</td><td><code>ls</code>, <code>find</code>, 민감 경로 탐색 확인</td></tr>
-<tr><td>T1074.001 Local Data Staging</td><td>임시 경로에 데이터 모으기 확인</td></tr>
-<tr><td>T1552.001 Credentials in Files</td><td>설정 파일, 환경 파일 접근 확인</td></tr>
+<tr><td><a href="https://attack.mitre.org/techniques/T1083/">T1083 File and Directory Discovery</a></td><td><code>ls</code>, <code>find</code>, 민감 경로 탐색 확인</td></tr>
+<tr><td><a href="https://attack.mitre.org/techniques/T1074/001/">T1074.001 Local Data Staging</a></td><td>임시 경로에 데이터 모으기 확인</td></tr>
+<tr><td><a href="https://attack.mitre.org/techniques/T1552/001/">T1552.001 Credentials in Files</a></td><td>설정 파일, 환경 파일 접근 확인</td></tr>
 </tbody></table></div>
 <h2 id="kql-draft">KQL Draft</h2>
 <pre><code>event.module: &quot;auditd&quot; and auditd.log.name: /opt/spacebar-booking*</code></pre>

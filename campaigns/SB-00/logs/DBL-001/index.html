@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SB-00 DBL-001 PostgreSQL Connection and Query Log | Spacebar Campaign Logs</title>
+  <link rel="stylesheet" href="/assets/campaign.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="/campaigns/"><img class="brand-logo" src="/assets/spacebarLogo.png" alt="Spacebar"><span>Spacebar Campaigns</span></a>
+    </div>
+  </header>
+
+  <div class="page-shell">
+
+    <aside class="campaign-sidebar" aria-label="Campaign log navigation">
+      <div class="sidebar-block">
+        <div class="sidebar-title">SB-00 Logs</div>
+        <nav class="sidebar-links">
+          <a class="sidebar-link" href="/campaigns/SB-00/">Campaign Page</a>
+          <a class="sidebar-link" href="/campaigns/SB-00/detection-map/">Detection Map</a>
+          <a class="sidebar-link" href="/campaigns/SB-00/logs/">Campaign Logs</a>
+          <a class="sidebar-link" href="/campaigns/SB-00/logs/AWSL-001/"><span>AWSL-001</span>AWS VPC Flow Log</a>
+          <a class="sidebar-link active" href="/campaigns/SB-00/logs/DBL-001/"><span>DBL-001</span>PostgreSQL Connection and Query Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-00/logs/JL-001/"><span>JL-001</span>Jenkins HTTP Access Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-00/logs/JL-002/"><span>JL-002</span>Jenkins Docker and System Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-00/logs/LL-001/"><span>LL-001</span>Linux SSH Auth Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-00/logs/LL-002/"><span>LL-002</span>Linux auditd File Access Log</a>
+        </nav>
+      </div>
+      <div class="sidebar-block">
+        <div class="sidebar-title">Global Catalog</div>
+        <nav class="sidebar-links">
+          <a class="sidebar-link" href="/logs/">All Logs</a>
+        </nav>
+      </div>
+    </aside>
+    <main class="page campaign-content">
+      <div class="breadcrumbs"><a href="/campaigns/">Home</a> / <a href="/campaigns/SB-00/">SB-01 Demo</a> / <a href="/campaigns/SB-00/logs/">Campaign Logs</a> / <span>DBL-001</span></div>
+      <div class="concept-banner">
+        <b>Campaign-scoped Log</b>
+        <span>이 페이지는 SB-00 기준으로 보는 로그 설명이다. 공통 원본은 <a href="/logs/DBL-001/">Global Log Catalog</a>에서도 확인할 수 있다.</span>
+      </div>
+<h1>DBL-001 PostgreSQL Connection and Query Log</h1>
+<div class="meta-grid" aria-label="Campaign metadata">
+<div class="meta-label">Log ID:</div>
+<div class="meta-value">DBL-001</div>
+<div class="meta-label">Source:</div>
+<div class="meta-value">PostgreSQL DB host</div>
+<div class="meta-label">Representative Path:</div>
+<div class="meta-value"><code>/var/log/postgresql/postgresql-*.log</code></div>
+<div class="meta-label">Collection:</div>
+<div class="meta-value">Filebeat custom log input 또는 PostgreSQL module</div>
+<div class="meta-label">Primary Use:</div>
+<div class="meta-value">DB 접속 계정, 출발지, 쿼리 대상, 대량 조회 정황 확인</div>
+</div>
+<h2 id="log-structure">Log Structure</h2>
+<p>PostgreSQL 로그는 설정에 따라 접속/종료, 인증 실패, statement, duration, slow query 등을 남긴다. 실무형 분석에서는 모든 쿼리를 무조건 남기기보다, 실습 목적에 맞춰 접속 로그와 특정 statement 로그를 제한적으로 수집하는 것이 적절하다.</p>
+<h2 id="important-fields">Important Fields</h2>
+<div class="table-wrap wide-table">
+<table>
+<thead><tr><th>Field</th><th>Meaning</th></tr></thead>
+<tbody>
+<tr><td><code>@timestamp</code></td><td>DB 이벤트 발생 시간</td></tr>
+<tr><td><code>user.name</code></td><td>DB 접속 계정</td></tr>
+<tr><td><code>database.name</code></td><td>접속 대상 DB</td></tr>
+<tr><td><code>source.ip</code></td><td>접속 출발지</td></tr>
+<tr><td><code>event.action</code></td><td>connection, disconnection, statement 등</td></tr>
+<tr><td><code>message</code></td><td>PostgreSQL 원본 로그</td></tr>
+</tbody></table></div>
+<h2 id="mapped-techniques">Mapped Techniques</h2>
+<div class="table-wrap wide-table">
+<table>
+<thead><tr><th>Technique</th><th>Mapping Reason</th></tr></thead>
+<tbody>
+<tr><td>T1213.006 Data from Information Repositories: Databases</td><td>DB 조회와 데이터 접근 확인</td></tr>
+<tr><td>T1078 Valid Accounts</td><td>정상 DB 계정으로 접속했는지 확인</td></tr>
+</tbody></table></div>
+<h2 id="kql-draft">KQL Draft</h2>
+<pre><code>service.type: &quot;postgresql&quot; and message: (&quot;booking&quot; or &quot;reservation&quot; or &quot;customer&quot;)</code></pre>
+<h2 id="investigation-pivot">Investigation Pivot</h2>
+<p>DB 접속 계정과 source IP를 기준으로 App 서버 환경 파일 접근 로그, SSH 접속 로그, Jenkins 배포 로그와 연결한다.</p>
+      <footer class="footer">
+        Spacebar Project. This campaign log page is scoped to SB-00.
+      </footer>
+    </main>
+  </div>
+</body>
+</html>

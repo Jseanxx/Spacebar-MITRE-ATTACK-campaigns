@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SB-06 HFL-003 Hanguel IR Agent Enriched Event | Spacebar Campaign Logs</title>
+  <link rel="stylesheet" href="/assets/campaign.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="/campaigns/"><img class="brand-logo" src="/assets/spacebarLogo.png" alt="Spacebar"><span>Spacebar Campaigns</span></a>
+    </div>
+  </header>
+
+  <div class="page-shell">
+
+    <aside class="campaign-sidebar" aria-label="Campaign log navigation">
+      <div class="sidebar-block">
+        <div class="sidebar-title">SB-06 Logs</div>
+        <nav class="sidebar-links">
+          <a class="sidebar-link" href="/campaigns/SB-06/">Campaign Page</a>
+          <a class="sidebar-link" href="/campaigns/SB-06/detection-map/">Detection Map</a>
+          <a class="sidebar-link" href="/campaigns/SB-06/logs/">Campaign Logs</a>
+          <a class="sidebar-link" href="/campaigns/SB-06/logs/HFA-001/"><span>HFA-001</span>Linux auditd Execve Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-06/logs/HFA-002/"><span>HFA-002</span>Linux auditd Sensitive File Access Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-06/logs/HFA-003/"><span>HFA-003</span>Linux auditd Docker Socket Access Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-06/logs/HFA-004/"><span>HFA-004</span>Linux auditd Tool Transfer Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-06/logs/HFC-001/"><span>HFC-001</span>CloudTrail Management Event</a>
+          <a class="sidebar-link" href="/campaigns/SB-06/logs/HFE-002/"><span>HFE-002</span>Sequential Correlator Alert</a>
+          <a class="sidebar-link" href="/campaigns/SB-06/logs/HFL-001/"><span>HFL-001</span>Langflow/Nginx Access Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-06/logs/HFL-002/"><span>HFL-002</span>Langflow App Container Log</a>
+          <a class="sidebar-link active" href="/campaigns/SB-06/logs/HFL-003/"><span>HFL-003</span>Hanguel IR Agent Enriched Event</a>
+          <a class="sidebar-link" href="/campaigns/SB-06/logs/HFL-004/"><span>HFL-004</span>Linux SSH Auth Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-06/logs/HFW-001/"><span>HFW-001</span>AWS WAF Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-06/logs/HFW-002/"><span>HFW-002</span>VPC Flow Log</a>
+        </nav>
+      </div>
+      <div class="sidebar-block">
+        <div class="sidebar-title">Global Catalog</div>
+        <nav class="sidebar-links">
+          <a class="sidebar-link" href="/logs/">All Logs</a>
+        </nav>
+      </div>
+    </aside>
+    <main class="page campaign-content">
+      <div class="breadcrumbs"><a href="/campaigns/">Home</a> / <a href="/campaigns/SB-06/">Operation Hanguel Flow</a> / <a href="/campaigns/SB-06/logs/">Campaign Logs</a> / <span>HFL-003</span></div>
+      <div class="concept-banner">
+        <b>Campaign-scoped Log</b>
+        <span>이 페이지는 SB-06 기준으로 보는 로그 설명이다. 공통 원본은 <a href="/logs/HFL-003/">Global Log Catalog</a>에서도 확인할 수 있다.</span>
+      </div>
+<h1>HFL-003 Hanguel IR Agent Enriched Event</h1>
+<div class="meta-grid" aria-label="Campaign metadata">
+<div class="meta-label">Source Alias:</div>
+<div class="meta-value">HL-003</div>
+<div class="meta-label">발생 위치:</div>
+<div class="meta-value">App 서버 <code>hanguel-ir-agent</code></div>
+<div class="meta-label">원본 위치:</div>
+<div class="meta-value">Docker log + <code>/var/log</code> + <code>/var/log/audit/audit.log</code></div>
+<div class="meta-label">수집 방식:</div>
+<div class="meta-value">Python agent가 원시 로그를 읽고 ECS 유사 JSON으로 enrich 후 Logstash <code>8088</code>로 전송</div>
+<div class="meta-label">ELK index:</div>
+<div class="meta-value"><code>langflow-agent-*</code></div>
+<div class="meta-label">분류:</div>
+<div class="meta-value"><code>normal</code>, <code>suspicious</code>, <code>attack</code></div>
+<div class="meta-label">커버 Technique:</div>
+<div class="meta-value">Operation Hanguel Flow 대부분의 Campaign Technique</div>
+</div>
+<h2 id="주요-필드">주요 필드</h2>
+<div class="table-wrap wide-table">
+<table>
+<thead><tr><th>Field</th><th>Meaning</th></tr></thead>
+<tbody>
+<tr><td><code>event.action</code></td><td>정규화된 행위 이름</td></tr>
+<tr><td><code>hanguel.classification</code></td><td>normal/suspicious/attack 분류</td></tr>
+<tr><td><code>hanguel.risk_score</code></td><td>위험 점수</td></tr>
+<tr><td><code>hanguel.detection_stage</code></td><td>탐지 단계</td></tr>
+<tr><td><code>hanguel.evidence</code></td><td>룰 근거</td></tr>
+<tr><td><code>threat.technique</code></td><td>연결된 ATT&amp;CK Technique</td></tr>
+<tr><td><code>vulnerability.id</code></td><td>취약점 ID</td></tr>
+</tbody></table></div>
+<h2 id="대표-분류-정책">대표 분류 정책</h2>
+<pre><code>normal: Langflow UI build request, host process telemetry
+suspicious: direct validate API, container shell without strong exploit context
+attack: suspicious validate API 이후 container shell, sensitive file access, tool transfer, Docker socket access</code></pre>
+<h2 id="kql">KQL</h2>
+<pre><code>campaign.id : &quot;HGC-2025-001&quot; and hanguel.classification : *</code></pre>
+<pre><code>hanguel.classification : (&quot;normal&quot; or &quot;suspicious&quot; or &quot;attack&quot;)</code></pre>
+      <footer class="footer">
+        Spacebar Project. This campaign log page is scoped to SB-06.
+      </footer>
+    </main>
+  </div>
+</body>
+</html>

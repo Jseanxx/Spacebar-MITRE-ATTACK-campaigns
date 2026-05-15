@@ -85,9 +85,11 @@ function renderMetadataGrid(rows) {
   return `<div class="meta-grid" aria-label="Campaign metadata">\n${body}\n</div>`;
 }
 
-function normalizeInternalLinks(html) {
+function normalizeInternalLinks(html, campaignId = null) {
+  const logHref = (id) => (campaignId ? `/campaigns/${campaignId}/logs/${id}/` : `/logs/${id}/`);
   return html
-    .replace(/href="(?:\.\.\/)?logs\/([A-Z]+-\d+)\.html"/g, 'href="/logs/$1/"')
+    .replace(/href="(?:\.\.\/)?logs\/([A-Z]+-\d+)\.html"/g, (_, id) => `href="${logHref(id)}"`)
+    .replace(/href="\/logs\/([A-Z]+-\d+)\/"/g, (_, id) => `href="${logHref(id)}"`)
     .replace(/href="(?:\.\.\/)?campaigns\/(SB-\d+)\.html"/g, 'href="/campaigns/$1/"')
     .replace(/href="(?:\.\.\/)?campaigns\/(SB-\d+)-detection-map\.html"/g, 'href="/campaigns/$1/detection-map/"')
     .replace(/href="(SB-\d+)\.html"/g, 'href="/campaigns/$1/"')
@@ -331,8 +333,13 @@ function readContentCollection(dir, pattern, slugFactory) {
     });
 }
 
+function getCampaignLogs(detection, logs) {
+  if (!detection) return [];
+  return logs.filter((log) => detection.body.includes(log.data.id));
+}
+
 function renderSidebar(campaigns, currentId, options = {}) {
-  const { detectionSlug, logIndexHref = "/logs/" } = options;
+  const { detectionSlug, logIndexHref = "/logs/", campaignLogsHref } = options;
   return `
     <aside class="campaign-sidebar" aria-label="Campaign navigation">
       <div class="sidebar-block">
@@ -350,10 +357,11 @@ function renderSidebar(campaigns, currentId, options = {}) {
         <div class="sidebar-title">On This Page</div>
         <nav class="sidebar-links">
           ${detectionSlug ? `<a class="sidebar-link" href="/campaigns/${detectionSlug}">Detection Map</a>` : ""}
+          ${campaignLogsHref ? `<a class="sidebar-link" href="${campaignLogsHref}">Campaign Logs</a>` : ""}
           <a class="sidebar-link" href="#techniques-used">Techniques Used</a>
           <a class="sidebar-link" href="#software">Software</a>
           <a class="sidebar-link" href="#references">References</a>
-          <a class="sidebar-link" href="${logIndexHref}">Log Catalog</a>
+          <a class="sidebar-link" href="${logIndexHref}">Global Log Catalog</a>
         </nav>
       </div>
     </aside>`;
@@ -378,12 +386,13 @@ function renderHeader(title, cssHref = assetHref, logo = logoSrc) {
 
 function renderCampaignPage(campaigns, campaign, detectionByCampaign = new Map()) {
   const { data, body } = campaign;
-  const bodyHtml = normalizeInternalLinks(wrapCampaignHero(data.format === "html" ? body : markdownToHtml(body)));
+  const bodyHtml = normalizeInternalLinks(wrapCampaignHero(data.format === "html" ? body : markdownToHtml(body)), data.id);
   const detectionSlug = detectionByCampaign.get(data.id)?.slug;
+  const campaignLogsHref = detectionSlug ? `/campaigns/${data.id}/logs/` : null;
   return `${renderHeader(`${data.name} | Spacebar Campaigns`)}
 
   <div class="page-shell">
-${renderSidebar(campaigns, data.id, { detectionSlug })}
+${renderSidebar(campaigns, data.id, { detectionSlug, campaignLogsHref })}
     <main class="page campaign-content">
       <div class="breadcrumbs"><a href="/campaigns/">Home</a> / <a href="/campaigns/">Campaigns</a> / <span>${escapeHtml(data.name)}</span></div>
 ${bodyHtml}
@@ -412,18 +421,105 @@ ${bodyHtml}
 
 function renderDetectionPage(campaigns, detection) {
   const { data, body } = detection;
-  const bodyHtml = normalizeInternalLinks(data.format === "html" ? body : markdownToHtml(body));
+  const bodyHtml = normalizeInternalLinks(data.format === "html" ? body : markdownToHtml(body), data.campaign);
   const campaign = campaigns.find((item) => item.data.id === data.campaign);
   const campaignName = campaign ? campaign.data.name : data.campaign;
   return `${renderHeader(`${data.name} | Spacebar Detection Map`)}
 
   <div class="page-shell">
-${renderSidebar(campaigns, data.campaign, { logIndexHref: "/logs/" })}
+${renderSidebar(campaigns, data.campaign, { logIndexHref: "/logs/", campaignLogsHref: `/campaigns/${data.campaign}/logs/` })}
     <main class="page campaign-content">
       <div class="breadcrumbs"><a href="/campaigns/">Home</a> / <a href="/campaigns/">Campaigns</a> / <a href="/campaigns/${data.campaign}/">${escapeHtml(campaignName)}</a> / <span>Detection Map</span></div>
 ${bodyHtml}
       <footer class="footer">
         Spacebar Project. This detection map is an educational analysis artifact.
+      </footer>
+    </main>
+  </div>
+</body>
+</html>
+`;
+}
+
+function renderCampaignLogSidebar(campaign, logs, currentId = null) {
+  return `
+    <aside class="campaign-sidebar" aria-label="Campaign log navigation">
+      <div class="sidebar-block">
+        <div class="sidebar-title">${escapeHtml(campaign.data.id)} Logs</div>
+        <nav class="sidebar-links">
+          <a class="sidebar-link" href="/campaigns/${campaign.data.id}/">Campaign Page</a>
+          <a class="sidebar-link" href="/campaigns/${campaign.data.id}/detection-map/">Detection Map</a>
+          <a class="sidebar-link${currentId ? "" : " active"}" href="/campaigns/${campaign.data.id}/logs/">Campaign Logs</a>
+          ${logs
+            .map((log) => {
+              const active = log.data.id === currentId ? " active" : "";
+              return `<a class="sidebar-link${active}" href="/campaigns/${campaign.data.id}/logs/${log.data.id}/"><span>${escapeHtml(log.data.id)}</span>${escapeHtml(log.data.name)}</a>`;
+            })
+            .join("\n          ")}
+        </nav>
+      </div>
+      <div class="sidebar-block">
+        <div class="sidebar-title">Global Catalog</div>
+        <nav class="sidebar-links">
+          <a class="sidebar-link" href="/logs/">All Logs</a>
+        </nav>
+      </div>
+    </aside>`;
+}
+
+function renderCampaignLogIndex(campaign, logs) {
+  return `${renderHeader(`${campaign.data.id} Logs | Spacebar Campaigns`)}
+
+  <div class="page-shell">
+${renderCampaignLogSidebar(campaign, logs)}
+    <main class="page campaign-content">
+      <div class="breadcrumbs"><a href="/campaigns/">Home</a> / <a href="/campaigns/${campaign.data.id}/">${escapeHtml(campaign.data.name)}</a> / <span>Campaign Logs</span></div>
+      <h1>${escapeHtml(campaign.data.id)} Campaign Logs</h1>
+      <p class="summary">
+        이 페이지는 ${escapeHtml(campaign.data.name)}에서 실제로 참조하는 로그만 모아 보여준다.
+        전체 팀 공통 로그 목록은 Global Log Catalog에서 확인한다.
+      </p>
+      <div class="cards">
+${logs
+  .map(
+    (log) => `        <article class="card">
+          <h3><a href="/campaigns/${campaign.data.id}/logs/${log.data.id}/">${escapeHtml(log.data.id)} ${escapeHtml(log.data.name)}</a></h3>
+          <p>${escapeHtml(log.data.description || "")}</p>
+          <div class="tag-row">
+            ${(log.data.techniques || "")
+              .split(",")
+              .map((item) => item.trim())
+              .filter(Boolean)
+              .map((item) => `<span class="tag">${escapeHtml(item)}</span>`)
+              .join("\n            ")}
+          </div>
+        </article>`
+  )
+  .join("\n")}
+      </div>
+    </main>
+  </div>
+</body>
+</html>
+`;
+}
+
+function renderCampaignLogPage(campaign, logs, log) {
+  const { data, body } = log;
+  const bodyHtml = normalizeInternalLinks(data.format === "html" ? body : markdownToHtml(body), campaign.data.id);
+  return `${renderHeader(`${campaign.data.id} ${data.id} ${data.name} | Spacebar Campaign Logs`)}
+
+  <div class="page-shell">
+${renderCampaignLogSidebar(campaign, logs, data.id)}
+    <main class="page campaign-content">
+      <div class="breadcrumbs"><a href="/campaigns/">Home</a> / <a href="/campaigns/${campaign.data.id}/">${escapeHtml(campaign.data.name)}</a> / <a href="/campaigns/${campaign.data.id}/logs/">Campaign Logs</a> / <span>${escapeHtml(data.id)}</span></div>
+      <div class="concept-banner">
+        <b>Campaign-scoped Log</b>
+        <span>이 페이지는 ${escapeHtml(campaign.data.id)} 기준으로 보는 로그 설명이다. 공통 원본은 <a href="/logs/${escapeHtml(data.id)}/">Global Log Catalog</a>에서도 확인할 수 있다.</span>
+      </div>
+${bodyHtml}
+      <footer class="footer">
+        Spacebar Project. This campaign log page is scoped to ${escapeHtml(campaign.data.id)}.
       </footer>
     </main>
   </div>
@@ -584,6 +680,20 @@ function main() {
 
   logs.forEach((log) => {
     writeSitePage(logsOutDir, log.slug, renderLogPage(logs, log, detections));
+  });
+
+  detections.forEach((detection) => {
+    const campaign = campaigns.find((item) => item.data.id === detection.data.campaign);
+    if (!campaign) return;
+    const campaignLogs = getCampaignLogs(detection, logs);
+    if (!campaignLogs.length) return;
+
+    const campaignLogsBase = path.join(outDir, campaign.data.id, "logs");
+    fs.mkdirSync(campaignLogsBase, { recursive: true });
+    fs.writeFileSync(path.join(campaignLogsBase, "index.html"), renderCampaignLogIndex(campaign, campaignLogs));
+    campaignLogs.forEach((log) => {
+      writeSitePage(campaignLogsBase, `${log.data.id}/`, renderCampaignLogPage(campaign, campaignLogs, log));
+    });
   });
 
   fs.writeFileSync(path.join(outDir, "index.html"), renderIndex(campaigns, detectionByCampaign));

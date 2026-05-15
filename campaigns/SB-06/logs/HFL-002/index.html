@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SB-06 HFL-002 Langflow App Container Log | Spacebar Campaign Logs</title>
+  <link rel="stylesheet" href="/assets/campaign.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="/campaigns/"><img class="brand-logo" src="/assets/spacebarLogo.png" alt="Spacebar"><span>Spacebar Campaigns</span></a>
+    </div>
+  </header>
+
+  <div class="page-shell">
+
+    <aside class="campaign-sidebar" aria-label="Campaign log navigation">
+      <div class="sidebar-block">
+        <div class="sidebar-title">SB-06 Logs</div>
+        <nav class="sidebar-links">
+          <a class="sidebar-link" href="/campaigns/SB-06/">Campaign Page</a>
+          <a class="sidebar-link" href="/campaigns/SB-06/detection-map/">Detection Map</a>
+          <a class="sidebar-link" href="/campaigns/SB-06/logs/">Campaign Logs</a>
+          <a class="sidebar-link" href="/campaigns/SB-06/logs/HFA-001/"><span>HFA-001</span>Linux auditd Execve Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-06/logs/HFA-002/"><span>HFA-002</span>Linux auditd Sensitive File Access Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-06/logs/HFA-003/"><span>HFA-003</span>Linux auditd Docker Socket Access Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-06/logs/HFA-004/"><span>HFA-004</span>Linux auditd Tool Transfer Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-06/logs/HFC-001/"><span>HFC-001</span>CloudTrail Management Event</a>
+          <a class="sidebar-link" href="/campaigns/SB-06/logs/HFE-002/"><span>HFE-002</span>Sequential Correlator Alert</a>
+          <a class="sidebar-link" href="/campaigns/SB-06/logs/HFL-001/"><span>HFL-001</span>Langflow/Nginx Access Log</a>
+          <a class="sidebar-link active" href="/campaigns/SB-06/logs/HFL-002/"><span>HFL-002</span>Langflow App Container Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-06/logs/HFL-003/"><span>HFL-003</span>Hanguel IR Agent Enriched Event</a>
+          <a class="sidebar-link" href="/campaigns/SB-06/logs/HFL-004/"><span>HFL-004</span>Linux SSH Auth Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-06/logs/HFW-001/"><span>HFW-001</span>AWS WAF Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-06/logs/HFW-002/"><span>HFW-002</span>VPC Flow Log</a>
+        </nav>
+      </div>
+      <div class="sidebar-block">
+        <div class="sidebar-title">Global Catalog</div>
+        <nav class="sidebar-links">
+          <a class="sidebar-link" href="/logs/">All Logs</a>
+        </nav>
+      </div>
+    </aside>
+    <main class="page campaign-content">
+      <div class="breadcrumbs"><a href="/campaigns/">Home</a> / <a href="/campaigns/SB-06/">Operation Hanguel Flow</a> / <a href="/campaigns/SB-06/logs/">Campaign Logs</a> / <span>HFL-002</span></div>
+      <div class="concept-banner">
+        <b>Campaign-scoped Log</b>
+        <span>이 페이지는 SB-06 기준으로 보는 로그 설명이다. 공통 원본은 <a href="/logs/HFL-002/">Global Log Catalog</a>에서도 확인할 수 있다.</span>
+      </div>
+<h1>HFL-002 Langflow App Container Log</h1>
+<div class="meta-grid" aria-label="Campaign metadata">
+<div class="meta-label">Source Alias:</div>
+<div class="meta-value">HL-002</div>
+<div class="meta-label">발생 위치:</div>
+<div class="meta-value"><code>hanguel-langflow</code> container</div>
+<div class="meta-label">원본 위치:</div>
+<div class="meta-value">Docker container JSON log</div>
+<div class="meta-label">수집 방식:</div>
+<div class="meta-value"><code>hanguel-ir-agent</code> Docker log polling</div>
+<div class="meta-label">커버 Technique:</div>
+<div class="meta-value">T1059, T1082, T1083, T1005, T1105</div>
+</div>
+<h2 id="주요-필드">주요 필드</h2>
+<div class="table-wrap wide-table">
+<table>
+<thead><tr><th>Field</th><th>Meaning</th></tr></thead>
+<tbody>
+<tr><td><code>log.original</code></td><td>컨테이너 원본 로그</td></tr>
+<tr><td><code>container.*</code></td><td>컨테이너 식별 정보</td></tr>
+<tr><td><code>event.dataset</code></td><td>dataset</td></tr>
+<tr><td><code>event.action</code></td><td>정규화된 이벤트 타입</td></tr>
+</tbody></table></div>
+<h2 id="분석-포인트">분석 포인트</h2>
+<ul>
+<li><code>whoami</code>, <code>id</code>, <code>hostname</code>, <code>uname -a</code>, <code>ls -la</code>, <code>cat /etc/passwd</code> 같은 명령 실행 결과가 app/container log 또는 auditd에 남을 수 있다.</li>
+<li>단순 application error는 공격 증거가 아니며, HTTP 직접 API 접근 또는 auditd execve와 묶어서 봐야 한다.</li>
+</ul>
+<h2 id="kql">KQL</h2>
+<pre><code>event.action : &quot;command_discovery&quot;</code></pre>
+      <footer class="footer">
+        Spacebar Project. This campaign log page is scoped to SB-06.
+      </footer>
+    </main>
+  </div>
+</body>
+</html>

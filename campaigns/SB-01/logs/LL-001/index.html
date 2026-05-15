@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SB-01 LL-001 Linux SSH Auth Log | Spacebar Campaign Logs</title>
+  <link rel="stylesheet" href="/assets/campaign.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="/campaigns/"><img class="brand-logo" src="/assets/spacebarLogo.png" alt="Spacebar"><span>Spacebar Campaigns</span></a>
+    </div>
+  </header>
+
+  <div class="page-shell">
+
+    <aside class="campaign-sidebar" aria-label="Campaign log navigation">
+      <div class="sidebar-block">
+        <div class="sidebar-title">SB-01 Logs</div>
+        <nav class="sidebar-links">
+          <a class="sidebar-link" href="/campaigns/SB-01/">Campaign Page</a>
+          <a class="sidebar-link" href="/campaigns/SB-01/detection-map/">Detection Map</a>
+          <a class="sidebar-link" href="/campaigns/SB-01/logs/">Campaign Logs</a>
+          <a class="sidebar-link" href="/campaigns/SB-01/logs/AWSL-001/"><span>AWSL-001</span>AWS VPC Flow Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-01/logs/DBL-001/"><span>DBL-001</span>PostgreSQL Connection and Query Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-01/logs/JL-001/"><span>JL-001</span>Jenkins HTTP Access Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-01/logs/JL-002/"><span>JL-002</span>Jenkins Docker and System Log</a>
+          <a class="sidebar-link active" href="/campaigns/SB-01/logs/LL-001/"><span>LL-001</span>Linux SSH Auth Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-01/logs/LL-002/"><span>LL-002</span>Linux auditd File Access Log</a>
+        </nav>
+      </div>
+      <div class="sidebar-block">
+        <div class="sidebar-title">Global Catalog</div>
+        <nav class="sidebar-links">
+          <a class="sidebar-link" href="/logs/">All Logs</a>
+        </nav>
+      </div>
+    </aside>
+    <main class="page campaign-content">
+      <div class="breadcrumbs"><a href="/campaigns/">Home</a> / <a href="/campaigns/SB-01/">2024 PipelineKey</a> / <a href="/campaigns/SB-01/logs/">Campaign Logs</a> / <span>LL-001</span></div>
+      <div class="concept-banner">
+        <b>Campaign-scoped Log</b>
+        <span>이 페이지는 SB-01 기준으로 보는 로그 설명이다. 공통 원본은 <a href="/logs/LL-001/">Global Log Catalog</a>에서도 확인할 수 있다.</span>
+      </div>
+<h1>LL-001 Linux SSH Auth Log</h1>
+<div class="meta-grid" aria-label="Campaign metadata">
+<div class="meta-label">Log ID:</div>
+<div class="meta-value">LL-001</div>
+<div class="meta-label">Source:</div>
+<div class="meta-value">Linux App/Jenkins/DB host</div>
+<div class="meta-label">Representative Path:</div>
+<div class="meta-value"><code>/var/log/auth.log</code></div>
+<div class="meta-label">Collection:</div>
+<div class="meta-value">Filebeat system module 또는 custom log input</div>
+<div class="meta-label">Primary Use:</div>
+<div class="meta-value">SSH 인증 성공/실패, 세션 시작/종료 확인</div>
+</div>
+<h2 id="why-this-log-matters">Why This Log Matters</h2>
+<p>SB-01에서 공격자는 Jenkins에서 확보한 배포 credential을 이용해 App 서버로 SSH 접속한다. <code>auth.log</code>는 이 이동이 실제로 발생했는지 확인하는 1차 증거다. 특히 접속 계정, 출발지 IP, 인증 방식, 성공/실패 여부를 통해 정상 배포 접근과 비정상 접근을 구분할 수 있다.</p>
+<h2 id="log-structure">Log Structure</h2>
+<p>Linux SSH 인증 로그는 일반적으로 시간, 호스트명, 프로세스, 인증 결과, 계정, 출발지 IP, 포트, 인증 방식 정보를 포함한다. ELK로 수집하면 <code>message</code> 원문과 함께 <code>user.name</code>, <code>source.ip</code>, <code>event.outcome</code>, <code>process.name</code> 같은 필드로 정규화할 수 있다.</p>
+<pre><code>&lt;timestamp&gt; &lt;host&gt; &lt;process&gt;[&lt;pid&gt;]: &lt;auth_result&gt; &lt;auth_method&gt; for &lt;user&gt; from &lt;source_ip&gt; port &lt;source_port&gt; ssh2</code></pre>
+<p>예를 들어 SSH public key 인증에 성공하면 아래처럼 <code>Accepted publickey</code>, 접속 계정, 출발지 IP, 포트가 한 줄에 같이 남는다.</p>
+<h2 id="raw-log-example">Raw Log Example</h2>
+<pre><code>May 08 13:25:41 sb01-app sshd[2841]: Accepted publickey for deploy from 10.10.40.21 port 51244 ssh2: RSA SHA256:...
+May 08 13:25:41 sb01-app sshd[2841]: pam_unix(sshd:session): session opened for user deploy(uid=1001) by (uid=0)
+May 08 13:27:02 sb01-app sshd[2841]: pam_unix(sshd:session): session closed for user deploy</code></pre>
+<h2 id="representative-events">Representative Events</h2>
+<div class="table-wrap wide-table">
+<table>
+<thead><tr><th>Event Type</th><th>Example Signal</th><th>Meaning</th></tr></thead>
+<tbody>
+<tr><td>Login success</td><td><code>Accepted publickey for deploy</code></td><td>SSH public key 인증 성공</td></tr>
+<tr><td>Login failure</td><td><code>Failed password for invalid user</code></td><td>비밀번호 인증 실패 또는 계정 추측</td></tr>
+<tr><td>Session opened</td><td><code>pam_unix(sshd:session): session opened</code></td><td>SSH 세션 시작</td></tr>
+<tr><td>Session closed</td><td><code>pam_unix(sshd:session): session closed</code></td><td>SSH 세션 종료</td></tr>
+</tbody></table></div>
+<h2 id="important-fields">Important Fields</h2>
+<div class="table-wrap wide-table">
+<table>
+<thead><tr><th>Field</th><th>Meaning</th></tr></thead>
+<tbody>
+<tr><td><code>@timestamp</code></td><td>인증 이벤트 발생 시간</td></tr>
+<tr><td><code>user.name</code></td><td>접속 계정</td></tr>
+<tr><td><code>source.ip</code></td><td>접속 출발지 IP</td></tr>
+<tr><td><code>event.outcome</code></td><td>성공 또는 실패</td></tr>
+<tr><td><code>process.name</code></td><td>보통 <code>sshd</code></td></tr>
+<tr><td><code>message</code></td><td>원본 인증 로그</td></tr>
+</tbody></table></div>
+<h2 id="collection-method">Collection Method</h2>
+<div class="table-wrap wide-table">
+<table>
+<thead><tr><th>Method</th><th>Use Case</th></tr></thead>
+<tbody>
+<tr><td>Filebeat system module</td><td>Linux 인증 로그를 ECS 필드로 정규화해서 수집할 때 사용</td></tr>
+<tr><td>Filebeat custom log input</td><td><code>project.name</code>, <code>sb01_server</code>, <code>sb01_log_type</code> 같은 SB-01 전용 필드를 붙일 때 사용</td></tr>
+</tbody></table></div>
+<h2 id="mapped-techniques">Mapped Techniques</h2>
+<div class="table-wrap wide-table">
+<table>
+<thead><tr><th>Technique</th><th>Mapping Reason</th></tr></thead>
+<tbody>
+<tr><td><a href="https://attack.mitre.org/techniques/T1021/004/">T1021.004 Remote Services: SSH</a></td><td>SSH를 통한 원격 접속 자체를 확인</td></tr>
+<tr><td><a href="https://attack.mitre.org/techniques/T1078/">T1078 Valid Accounts</a></td><td>정상 계정/키를 이용한 인증 성공 확인</td></tr>
+<tr><td><a href="https://attack.mitre.org/techniques/T1110/">T1110 Brute Force</a></td><td>반복 인증 실패, invalid user 패턴 확인</td></tr>
+</tbody></table></div>
+<h2 id="kql-draft">KQL Draft</h2>
+<pre><code>sb01_server: &quot;app&quot; and sb01_log_type: &quot;linux_auth&quot; and message: &quot;Accepted publickey for deploy&quot;</code></pre>
+<h2 id="investigation-pivot">Investigation Pivot</h2>
+<ol>
+<li><code>Accepted publickey for deploy</code> 이벤트로 SSH 성공 여부를 확인한다.</li>
+<li><code>source.ip</code>가 Jenkins 서버인지, 외부 또는 예상 밖 내부 서버인지 확인한다.</li>
+<li>같은 시간대 Jenkins build/system log에서 배포 job 또는 CLI 사용 흔적을 확인한다.</li>
+<li>SSH 직후 <code>LL-002 auditd</code>에서 <code>/opt/spacebar-booking</code> 접근이 이어졌는지 확인한다.</li>
+<li>필요하면 <code>DBL-001 PostgreSQL</code> 로그로 DB 접속과 조회 행위를 연결한다.</li>
+</ol>
+<h2 id="limitations">Limitations</h2>
+<p><code>auth.log</code>만으로는 SSH 접속 이후 실행한 명령이나 접근한 파일을 알 수 없다. 따라서 App 경로 접근은 <code>LL-002 auditd</code>, DB 조회는 <code>DBL-001</code>, 네트워크 전송은 <code>AWSL-001</code>과 함께 봐야 한다.</p>
+      <footer class="footer">
+        Spacebar Project. This campaign log page is scoped to SB-01.
+      </footer>
+    </main>
+  </div>
+</body>
+</html>
