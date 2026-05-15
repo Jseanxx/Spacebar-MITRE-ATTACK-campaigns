@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SB-06 Detection Map | Spacebar Detection Map</title>
+  <link rel="stylesheet" href="/assets/campaign.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="/campaigns/"><img class="brand-logo" src="/assets/spacebarLogo.png" alt="Spacebar"><span>Spacebar Campaigns</span></a>
+    </div>
+  </header>
+
+  <div class="page-shell">
+
+    <aside class="campaign-sidebar" aria-label="Campaign navigation">
+      <div class="sidebar-block">
+        <div class="sidebar-title">Campaigns</div>
+        <nav class="sidebar-links">
+          <a class="sidebar-link" href="/campaigns/SB-01/"><span>SB-01</span>2024 PipelineKey</a>
+          <a class="sidebar-link" href="/campaigns/SB-02/"><span>SB-02</span>Operation Poisoned Relay</a>
+          <a class="sidebar-link" href="/campaigns/SB-03/"><span>SB-03</span>Operation MyCompany Dominance</a>
+          <a class="sidebar-link" href="/campaigns/SB-04/"><span>SB-04</span>NodeFall</a>
+          <a class="sidebar-link" href="/campaigns/SB-05/"><span>SB-05</span>ClusterDrain</a>
+          <a class="sidebar-link active" href="/campaigns/SB-06/"><span>SB-06</span>Operation Hanguel Flow</a>
+        </nav>
+      </div>
+      <div class="sidebar-block sidebar-sections">
+        <div class="sidebar-title">On This Page</div>
+        <nav class="sidebar-links">
+          
+          <a class="sidebar-link" href="#techniques-used">Techniques Used</a>
+          <a class="sidebar-link" href="#software">Software</a>
+          <a class="sidebar-link" href="#references">References</a>
+          <a class="sidebar-link" href="/logs/">Log Catalog</a>
+        </nav>
+      </div>
+    </aside>
+    <main class="page campaign-content">
+      <div class="breadcrumbs"><a href="/campaigns/">Home</a> / <a href="/campaigns/">Campaigns</a> / <a href="/campaigns/SB-06/">Operation Hanguel Flow</a> / <span>Detection Map</span></div>
+<h1>SB-06 Detection Map</h1>
+
+<p class="summary">
+  이 페이지는 Operation Hanguel Flow 환경에서 발생하는 공격 Technique과 이를 증명할 수 있는 Log Source를 분리해 정리한 Campaign Page 2 초안이다.
+  Technique 문서는 공격 행위와 분석 관점을 설명하고, Log Catalog는 원본 로그 위치, 수집 방식, 주요 필드, 커버 가능한 Technique을 역매핑한다.
+</p>
+
+<div class="concept-banner">
+  <b>문서화 원칙</b>
+  <span>Technique 문서와 Log Source 문서를 분리한다. Technique은 관련 Log ID를 참조하고, Log Catalog는 해당 로그가 어떤 Technique들을 커버하는지 역매핑한다.</span>
+</div>
+
+<h2 id="environment">Environment Scope</h2>
+<div class="table-wrap wide-table">
+  <table>
+    <tbody>
+      <tr><th>AWS Region</th><td>ap-northeast-2</td></tr>
+      <tr><th>Bastion / Nginx / NAT</th><td>hanguel-nginx-bastion, 172.31.40.163</td></tr>
+      <tr><th>Langflow App</th><td>hanguel-langflow-app, 172.31.1.155</td></tr>
+      <tr><th>ELK / SOC</th><td>hanguel-elk-soc, 172.31.1.152</td></tr>
+      <tr><th>Public Entry</th><td>ALB + hanguel-nginx path</td></tr>
+      <tr><th>Campaign ID</th><td>HGC-2025-001</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<h2 id="technique-log-map">Technique to Log Map</h2>
+<div class="table-wrap wide-table">
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>MITRE ID</th>
+        <th>Technique</th>
+        <th>현재 환경 적용 여부</th>
+        <th>Related Logs</th>
+        <th>Representative event.action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>1</td><td class="id-cell">T1595</td><td>Active Scanning</td><td>관측 가능</td><td><a href="/logs/HFL-001/">HFL-001</a>, <a href="/logs/HFL-003/">HFL-003</a></td><td><code>web_scanner</code></td></tr>
+      <tr><td>2</td><td class="id-cell">T1190</td><td>Exploit Public-Facing Application</td><td>핵심 Technique</td><td><a href="/logs/HFL-001/">HFL-001</a>, <a href="/logs/HFL-003/">HFL-003</a>, <a href="/logs/HFW-001/">HFW-001</a>, <a href="/logs/HFE-002/">HFE-002</a></td><td><code>langflow_rce_attempt</code>, <code>web_ssrf</code>, <code>web_file_inclusion</code></td></tr>
+      <tr><td>3</td><td class="id-cell">T1059.006</td><td>Command and Scripting Interpreter: Python</td><td>핵심 Technique</td><td><a href="/logs/HFL-003/">HFL-003</a>, <a href="/logs/HFA-001/">HFA-001</a></td><td><code>langflow_rce_attempt</code></td></tr>
+      <tr><td>4</td><td class="id-cell">T1059.004</td><td>Unix Shell</td><td>핵심 Technique</td><td><a href="/logs/HFA-001/">HFA-001</a>, <a href="/logs/HFL-003/">HFL-003</a>, <a href="/logs/HFE-002/">HFE-002</a></td><td><code>hanguel_shell_exec</code>, <code>container_shell_exec</code></td></tr>
+      <tr><td>5</td><td class="id-cell">T1082</td><td>System Information Discovery</td><td>관측 가능</td><td><a href="/logs/HFA-001/">HFA-001</a>, <a href="/logs/HFL-002/">HFL-002</a>, <a href="/logs/HFL-003/">HFL-003</a></td><td><code>command_discovery</code></td></tr>
+      <tr><td>6</td><td class="id-cell">T1083</td><td>File and Directory Discovery</td><td>관측 가능</td><td><a href="/logs/HFA-001/">HFA-001</a>, <a href="/logs/HFL-002/">HFL-002</a>, <a href="/logs/HFL-003/">HFL-003</a></td><td><code>command_discovery</code></td></tr>
+      <tr><td>7</td><td class="id-cell">T1005</td><td>Data from Local System</td><td>관측 가능</td><td><a href="/logs/HFL-001/">HFL-001</a>, <a href="/logs/HFA-002/">HFA-002</a>, <a href="/logs/HFL-003/">HFL-003</a></td><td><code>web_path_traversal</code>, <code>hanguel_sensitive_file_access</code></td></tr>
+      <tr><td>8</td><td class="id-cell">T1003</td><td>OS Credential Dumping</td><td>조건부 관측</td><td><a href="/logs/HFA-002/">HFA-002</a>, <a href="/logs/HFL-003/">HFL-003</a></td><td><code>hanguel_sensitive_file_access</code></td></tr>
+      <tr><td>9</td><td class="id-cell">T1105</td><td>Ingress Tool Transfer</td><td>관측 가능</td><td><a href="/logs/HFA-001/">HFA-001</a>, <a href="/logs/HFA-004/">HFA-004</a>, <a href="/logs/HFL-003/">HFL-003</a></td><td><code>hanguel_tool_transfer</code>, <code>tool_transfer</code></td></tr>
+      <tr><td>10</td><td class="id-cell">T1611</td><td>Escape to Host</td><td>조건부 관측</td><td><a href="/logs/HFA-003/">HFA-003</a>, <a href="/logs/HFL-003/">HFL-003</a></td><td><code>hanguel_docker_socket_access</code></td></tr>
+      <tr><td>11</td><td class="id-cell">T1078</td><td>Valid Accounts</td><td>확장 필요</td><td><a href="/logs/HFL-004/">HFL-004</a>, <a href="/logs/HFC-001/">HFC-001</a></td><td>SSH 성공 탐지 룰 확장 필요</td></tr>
+      <tr><td>12</td><td class="id-cell">T1110</td><td>Brute Force</td><td>관측 가능</td><td><a href="/logs/HFL-004/">HFL-004</a>, <a href="/logs/HFL-003/">HFL-003</a></td><td><code>ssh_authentication_failure</code></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<h2 id="detection-details">Detection Details</h2>
+
+<p>
+  아래 상세 항목은 Technique별로 어떤 행위가 발생하고, 어떤 Log ID를 1차 근거로 삼아야 하며, 어떤 필드와 KQL로 확인할 수 있는지 정리한다.
+  단일 로그만으로 단정하지 않고, <code>source.ip</code>, <code>event.action</code>, <code>hanguel.classification</code>, <code>related.events</code>를 pivot으로 연결한다.
+</p>
+
+<details class="technique-panel" open>
+  <summary><span class="id-cell">T1190</span> Exploit Public-Facing Application</summary>
+  <div class="technique-body">
+    <p>외부 공개 Langflow 서비스의 <code>/api/v1/validate/code</code> API를 직접 호출하고, CVE-2025-3248 맥락에서 Python code validation 경로를 악용해 명령 실행을 유도하는 단계다.</p>
+    <div class="mapping-grid">
+      <div><h3>Log IDs</h3><p><a href="/logs/HFL-001/">HFL-001</a>, <a href="/logs/HFL-003/">HFL-003</a>, <a href="/logs/HFW-001/">HFW-001</a>, <a href="/logs/HFE-002/">HFE-002</a></p></div>
+      <div><h3>Detection Point</h3><p><code>url.original</code>, <code>user_agent.original</code>, <code>event.action</code>, <code>vulnerability.id</code></p></div>
+      <div><h3>KQL Draft</h3><p><code>event.action : "langflow_rce_attempt"</code></p></div>
+    </div>
+    <p>Investigation Pivot: 같은 <code>source.ip</code>의 직전 web scan 여부, 이후 <code>hanguel_shell_exec</code>, <code>hanguel_sensitive_file_access</code>, <code>hanguel_tool_transfer</code> 발생 여부를 본다.</p>
+  </div>
+</details>
+
+<details class="technique-panel">
+  <summary><span class="id-cell">T1059.004 / T1059.006</span> Unix Shell / Python Execution</summary>
+  <div class="technique-body">
+    <p>validate API 악용 이후 Langflow 컨테이너 내부에서 <code>bash</code>, <code>sh</code>, <code>python</code>, <code>os.system</code>을 실행하는 단계다.</p>
+    <div class="mapping-grid">
+      <div><h3>Log IDs</h3><p><a href="/logs/HFA-001/">HFA-001</a>, <a href="/logs/HFL-003/">HFL-003</a>, <a href="/logs/HFE-002/">HFE-002</a></p></div>
+      <div><h3>Detection Point</h3><p><code>subj=docker-default</code>, <code>comm="bash"</code>, <code>comm="sh"</code>, <code>comm="python3"</code></p></div>
+      <div><h3>KQL Draft</h3><p><code>event.action : ("hanguel_shell_exec" or "container_shell_exec")</code></p></div>
+    </div>
+  </div>
+</details>
+
+<details class="technique-panel">
+  <summary><span class="id-cell">T1082 / T1083</span> System and File Discovery</summary>
+  <div class="technique-body">
+    <p>공격자가 컨테이너 내부에서 <code>whoami</code>, <code>id</code>, <code>hostname</code>, <code>uname -a</code>, <code>pwd</code>, <code>ls -la</code> 등으로 환경 정보를 확인하는 단계다.</p>
+    <div class="mapping-grid">
+      <div><h3>Log IDs</h3><p><a href="/logs/HFL-002/">HFL-002</a>, <a href="/logs/HFA-001/">HFA-001</a>, <a href="/logs/HFL-003/">HFL-003</a></p></div>
+      <div><h3>Detection Point</h3><p><code>event.action: command_discovery</code>, RCE 이후 발생 시 <code>attack</code> 승격</p></div>
+      <div><h3>KQL Draft</h3><p><code>event.action : "command_discovery"</code></p></div>
+    </div>
+  </div>
+</details>
+
+<details class="technique-panel">
+  <summary><span class="id-cell">T1005 / T1003</span> Data and Credential-Oriented File Access</summary>
+  <div class="technique-body">
+    <p><code>/etc/passwd</code>, <code>/etc/shadow</code>, internal-docs, fake secret 등 내부 정보나 credential 단서에 접근하는 단계다.</p>
+    <div class="mapping-grid">
+      <div><h3>Log IDs</h3><p><a href="/logs/HFL-001/">HFL-001</a>, <a href="/logs/HFA-002/">HFA-002</a>, <a href="/logs/HFL-003/">HFL-003</a>, <a href="/logs/HFE-002/">HFE-002</a></p></div>
+      <div><h3>Detection Point</h3><p><code>web_path_traversal</code>, <code>web_ssrf</code>, <code>hanguel_sensitive_file_access</code></p></div>
+      <div><h3>KQL Draft</h3><p><code>event.action : ("web_path_traversal" or "web_ssrf" or "hanguel_sensitive_file_access")</code></p></div>
+    </div>
+  </div>
+</details>
+
+<details class="technique-panel">
+  <summary><span class="id-cell">T1105</span> Ingress Tool Transfer</summary>
+  <div class="technique-body">
+    <p>RCE 이후 <code>curl</code> 또는 <code>wget</code>으로 외부 도구를 가져오는 단계다.</p>
+    <div class="mapping-grid">
+      <div><h3>Log IDs</h3><p><a href="/logs/HFA-001/">HFA-001</a>, <a href="/logs/HFA-004/">HFA-004</a>, <a href="/logs/HFL-003/">HFL-003</a></p></div>
+      <div><h3>Detection Point</h3><p>auditd <code>comm="curl"</code> 또는 <code>comm="wget"</code>, URL 포함 command output</p></div>
+      <div><h3>KQL Draft</h3><p><code>event.action : ("hanguel_tool_transfer" or "tool_transfer")</code></p></div>
+    </div>
+  </div>
+</details>
+
+<details class="technique-panel">
+  <summary><span class="id-cell">T1611</span> Escape to Host</summary>
+  <div class="technique-body">
+    <p>컨테이너에서 host Docker socket에 접근해 host 제어 또는 container escape를 시도하는 단계다.</p>
+    <div class="mapping-grid">
+      <div><h3>Log IDs</h3><p><a href="/logs/HFA-003/">HFA-003</a>, <a href="/logs/HFL-003/">HFL-003</a></p></div>
+      <div><h3>Detection Point</h3><p><code>/var/run/docker.sock</code> 접근, <code>hanguel_docker_socket_access</code></p></div>
+      <div><h3>KQL Draft</h3><p><code>event.action : "hanguel_docker_socket_access"</code></p></div>
+    </div>
+  </div>
+</details>
+
+<h2 id="mapping-matrix">Technique to Log Matrix</h2>
+<div class="table-wrap wide-table">
+  <table>
+    <thead>
+      <tr>
+        <th>Technique</th><th>HFL-001</th><th>HFL-002</th><th>HFL-003</th><th>HFL-004</th><th>HFA-001</th><th>HFA-002</th><th>HFA-003</th><th>HFA-004</th><th>HFW-001</th><th>HFW-002</th><th>HFC-001</th><th>HFE-002</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>T1595 Active Scanning</td><td>O</td><td>-</td><td>O</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>O</td><td>O</td><td>-</td><td>O</td></tr>
+      <tr><td>T1190 Exploit Public-Facing Application</td><td>O</td><td>-</td><td>O</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>O</td><td>-</td><td>-</td><td>O</td></tr>
+      <tr><td>T1059.006 Python</td><td>-</td><td>O</td><td>O</td><td>-</td><td>O</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>O</td></tr>
+      <tr><td>T1059.004 Unix Shell</td><td>-</td><td>O</td><td>O</td><td>-</td><td>O</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>O</td></tr>
+      <tr><td>T1082 System Information Discovery</td><td>-</td><td>O</td><td>O</td><td>-</td><td>O</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>O</td></tr>
+      <tr><td>T1083 File and Directory Discovery</td><td>-</td><td>O</td><td>O</td><td>-</td><td>O</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>O</td></tr>
+      <tr><td>T1005 Data from Local System</td><td>O</td><td>O</td><td>O</td><td>-</td><td>-</td><td>O</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>O</td></tr>
+      <tr><td>T1003 OS Credential Dumping</td><td>-</td><td>-</td><td>O</td><td>-</td><td>-</td><td>O</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>O</td></tr>
+      <tr><td>T1105 Ingress Tool Transfer</td><td>-</td><td>O</td><td>O</td><td>-</td><td>O</td><td>-</td><td>-</td><td>O</td><td>-</td><td>O</td><td>-</td><td>O</td></tr>
+      <tr><td>T1611 Escape to Host</td><td>-</td><td>-</td><td>O</td><td>-</td><td>-</td><td>-</td><td>O</td><td>-</td><td>-</td><td>-</td><td>-</td><td>O</td></tr>
+      <tr><td>T1110 Brute Force</td><td>-</td><td>-</td><td>O</td><td>O</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+      <tr><td>T1078 Valid Accounts</td><td>-</td><td>-</td><td>확장 필요</td><td>O</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>O</td><td>-</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<h2 id="referenced-log-catalog">Referenced Log Catalog</h2>
+<div class="cards">
+  <article class="card"><h3><a href="/logs/HFL-001/">HFL-001 Langflow/Nginx Access Log</a></h3><p>Langflow API 접근, direct validate API, web attack, scanner 흔적을 확인한다.</p></article>
+  <article class="card"><h3><a href="/logs/HFL-003/">HFL-003 Hanguel IR Agent Enriched Event</a></h3><p>normal/suspicious/attack 분류와 risk score, evidence, threat.technique을 확인한다.</p></article>
+  <article class="card"><h3><a href="/logs/HFA-001/">HFA-001 Linux auditd Execve Log</a></h3><p>컨테이너/host 명령 실행, discovery, shell execution, tool transfer를 확인한다.</p></article>
+  <article class="card"><h3><a href="/logs/HFE-002/">HFE-002 Sequential Correlator Alert</a></h3><p>단일 이벤트가 아니라 시간창 내 복수 이벤트를 묶어 incident 후보로 판단한다.</p></article>
+</div>
+
+<h2 id="next-improvements">Current Gaps</h2>
+<ol>
+  <li>SSH 성공 로그 룰을 추가해 <code>Accepted publickey</code>를 <code>ssh_authentication_success</code> 또는 <code>valid_account_usage</code>로 태깅한다.</li>
+  <li>AWS WAF, VPC Flow Log, CloudTrail을 ELK로 직접 ingest하면 AWSL 계열 보조 증거가 강해진다.</li>
+  <li><code>internal-docs:8080</code> 접근을 <code>internal_data_access</code>로 태깅하면 T1005/T1213 설명력이 올라간다.</li>
+  <li><code>/tmp/hanguel_*.txt</code>, <code>/tmp/*.tar.gz</code> 생성/압축 감시를 추가하면 T1074.001 Local Data Staging을 확장할 수 있다.</li>
+  <li>VPC Flow Log 또는 proxy log 기반 외부 전송 탐지를 추가하면 T1041/T1048까지 확장할 수 있다.</li>
+</ol>
+      <footer class="footer">
+        Spacebar Project. This detection map is an educational analysis artifact.
+      </footer>
+    </main>
+  </div>
+</body>
+</html>

@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DBL-001 PostgreSQL Connection and Query Log | Spacebar Log Catalog</title>
+  <link rel="stylesheet" href="/assets/campaign.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="/campaigns/"><img class="brand-logo" src="/assets/spacebarLogo.png" alt="Spacebar"><span>Spacebar Campaigns</span></a>
+    </div>
+  </header>
+
+  <div class="page-shell">
+
+    <aside class="campaign-sidebar" aria-label="Log catalog navigation">
+      <div class="sidebar-block">
+        <div class="sidebar-title">Log Catalog</div>
+        <nav class="sidebar-links">
+          <a class="sidebar-link" href="/logs/">Index</a>
+          <a class="sidebar-link" href="/logs/AWSL-001/"><span>AWSL-001</span>AWS VPC Flow Log</a>
+          <a class="sidebar-link active" href="/logs/DBL-001/"><span>DBL-001</span>PostgreSQL Connection and Query Log</a>
+          <a class="sidebar-link" href="/logs/HFA-001/"><span>HFA-001</span>Linux auditd Execve Log</a>
+          <a class="sidebar-link" href="/logs/HFA-002/"><span>HFA-002</span>Linux auditd Sensitive File Access Log</a>
+          <a class="sidebar-link" href="/logs/HFA-003/"><span>HFA-003</span>Linux auditd Docker Socket Access Log</a>
+          <a class="sidebar-link" href="/logs/HFA-004/"><span>HFA-004</span>Linux auditd Tool Transfer Log</a>
+          <a class="sidebar-link" href="/logs/HFC-001/"><span>HFC-001</span>CloudTrail Management Event</a>
+          <a class="sidebar-link" href="/logs/HFE-001/"><span>HFE-001</span>Logstash Ingested Event</a>
+          <a class="sidebar-link" href="/logs/HFE-002/"><span>HFE-002</span>Sequential Correlator Alert</a>
+          <a class="sidebar-link" href="/logs/HFL-001/"><span>HFL-001</span>Langflow/Nginx Access Log</a>
+          <a class="sidebar-link" href="/logs/HFL-002/"><span>HFL-002</span>Langflow App Container Log</a>
+          <a class="sidebar-link" href="/logs/HFL-003/"><span>HFL-003</span>Hanguel IR Agent Enriched Event</a>
+          <a class="sidebar-link" href="/logs/HFL-004/"><span>HFL-004</span>Linux SSH Auth Log</a>
+          <a class="sidebar-link" href="/logs/HFW-001/"><span>HFW-001</span>AWS WAF Log</a>
+          <a class="sidebar-link" href="/logs/HFW-002/"><span>HFW-002</span>VPC Flow Log</a>
+          <a class="sidebar-link" href="/logs/JL-001/"><span>JL-001</span>Jenkins HTTP Access Log</a>
+          <a class="sidebar-link" href="/logs/JL-002/"><span>JL-002</span>Jenkins Docker and System Log</a>
+          <a class="sidebar-link" href="/logs/LL-001/"><span>LL-001</span>Linux SSH Auth Log</a>
+          <a class="sidebar-link" href="/logs/LL-002/"><span>LL-002</span>Linux auditd File Access Log</a>
+        </nav>
+      </div>
+      <div class="sidebar-block">
+        <div class="sidebar-title">Campaigns</div>
+        <nav class="sidebar-links">
+          <a class="sidebar-link" href="/campaigns/">Campaign Index</a>
+          <a class="sidebar-link" href="/campaigns/SB-01/detection-map/"><span>SB-01</span>SB-01 Detection Map</a>
+          <a class="sidebar-link" href="/campaigns/SB-06/detection-map/"><span>SB-06</span>SB-06 Detection Map</a>
+        </nav>
+      </div>
+    </aside>
+    <main class="page campaign-content">
+      <div class="breadcrumbs"><a href="/campaigns/">Home</a> / <a href="/logs/">Log Catalog</a> / <span>DBL-001</span></div>
+<h1>DBL-001 PostgreSQL Connection and Query Log</h1>
+<div class="meta-grid" aria-label="Campaign metadata">
+<div class="meta-label">Log ID:</div>
+<div class="meta-value">DBL-001</div>
+<div class="meta-label">Source:</div>
+<div class="meta-value">PostgreSQL DB host</div>
+<div class="meta-label">Representative Path:</div>
+<div class="meta-value"><code>/var/log/postgresql/postgresql-*.log</code></div>
+<div class="meta-label">Collection:</div>
+<div class="meta-value">Filebeat custom log input 또는 PostgreSQL module</div>
+<div class="meta-label">Primary Use:</div>
+<div class="meta-value">DB 접속 계정, 출발지, 쿼리 대상, 대량 조회 정황 확인</div>
+</div>
+<h2 id="log-structure">Log Structure</h2>
+<p>PostgreSQL 로그는 설정에 따라 접속/종료, 인증 실패, statement, duration, slow query 등을 남긴다. 실무형 분석에서는 모든 쿼리를 무조건 남기기보다, 실습 목적에 맞춰 접속 로그와 특정 statement 로그를 제한적으로 수집하는 것이 적절하다.</p>
+<h2 id="important-fields">Important Fields</h2>
+<div class="table-wrap wide-table">
+<table>
+<thead><tr><th>Field</th><th>Meaning</th></tr></thead>
+<tbody>
+<tr><td><code>@timestamp</code></td><td>DB 이벤트 발생 시간</td></tr>
+<tr><td><code>user.name</code></td><td>DB 접속 계정</td></tr>
+<tr><td><code>database.name</code></td><td>접속 대상 DB</td></tr>
+<tr><td><code>source.ip</code></td><td>접속 출발지</td></tr>
+<tr><td><code>event.action</code></td><td>connection, disconnection, statement 등</td></tr>
+<tr><td><code>message</code></td><td>PostgreSQL 원본 로그</td></tr>
+</tbody></table></div>
+<h2 id="mapped-techniques">Mapped Techniques</h2>
+<div class="table-wrap wide-table">
+<table>
+<thead><tr><th>Technique</th><th>Mapping Reason</th></tr></thead>
+<tbody>
+<tr><td>T1213.006 Data from Information Repositories: Databases</td><td>DB 조회와 데이터 접근 확인</td></tr>
+<tr><td>T1078 Valid Accounts</td><td>정상 DB 계정으로 접속했는지 확인</td></tr>
+</tbody></table></div>
+<h2 id="kql-draft">KQL Draft</h2>
+<pre><code>service.type: &quot;postgresql&quot; and message: (&quot;booking&quot; or &quot;reservation&quot; or &quot;customer&quot;)</code></pre>
+<h2 id="investigation-pivot">Investigation Pivot</h2>
+<p>DB 접속 계정과 source IP를 기준으로 App 서버 환경 파일 접근 로그, SSH 접속 로그, Jenkins 배포 로그와 연결한다.</p>
+      <footer class="footer">
+        Spacebar Project. Log IDs are project-defined analysis identifiers, not MITRE ATT&amp;CK IDs.
+      </footer>
+    </main>
+  </div>
+</body>
+</html>

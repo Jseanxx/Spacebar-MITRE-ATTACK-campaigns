@@ -1,0 +1,349 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Operation Poisoned Relay | Spacebar Campaigns</title>
+  <link rel="stylesheet" href="/assets/campaign.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="/campaigns/"><img class="brand-logo" src="/assets/spacebarLogo.png" alt="Spacebar"><span>Spacebar Campaigns</span></a>
+    </div>
+  </header>
+
+  <div class="page-shell">
+
+    <aside class="campaign-sidebar" aria-label="Campaign navigation">
+      <div class="sidebar-block">
+        <div class="sidebar-title">Campaigns</div>
+        <nav class="sidebar-links">
+          <a class="sidebar-link" href="/campaigns/SB-01/"><span>SB-01</span>2024 PipelineKey</a>
+          <a class="sidebar-link active" href="/campaigns/SB-02/"><span>SB-02</span>Operation Poisoned Relay</a>
+          <a class="sidebar-link" href="/campaigns/SB-03/"><span>SB-03</span>Operation MyCompany Dominance</a>
+          <a class="sidebar-link" href="/campaigns/SB-04/"><span>SB-04</span>NodeFall</a>
+          <a class="sidebar-link" href="/campaigns/SB-05/"><span>SB-05</span>ClusterDrain</a>
+          <a class="sidebar-link" href="/campaigns/SB-06/"><span>SB-06</span>Operation Hanguel Flow</a>
+        </nav>
+      </div>
+      <div class="sidebar-block sidebar-sections">
+        <div class="sidebar-title">On This Page</div>
+        <nav class="sidebar-links">
+          
+          <a class="sidebar-link" href="#techniques-used">Techniques Used</a>
+          <a class="sidebar-link" href="#software">Software</a>
+          <a class="sidebar-link" href="#references">References</a>
+          <a class="sidebar-link" href="/logs/">Log Catalog</a>
+        </nav>
+      </div>
+    </aside>
+    <main class="page campaign-content">
+      <div class="breadcrumbs"><a href="/campaigns/">Home</a> / <a href="/campaigns/">Campaigns</a> / <span>Operation Poisoned Relay</span></div>
+<div class="notice">
+      <div class="notice-inner">
+        <strong>모델링 출처:</strong> MITRE ATT&amp;CK Campaign <strong>C0014 — Operation Wocao</strong>를 기반으로 자체 VulnLab 시나리오로 재구성하였습니다.
+        원본 캠페인의 공개 서버 침해 → 내부망 횡단 패턴에서 영감을 받아,
+        <strong>공급망 오염</strong>을 핵심 공격 벡터로 설정한 시나리오입니다.
+      </div>
+    </div>
+
+    <div class="campaign-hero">
+  <div class="campaign-description">
+<h1>Operation Poisoned Relay</h1>
+<p class="summary">
+      외부에 노출된 JBoss AS 6 서버를 거점으로 삼은 뒤,
+      내부망이 신뢰하는 업데이트 릴레이 구조를 오염시켜
+      격리된 Active Directory DC를 무단 장악하는 공급망 침해 시나리오입니다.
+    </p>
+
+    <div class="tag-row" aria-label="Campaign tags">
+      <span class="tag">Supply Chain Focus</span>
+      <span class="tag">JBoss AS 6</span>
+      <span class="tag">AD Takeover</span>
+      <span class="tag">Modeled from C0014</span>
+    </div>
+  </div>
+<div class="meta-grid" aria-label="Campaign metadata">
+      <div class="meta-label">ID:</div>
+      <div class="meta-value">OPR-2026-001</div>
+      <div class="meta-label">Spacebar ID:</div>
+      <div class="meta-value">SB-02</div>
+      <div class="meta-label">Name:</div>
+      <div class="meta-value">Operation Poisoned Relay</div>
+      <div class="meta-label">Modeled From:</div>
+      <div class="meta-value">C0014 — Operation Wocao / MITRE ATT&amp;CK / Fox-IT 2019</div>
+      <div class="meta-label">Version:</div>
+      <div class="meta-value">1.0</div>
+      <div class="meta-label">Created:</div>
+      <div class="meta-value">2026-05-02</div>
+      <div class="meta-label">Target Env:</div>
+      <div class="meta-value">Windows Server Domain Controller 기반 Active Directory 테스트 환경</div>
+      <div class="meta-label">Core Vector:</div>
+      <div class="meta-value">Supply Chain via Trusted Update Relay</div>
+      <div class="meta-label">Objective:</div>
+      <div class="meta-value">AD 전체 계정 탈취</div>
+    </div>
+</div>
+
+    <h2 id="overview">Overview</h2>
+    <p>
+      Spacebar는 보안 정책상 내부 DC(VM2)의 인터넷 직접 연결을 차단하고, 외부망 JBoss AS 6 서버(VM1)를 통해 패치를 릴레이하는 구조를
+      운용하고 있습니다. JBoss AS 6의 인증 없는 원격 코드 실행 취약점으로,
+      공개 노출된 VM1은 jexboss를 통한 웹쉘 업로드에 취약합니다. VM2는 VM1을 신뢰하여 5분마다 patch.exe를 자동 실행하는 구조이므로,
+      공격자가 uploads/ 폴더의 파일을 교체하는 것만으로 인터넷과 완전히 격리된 DC까지 SYSTEM 권한 실행을 달성할 수 있습니다.
+    </p>
+
+    <div class="info-grid" aria-label="Attack chain">
+      <div class="info-cell">
+        <b>1. JBoss 침해</b>
+        <span>JBoss AS 6 원격 코드 실행 취약점으로 외부 노출 서버 장악. 웹쉘로 지속 제어권 확보.</span>
+      </div>
+      <div class="info-cell">
+        <b>2. 릴레이 오염</b>
+        <span><code>uploads/patch.exe</code>를 리버스 쉘 탑재 악성 PE로 교체. 정상 파일명·아이콘 유지.</span>
+      </div>
+      <div class="info-cell">
+        <b>3. 자동 실행</b>
+        <span>DC 작업 스케줄러가 5분 주기로 오염된 파일을 신뢰 서버에서 가져와 SYSTEM 권한으로 실행.</span>
+      </div>
+      <div class="info-cell">
+        <b>4. AD 장악</b>
+        <span>리버스 쉘 → Mimikatz LSASS 덤프 → 전체 AD 계정 탈취 또는 랜섬웨어 배포.</span>
+      </div>
+    </div>
+
+    <div class="phase-grid" aria-label="Technique phase matrix">
+      <div class="phase-item"><b>Initial Access</b><span>T1190</span><br><span>T1505.003</span></div>
+      <div class="phase-item"><b>Supply Chain</b><span>T1195.002</span><br><span>T1036.005</span></div>
+      <div class="phase-item"><b>Lateral Movement</b><span>T1053.005</span><br><span>T1059.004</span></div>
+      <div class="phase-item"><b>Credential Access</b><span>T1003.001</span></div>
+      <div class="phase-item"><b>C2</b><span>T1071.001</span></div>
+      <div class="phase-item"><b>Impact</b><span>T1486</span></div>
+    </div>
+
+    <h2>Groups</h2>
+    <div class="table-wrap medium-table">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="id-cell">G-SB-002</td>
+            <td>PoisonedRelay</td>
+            <td>Operation Poisoned Relay 활동과 연결된 가상 공격 그룹이다. 외부 JBoss 서버 침해 이후 내부망이 신뢰하는 업데이트 릴레이 구조를 오염시키는 방식을 사용한다.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2 id="techniques-used">Techniques Used</h2>
+    <div class="table-tools">
+      <label class="searchbox" for="techFilter">
+        <span>Filter</span>
+        <input id="techFilter" type="search" placeholder="예: T1195, Supply, LSASS, Scheduled">
+      </label>
+    </div>
+    <div class="table-wrap wide-table">
+      <table id="techTable">
+        <thead>
+          <tr>
+            <th>Phase</th>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Use</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Initial Access</td>
+            <td class="id-cell">T1190</td>
+            <td>Exploit Public-Facing Application</td>
+            <td>JBoss AS 6 역직렬화 취약점으로 외부에서 원격 코드 실행. jexboss 활용.</td>
+          </tr>
+          <tr>
+            <td>Initial Access</td>
+            <td class="id-cell">T1505.003</td>
+            <td>Web Shell</td>
+            <td>익스플로잇 성공 후 JSP 웹쉘을 JBoss 배포 경로에 업로드. 지속 명령 실행 채널 확보.</td>
+          </tr>
+          <tr>
+            <td>Supply Chain ★</td>
+            <td class="id-cell">T1195.002</td>
+            <td>Supply Chain Compromise</td>
+            <td>내부망이 신뢰하는 업데이트 공유 폴더의 <code>patch.exe</code>를 리버스 쉘 내장 악성 파일로 무음 교체.</td>
+          </tr>
+          <tr>
+            <td>Supply Chain ★</td>
+            <td class="id-cell">T1036.005</td>
+            <td>Masquerading</td>
+            <td>동일한 파일명·아이콘·버전 정보 사용. 사용자 및 자동화 스크립트 의심 최소화.</td>
+          </tr>
+          <tr>
+            <td>Lateral Movement</td>
+            <td class="id-cell">T1053.005</td>
+            <td>Scheduled Task / Job</td>
+            <td>VM2 Windows 작업 스케줄러가 5분 주기로 VM1에서 <code>patch.exe</code> 다운로드 후 SYSTEM 권한 실행.</td>
+          </tr>
+          <tr>
+            <td>Credential Access</td>
+            <td class="id-cell">T1003.001</td>
+            <td>OS Credential Dumping: LSASS</td>
+            <td>DC 장악 후 Mimikatz로 LSASS 메모리 덤프. 도메인 전체 계정 해시·티켓 수집.</td>
+          </tr>
+          <tr>
+            <td>Lateral Movement</td>
+            <td class="id-cell">T1059.004</td>
+            <td>Unix Shell</td>
+            <td>웹쉘 경유 VM1 bash 명령 실행 — 내부망 구조 탐색, 파일 교체, 리버스 쉘 준비.</td>
+          </tr>
+          <tr>
+            <td>C2</td>
+            <td class="id-cell">T1071.001</td>
+            <td>Application Layer Protocol: Web</td>
+            <td>악성 <code>patch.exe</code>의 리버스 쉘이 HTTP를 통해 공격자 Kali로 아웃바운드 C2 연결.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2 id="software">Software</h2>
+    <div class="table-wrap medium-table">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Role</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="id-cell">SW-OPR001</td>
+            <td>jexboss</td>
+            <td>JBoss AS 취약점 자동 탐지 및 익스플로잇 오픈소스 도구.</td>
+            <td>Initial access — JBoss exploit</td>
+          </tr>
+          <tr>
+            <td class="id-cell">SW-OPR002</td>
+            <td>JSP WebShell</td>
+            <td>jexboss가 JBoss deploy 경로에 설치하는 JSP 기반 웹쉘. 파일 관리 및 명령 실행 기능.</td>
+            <td>Persistent control channel on VM1</td>
+          </tr>
+          <tr>
+            <td class="id-cell">SW-OPR003</td>
+            <td>Malicious patch.exe</td>
+            <td>정상 업데이트 파일로 위장한 Windows PE. 실행 시 공격자 Kali로 리버스 쉘 연결.</td>
+            <td>Supply chain payload — lateral movement</td>
+          </tr>
+          <tr>
+            <td class="id-cell">SW-OPR004</td>
+            <td>Mimikatz</td>
+            <td>Windows LSASS 메모리에서 자격증명을 추출하는 공개 도구.</td>
+            <td>Credential dumping on DC</td>
+          </tr>
+          <tr>
+            <td class="id-cell">SW-OPR005</td>
+            <td>ELK Stack (VM3)</td>
+            <td>Elasticsearch / Logstash / Kibana 기반 로그 수집·분석·시각화 플랫폼.</td>
+            <td>SIEM — detection &amp; investigation</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2 id="infrastructure">Observed Infrastructure</h2>
+    <p>
+      VM1은 외부망과 내부망 양쪽에 연결된 <strong>릴레이 허브</strong>로,
+      공격자는 이 구조를 악용해 인터넷과 완전히 차단된 VM2(DC)까지 파일을 통해 도달합니다.
+      VM2는 VM1만 신뢰하며 스스로 파일을 가져오는 구조이므로,
+      <strong>VM1 침해 = DC 침해 경로 확보</strong>를 의미합니다.
+    </p>
+
+    <div class="flow" aria-label="Observed infrastructure flow">
+      <div class="flow-step"><b>Attacker</b><span>Kali Linux / Ubuntu / External</span></div>
+      <div class="flow-step"><b>VM1 — Relay Hub</b><span>Ubuntu 18.04 / JBoss AS 6 / uploads 공유 폴더 / ens33: 192.168.241.10 / ens37: 192.168.141.10</span></div>
+      <div class="flow-step"><b>VM2 — DC (격리)</b><span>Windows Server 2012 R2 / Active Directory / 192.168.141.20 / 인터넷 완전 차단</span></div>
+      <div class="flow-step"><b>VM3 — ELK</b><span>SIEM / 탐지 플랫폼 / Elasticsearch + Kibana / Internal</span></div>
+    </div>
+
+    <p>
+      ← VM2가 VM1을 신뢰하여 <strong>스스로 파일을 가져오는</strong> 역방향 신뢰 구조가 핵심 취약점
+    </p>
+
+    <div class="two-col">
+      <section>
+        <h3>VM1 — EXT-WEB-JBOSS01 (릴레이 허브)</h3>
+        <div class="table-wrap">
+          <table>
+            <tbody>
+              <tr><th>OS</th><td>Ubuntu 18.04.6 LTS</td></tr>
+              <tr><th>서버</th><td>JBoss AS 6</td></tr>
+              <tr><th>External IP</th><td>192.168.241.10</td></tr>
+              <tr><th>Internal IP</th><td>192.168.141.10</td></tr>
+              <tr><th>공격 진입</th><td>jexboss → JSP WebShell → patch.exe 교체</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+      <section>
+        <h3>VM2 — INT-DC-01 (격리된 DC)</h3>
+        <div class="table-wrap">
+          <table>
+            <tbody>
+              <tr><th>OS</th><td>Windows Server 2012 R2</td></tr>
+              <tr><th>역할</th><td>Active Directory Domain Controller</td></tr>
+              <tr><th>Internal IP</th><td>192.168.141.20</td></tr>
+              <tr><th>인터넷</th><td>완전 차단 (VM1 게이트웨이 경유)</td></tr>
+              <tr><th>자동화</th><td>5분 간격 스케줄러 → patch.exe 다운로드·실행</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+
+    <h2 id="references">References</h2>
+    <p>
+      본 캠페인은 독립 시나리오이며, 아래 출처를 <strong>모델링 참고자료</strong>로 활용하였습니다.
+      Operation Poisoned Relay의 TTP 구성과 피해자 환경 설계는 자체적으로 작성되었습니다.
+    </p>
+    <ol>
+      <li><a href="https://attack.mitre.org/campaigns/C0014/" target="_blank" rel="noreferrer">MITRE ATT&amp;CK Campaign C0014 — Operation Wocao</a> — 모델링 출처 원본 캠페인 페이지.</li>
+      <li><a href="https://attack.mitre.org/techniques/T1195/002/" target="_blank" rel="noreferrer">MITRE ATT&amp;CK T1195.002</a> — Supply Chain Compromise: Software Supply Chain.</li>
+      <li><a href="https://attack.mitre.org/techniques/T1190/" target="_blank" rel="noreferrer">MITRE ATT&amp;CK T1190</a> — Exploit Public-Facing Application.</li>
+      <li><a href="https://attack.mitre.org/techniques/T1053/005/" target="_blank" rel="noreferrer">MITRE ATT&amp;CK T1053.005</a> — Scheduled Task / Job.</li>
+      <li><a href="https://attack.mitre.org/techniques/T1003/001/" target="_blank" rel="noreferrer">MITRE ATT&amp;CK T1003.001</a> — OS Credential Dumping: LSASS Memory.</li>
+      <li><a href="https://github.com/joaomatosf/jexboss" target="_blank" rel="noreferrer">jexboss (GitHub)</a> — JBoss AS 취약점 검증 도구.</li>
+      <li>Fox-IT (2019) — 201912_report_operation_wocao.pdf — 원본 캠페인 보고서.</li>
+    </ol>
+
+    <footer>
+      Operation Poisoned Relay (OPR-2025-001) — MITRE ATT&amp;CK C0014 모델링 기반 자체 VulnLab 캠페인 프로필.
+      모든 실습은 격리된 VM 환경 내에서만 진행됩니다.
+    </footer>
+      <footer class="footer">
+        Spacebar Project. This page is not affiliated with MITRE ATT&amp;CK.
+      </footer>
+    </main>
+  </div>
+  <script>
+    const techFilter = document.querySelector("#techFilter");
+    const techRows = document.querySelectorAll("#techTable tbody tr");
+
+    if (techFilter) {
+      techFilter.addEventListener("input", () => {
+        const query = techFilter.value.trim().toLowerCase();
+        techRows.forEach((row) => {
+          row.hidden = query !== "" && !row.textContent.toLowerCase().includes(query);
+        });
+      });
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>JL-002 Jenkins Docker and System Log | Spacebar Log Catalog</title>
+  <link rel="stylesheet" href="/assets/campaign.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="/campaigns/"><img class="brand-logo" src="/assets/spacebarLogo.png" alt="Spacebar"><span>Spacebar Campaigns</span></a>
+    </div>
+  </header>
+
+  <div class="page-shell">
+
+    <aside class="campaign-sidebar" aria-label="Log catalog navigation">
+      <div class="sidebar-block">
+        <div class="sidebar-title">Log Catalog</div>
+        <nav class="sidebar-links">
+          <a class="sidebar-link" href="/logs/">Index</a>
+          <a class="sidebar-link" href="/logs/AWSL-001/"><span>AWSL-001</span>AWS VPC Flow Log</a>
+          <a class="sidebar-link" href="/logs/DBL-001/"><span>DBL-001</span>PostgreSQL Connection and Query Log</a>
+          <a class="sidebar-link" href="/logs/HFA-001/"><span>HFA-001</span>Linux auditd Execve Log</a>
+          <a class="sidebar-link" href="/logs/HFA-002/"><span>HFA-002</span>Linux auditd Sensitive File Access Log</a>
+          <a class="sidebar-link" href="/logs/HFA-003/"><span>HFA-003</span>Linux auditd Docker Socket Access Log</a>
+          <a class="sidebar-link" href="/logs/HFA-004/"><span>HFA-004</span>Linux auditd Tool Transfer Log</a>
+          <a class="sidebar-link" href="/logs/HFC-001/"><span>HFC-001</span>CloudTrail Management Event</a>
+          <a class="sidebar-link" href="/logs/HFE-001/"><span>HFE-001</span>Logstash Ingested Event</a>
+          <a class="sidebar-link" href="/logs/HFE-002/"><span>HFE-002</span>Sequential Correlator Alert</a>
+          <a class="sidebar-link" href="/logs/HFL-001/"><span>HFL-001</span>Langflow/Nginx Access Log</a>
+          <a class="sidebar-link" href="/logs/HFL-002/"><span>HFL-002</span>Langflow App Container Log</a>
+          <a class="sidebar-link" href="/logs/HFL-003/"><span>HFL-003</span>Hanguel IR Agent Enriched Event</a>
+          <a class="sidebar-link" href="/logs/HFL-004/"><span>HFL-004</span>Linux SSH Auth Log</a>
+          <a class="sidebar-link" href="/logs/HFW-001/"><span>HFW-001</span>AWS WAF Log</a>
+          <a class="sidebar-link" href="/logs/HFW-002/"><span>HFW-002</span>VPC Flow Log</a>
+          <a class="sidebar-link" href="/logs/JL-001/"><span>JL-001</span>Jenkins HTTP Access Log</a>
+          <a class="sidebar-link active" href="/logs/JL-002/"><span>JL-002</span>Jenkins Docker and System Log</a>
+          <a class="sidebar-link" href="/logs/LL-001/"><span>LL-001</span>Linux SSH Auth Log</a>
+          <a class="sidebar-link" href="/logs/LL-002/"><span>LL-002</span>Linux auditd File Access Log</a>
+        </nav>
+      </div>
+      <div class="sidebar-block">
+        <div class="sidebar-title">Campaigns</div>
+        <nav class="sidebar-links">
+          <a class="sidebar-link" href="/campaigns/">Campaign Index</a>
+          <a class="sidebar-link" href="/campaigns/SB-01/detection-map/"><span>SB-01</span>SB-01 Detection Map</a>
+          <a class="sidebar-link" href="/campaigns/SB-06/detection-map/"><span>SB-06</span>SB-06 Detection Map</a>
+        </nav>
+      </div>
+    </aside>
+    <main class="page campaign-content">
+      <div class="breadcrumbs"><a href="/campaigns/">Home</a> / <a href="/logs/">Log Catalog</a> / <span>JL-002</span></div>
+<h1>JL-002 Jenkins Docker and System Log</h1>
+<div class="meta-grid" aria-label="Campaign metadata">
+<div class="meta-label">Log ID:</div>
+<div class="meta-value">JL-002</div>
+<div class="meta-label">Source:</div>
+<div class="meta-value">Jenkins Docker host</div>
+<div class="meta-label">Representative Path:</div>
+<div class="meta-value"><code>/var/lib/docker/containers/&lt;container-id&gt;/&lt;container-id&gt;-json.log</code></div>
+<div class="meta-label">Collection:</div>
+<div class="meta-value">Filebeat custom log input</div>
+<div class="meta-label">Primary Use:</div>
+<div class="meta-value">Jenkins 인증, CLI 사용, job 실행, 내부 오류/경고 확인</div>
+</div>
+<h2 id="log-structure">Log Structure</h2>
+<p>Docker JSON log는 컨테이너의 stdout/stderr를 JSON 형식으로 저장한다. Jenkins가 어떤 이벤트를 stdout으로 남기는지에 따라 확인 가능한 범위가 달라지므로, access log와 job/build log를 함께 보는 것이 좋다.</p>
+<h2 id="important-fields">Important Fields</h2>
+<div class="table-wrap wide-table">
+<table>
+<thead><tr><th>Field</th><th>Meaning</th></tr></thead>
+<tbody>
+<tr><td><code>@timestamp</code></td><td>로그 수집 또는 이벤트 시간</td></tr>
+<tr><td><code>container.id</code></td><td>Jenkins 컨테이너 ID</td></tr>
+<tr><td><code>log.file.path</code></td><td>Docker JSON log 경로</td></tr>
+<tr><td><code>stream</code></td><td>stdout 또는 stderr</td></tr>
+<tr><td><code>message</code></td><td>Jenkins 원본 로그 메시지</td></tr>
+</tbody></table></div>
+<h2 id="mapped-techniques">Mapped Techniques</h2>
+<div class="table-wrap wide-table">
+<table>
+<thead><tr><th>Technique</th><th>Mapping Reason</th></tr></thead>
+<tbody>
+<tr><td>T1078 Valid Accounts</td><td>Jenkins 인증/세션/사용자 행위 단서 확인</td></tr>
+<tr><td>T1190 Exploit Public-Facing Application</td><td>취약점 악용 전후 Jenkins 오류 또는 CLI 흔적 확인</td></tr>
+<tr><td>T1213 Data from Information Repositories</td><td>job, workspace, build 관련 접근 단서 확인</td></tr>
+<tr><td>T1552.004 Private Keys</td><td>credential 또는 배포 키 접근 정황을 다른 로그와 교차 확인</td></tr>
+</tbody></table></div>
+<h2 id="kql-draft">KQL Draft</h2>
+<pre><code>sb01_server: &quot;jenkins&quot; and sb01_log_type: &quot;jenkins_docker&quot;</code></pre>
+<h2 id="investigation-pivot">Investigation Pivot</h2>
+<p>Jenkins access log의 source IP, CLI jar 요청 시각, Docker/System 로그의 인증/오류 메시지, App SSH 접속 시각을 하나의 타임라인으로 묶는다.</p>
+      <footer class="footer">
+        Spacebar Project. Log IDs are project-defined analysis identifiers, not MITRE ATT&amp;CK IDs.
+      </footer>
+    </main>
+  </div>
+</body>
+</html>

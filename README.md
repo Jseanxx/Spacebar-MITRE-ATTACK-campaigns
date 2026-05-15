@@ -13,41 +13,57 @@ https://spacebar-mitre-attack-campaigns.vercel.app/campaigns/
 ## 폴더 구조
 
 ```text
-content/campaigns/
-  SB-01.md              # 팀원이 실제로 수정하는 원본 파일
-  SB-02.md
-  ...
+content/
+  campaigns/            # Campaign Page 1 원본
+    SB-01.md
+    SB-02.md
+  detections/           # Campaign Page 2 / Detection Map 원본
+    SB-01.md
+  log-catalog/          # 로그 분류 원본
+    LL-001.md
 
-campaigns/
-  index.html            # 빌드 결과물: 캠페인 목록 페이지
-  SB-01.html            # 빌드 결과물: 공개 HTML 페이지
-  SB-02.html
-  ...
+campaigns/              # 빌드 결과물
+  index.html
+  SB-01/
+    index.html
+    detection-map/
+      index.html
 
-assets/
-  campaign.css          # 공통 스타일
-  spacebarLogo.png      # 로고
+logs/                   # 빌드 결과물
+  index.html
+  LL-001/
+    index.html
 
-tools/
-  build-campaigns.js    # md/html 원본을 공개 HTML로 변환하는 스크립트
+assets/                 # 공통 스타일/이미지
+tools/                  # md/html 원본을 공개 HTML로 변환하는 스크립트
 ```
 
 중요:
 
-- 팀원은 기본적으로 `content/campaigns/SB-XX.md`만 수정합니다.
-- `campaigns/SB-XX.html`은 빌드 결과물이므로 직접 수정하지 않는 것을 권장합니다.
-- `main` 브랜치에 push하면 Vercel에서 자동으로 빌드 및 배포됩니다.
+- 팀원은 기본적으로 `content/` 아래 원본 Markdown만 수정합니다.
+- `campaigns/`, `logs/`는 GitHub Actions가 생성하는 빌드 결과물이므로 직접 수정하지 않습니다.
+- `main` 브랜치에 push하면 GitHub Actions가 HTML을 생성해 커밋하고, Vercel은 생성된 정적 파일을 배포합니다.
+
+## 공개 URL 구조
+
+```text
+/campaigns/                       # Campaign 목록
+/campaigns/SB-01/                 # SB-01 Campaign Page 1
+/campaigns/SB-01/detection-map/   # SB-01 Campaign Page 2
+/logs/                            # Log Catalog 목록
+/logs/LL-001/                     # 로그 상세 페이지
+```
 
 ## 팀원별 수정 파일
 
-| ID | 담당자 | 파일 |
-| --- | --- | --- |
-| SB-01 | 임준서 | `content/campaigns/SB-01.md` |
-| SB-02 | 김정현 | `content/campaigns/SB-02.md` |
-| SB-03 | 신가현 | `content/campaigns/SB-03.md` |
-| SB-04 | 서현재 | `content/campaigns/SB-04.md` |
-| SB-05 | 강지윤 | `content/campaigns/SB-05.md` |
-| SB-06 | 오한결 | `content/campaigns/SB-06.md` |
+| ID | 담당자 | Campaign Page 1 | Detection Map |
+| --- | --- | --- | --- |
+| SB-01 | 임준서 | `content/campaigns/SB-01.md` | `content/detections/SB-01.md` |
+| SB-02 | 김정현 | `content/campaigns/SB-02.md` | 필요 시 추가 |
+| SB-03 | 신가현 | `content/campaigns/SB-03.md` | 필요 시 추가 |
+| SB-04 | 서현재 | `content/campaigns/SB-04.md` | 필요 시 추가 |
+| SB-05 | 강지윤 | `content/campaigns/SB-05.md` | 필요 시 추가 |
+| SB-06 | 오한결 | `content/campaigns/SB-06.md` | `content/detections/SB-06.md` |
 
 ## 작성 방식 1: Markdown으로 작성하기
 
@@ -184,15 +200,13 @@ http://127.0.0.1:8091/campaigns/
 자기 파일을 수정한 뒤 아래 순서로 올리면 됩니다.
 
 ```bash
-npm run build
-
 git status
-git add content/campaigns/SB-XX.md campaigns/SB-XX.html campaigns/index.html
+git add content/campaigns/SB-XX.md
 git commit -m "Update SB-XX campaign"
 git push origin main
 ```
 
-`main`에 push되면 Vercel이 자동으로 배포합니다.
+`main`에 push되면 GitHub Actions가 `campaigns/`, `logs/` HTML을 생성해 자동 커밋하고, Vercel이 그 정적 파일을 배포합니다.
 
 ## 공개 페이지 작성 주의사항
 

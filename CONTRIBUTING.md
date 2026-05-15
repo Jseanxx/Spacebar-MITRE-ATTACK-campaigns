@@ -3,21 +3,31 @@
 ## 기본 원칙
 
 1. 자기 담당 파일만 수정합니다.
-2. 원본 파일은 `content/campaigns/SB-XX.md`입니다.
-3. `campaigns/SB-XX.html`은 빌드 결과물이므로 직접 수정하지 않습니다.
-4. 수정 후 `npm run build`를 실행합니다.
+2. 원본 파일은 `content/` 아래 Markdown입니다.
+3. `campaigns/`, `logs/`는 빌드 결과물이므로 직접 수정하지 않습니다.
+4. 수정 후 로컬 확인이 필요하면 `npm run build`를 실행합니다.
 5. 실제 credential, token, private key, 개인정보는 public 레포에 올리지 않습니다.
 
 ## 담당 파일
 
-| 담당자 | 수정 파일 |
-| --- | --- |
-| 임준서 | `content/campaigns/SB-01.md` |
-| 김정현 | `content/campaigns/SB-02.md` |
-| 신가현 | `content/campaigns/SB-03.md` |
-| 서현재 | `content/campaigns/SB-04.md` |
-| 강지윤 | `content/campaigns/SB-05.md` |
-| 오한결 | `content/campaigns/SB-06.md` |
+| 담당자 | Campaign Page 1 | Detection Map |
+| --- | --- | --- |
+| 임준서 | `content/campaigns/SB-01.md` | `content/detections/SB-01.md` |
+| 김정현 | `content/campaigns/SB-02.md` | 필요 시 추가 |
+| 신가현 | `content/campaigns/SB-03.md` | 필요 시 추가 |
+| 서현재 | `content/campaigns/SB-04.md` | 필요 시 추가 |
+| 강지윤 | `content/campaigns/SB-05.md` | 필요 시 추가 |
+| 오한결 | `content/campaigns/SB-06.md` | `content/detections/SB-06.md` |
+
+## URL 구조
+
+```text
+/campaigns/                       # Campaign 목록
+/campaigns/SB-01/                 # Campaign Page 1
+/campaigns/SB-01/detection-map/   # Campaign Page 2
+/logs/                            # Log Catalog 목록
+/logs/LL-001/                     # 로그 상세 페이지
+```
 
 ## Markdown으로 작성하는 경우
 
@@ -73,20 +83,18 @@ http://127.0.0.1:8091/campaigns/
 ## push 방법
 
 ```bash
-npm run build
-
-git add content/campaigns/SB-XX.md campaigns/SB-XX.html campaigns/index.html
+git add content/campaigns/SB-XX.md
 git commit -m "Update SB-XX campaign"
 git push origin main
 ```
 
-push 후 Vercel이 자동 배포합니다.
+push 후 GitHub Actions가 HTML을 생성해 자동 커밋하고, Vercel이 생성된 정적 파일을 배포합니다.
 
 ## 작성 전 체크리스트
 
 - [ ] 내 담당 `content/campaigns/SB-XX.md` 파일을 수정했는가?
 - [ ] `format: html`이 필요한 경우 frontmatter에 넣었는가?
-- [ ] `npm run build`를 실행했는가?
+- [ ] 로컬 확인이 필요하면 `npm run build`를 실행했는가?
 - [ ] 공개하면 안 되는 비밀번호, 토큰, SSH key, 개인정보가 없는가?
 - [ ] Techniques Used가 MITRE ATT&CK 형식에 맞게 작성되었는가?
 - [ ] 공격 실습 절차서가 아니라 캠페인 분석 페이지처럼 작성되었는가?

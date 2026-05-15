@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ClusterDrain | Spacebar Campaigns</title>
+  <link rel="stylesheet" href="/assets/campaign.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="/campaigns/"><img class="brand-logo" src="/assets/spacebarLogo.png" alt="Spacebar"><span>Spacebar Campaigns</span></a>
+    </div>
+  </header>
+
+  <div class="page-shell">
+
+    <aside class="campaign-sidebar" aria-label="Campaign navigation">
+      <div class="sidebar-block">
+        <div class="sidebar-title">Campaigns</div>
+        <nav class="sidebar-links">
+          <a class="sidebar-link" href="/campaigns/SB-01/"><span>SB-01</span>2024 PipelineKey</a>
+          <a class="sidebar-link" href="/campaigns/SB-02/"><span>SB-02</span>Operation Poisoned Relay</a>
+          <a class="sidebar-link" href="/campaigns/SB-03/"><span>SB-03</span>Operation MyCompany Dominance</a>
+          <a class="sidebar-link" href="/campaigns/SB-04/"><span>SB-04</span>NodeFall</a>
+          <a class="sidebar-link active" href="/campaigns/SB-05/"><span>SB-05</span>ClusterDrain</a>
+          <a class="sidebar-link" href="/campaigns/SB-06/"><span>SB-06</span>Operation Hanguel Flow</a>
+        </nav>
+      </div>
+      <div class="sidebar-block sidebar-sections">
+        <div class="sidebar-title">On This Page</div>
+        <nav class="sidebar-links">
+          
+          <a class="sidebar-link" href="#techniques-used">Techniques Used</a>
+          <a class="sidebar-link" href="#software">Software</a>
+          <a class="sidebar-link" href="#references">References</a>
+          <a class="sidebar-link" href="/logs/">Log Catalog</a>
+        </nav>
+      </div>
+    </aside>
+    <main class="page campaign-content">
+      <div class="breadcrumbs"><a href="/campaigns/">Home</a> / <a href="/campaigns/">Campaigns</a> / <span>ClusterDrain</span></div>
+<div class="campaign-hero">
+  <div class="campaign-description">
+<h1>ClusterDrain</h1>
+<p class="summary">
+   ClusterDrain은 침해된 내부 운영 지점에서 Kubernetes API 접근권을 확보한 뒤 ingress-nginx가 구성된 k3s 기반 Kubernetes 클러스터와 prod-platform namespace를 대상으로 전개된 침해 캠페인이다.
+   공격 그룹 YunTrace는 Kubernetes API를 이용해 namespace, pod, deployment, service, ingress 정보를 조회하여 클러스터 구조와 외부 진입점, 내부 서비스 구성을 파악하고 prod-platform namespace의 Secret 및 운영 리소스를 수집했다.
+   이후 orders-api Pod 내부 명령 실행, sb05-collector Pod 배포, sb05-reader ServiceAccount 및 RoleBinding 생성을 통해 컨테이너 실행과 namespace 단위 조회 권한 추가를 수행했다.
+   마지막으로 수집한 Kubernetes 리소스 정보와 실행 결과를 로컬 디렉터리에 스테이징하고 zip archive로 압축한 뒤, AWS CLI를 이용해 private AWS S3 bucket으로 유출했다.
+</p>
+  </div>
+<div class="meta-grid" aria-label="Campaign metadata">
+  <div class="meta-label">ID:</div>
+  <div class="meta-value">SB-05</div>
+  <div class="meta-label">First Seen:</div>
+  <div class="meta-value">May 2026</div>
+  <div class="meta-label">Last Seen:</div>
+  <div class="meta-value">May 2026</div>
+  <div class="meta-label">Version:</div>
+  <div class="meta-value">0.2</div>
+  <div class="meta-label">Created:</div>
+  <div class="meta-value">05 May 2026</div>
+  <div class="meta-label">Last Modified:</div>
+  <div class="meta-value">05 May 2026</div>
+</div>
+</div>
+
+<h2>Groups</h2>
+<div class="table-wrap wide-table">
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>G-SB-005</td>
+        <td>YunTrace</td>
+        <td>Kubernetes 기반 클라우드 운영 환경을 대상으로 ClusterDrain 활동을 수행한 공격 그룹이다.
+      </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<h2 id="techniques-used">Techniques Used</h2>
+<div class="table-wrap wide-table">
+  <table>
+    <thead>
+      <tr>
+        <th>Domain</th>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Use</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Enterprise</td>
+        <td>T1613</td>
+        <td>Container and Resource Discovery</td>
+        <td>Kubernetes API를 통해 namespace, pod, deployment, service, ingress 정보를 조회하여 클러스터 구조, 외부 진입점, 내부 서비스 구성을 파악했다.</td>
+      </tr>
+      <tr>
+        <td>Enterprise</td>
+        <td>T1552.007</td>
+        <td>Unsecured Credentials: Container API</td>
+        <td>prod-platform namespace의 Kubernetes Secret 객체를 조회하고, base64로 저장된 data 값을 디코딩하여 DB 접속 정보, API token, registry token 성격의 정보를 확인했다.</td>
+      </tr>
+      <tr>
+        <td>Enterprise</td>
+        <td>T1609</td>
+        <td>Container Administration Command</td>
+        <td>Kubernetes API의 exec 기능을 이용해 orders-api Pod 내부에서 명령을 실행하고, 컨테이너 내부 사용자, hostname, 환경변수, 파일 시스템 구조, nginx 프로세스 정보를 확인했다.</td>
+      </tr>
+      <tr>
+        <td>Enterprise</td>
+        <td>T1610</td>
+        <td>Deploy Container</td>
+        <td>prod-platform namespace에 sb05-collector Pod를 배포하여 클러스터 내부에 수집 목적의 컨테이너를 실행했다.</td>
+      </tr>
+      <tr>
+        <td>Enterprise</td>
+        <td>T1098.006</td>
+        <td>Additional Container Cluster Roles</td>
+        <td>sb05-reader ServiceAccount, Role, RoleBinding을 생성하여 prod-platform namespace 내 Secret, Pod, Deployment, ConfigMap, Ingress 조회 권한을 추가했다.</td>
+      </tr>
+      <tr>
+        <td>Enterprise</td>
+        <td>T1074.001</td>
+        <td>Data Staged: Local Data Staging</td>
+        <td>각 단계에서 수집한 Kubernetes 리소스 정보, Secret 정보, 컨테이너 명령 실행 결과, Pod 배포 결과, RBAC 추가 결과를 VM1 로컬 staging 디렉터리에 모았다.</td>
+      </tr>
+      <tr>
+        <td>Enterprise</td>
+        <td>T1560.001</td>
+        <td>Archive Collected Data: Archive via Utility</td>
+        <td>로컬 staging 디렉터리에 모아둔 수집 자료를 zip 유틸리티로 압축하여 단일 archive 파일로 만들었다.</td>
+      </tr>
+      <tr>
+        <td>Enterprise</td>
+        <td>T1567.002</td>
+        <td>Exfiltration Over Web Service: Exfiltration to Cloud Storage</td>
+        <td>생성한 archive 파일을 AWS CLI를 이용해 private AWS S3 bucket으로 업로드하여 외부 클라우드 저장소로 유출했다.</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<h2 id="software">Software</h2>
+<div class="table-wrap wide-table">
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>S-SB-05-001</td>
+        <td>Kubernetes</td>
+        <td>컨테이너화된 애플리케이션을 배포, 확장, 운영하기 위한 컨테이너 오케스트레이션 플랫폼이다.</td>
+      </tr>
+      <tr>
+        <td>S-SB-05-002</td>
+        <td>k3s</td>
+        <td>경량 Kubernetes 배포판으로, 본 캠페인에서 피해 Kubernetes 클러스터를 구성하는 데 사용되었다.</td>
+      </tr>
+      <tr>
+        <td>S-SB-05-003</td>
+        <td>ingress-nginx</td>
+        <td>Kubernetes Ingress rule을 처리하는 nginx 기반 Ingress Controller이며, 외부 요청을 내부 Service로 라우팅하는 역할을 한다.</td>
+      </tr>
+      <tr>
+        <td>S-SB-05-004</td>
+        <td>kubectl</td>
+        <td>Kubernetes API와 상호작용하기 위한 CLI 도구로, 리소스 탐색, Secret 조회, Pod exec, Pod 배포, RBAC 추가에 사용되었다.</td>
+      </tr>
+      <tr>
+        <td>S-SB-05-005</td>
+        <td>AWS CLI</td>
+        <td>AWS 서비스와 상호작용하기 위한 CLI 도구로, 압축된 수집 자료를 S3 bucket으로 업로드하는 데 사용되었다.</td>
+      </tr>
+      <tr>
+        <td>S-SB-05-006</td>
+        <td>AWS S3</td>
+        <td>객체 스토리지 서비스로, 본 캠페인에서 외부 클라우드 유출 저장소로 사용되었다.</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<h2 id="references">References</h2>
+<ol class="references">
+  <li>MITRE ATT&amp;CK, T1613 Container and Resource Discovery. <a href="https://attack.mitre.org/techniques/T1613/">https://attack.mitre.org/techniques/T1613/</a></li>
+  <li>MITRE ATT&amp;CK, T1552.007 Unsecured Credentials: Container API. <a href="https://attack.mitre.org/techniques/T1552/007/">https://attack.mitre.org/techniques/T1552/007/</a></li>
+  <li>MITRE ATT&amp;CK, T1609 Container Administration Command. <a href="https://attack.mitre.org/techniques/T1609/">https://attack.mitre.org/techniques/T1609/</a></li>
+  <li>MITRE ATT&amp;CK, T1610 Deploy Container. <a href="https://attack.mitre.org/techniques/T1610/">https://attack.mitre.org/techniques/T1610/</a></li>
+  <li>MITRE ATT&amp;CK, T1098.006 Additional Container Cluster Roles. <a href="https://attack.mitre.org/techniques/T1098/006/">https://attack.mitre.org/techniques/T1098/006/</a></li>
+  <li>MITRE ATT&amp;CK, T1074.001 Data Staged: Local Data Staging. <a href="https://attack.mitre.org/techniques/T1074/001/">https://attack.mitre.org/techniques/T1074/001/</a></li>
+  <li>MITRE ATT&amp;CK, T1560.001 Archive Collected Data: Archive via Utility. <a href="https://attack.mitre.org/techniques/T1560/001/">https://attack.mitre.org/techniques/T1560/001/</a></li>
+  <li>MITRE ATT&amp;CK, T1567.002 Exfiltration to Cloud Storage. <a href="https://attack.mitre.org/techniques/T1567/002/">https://attack.mitre.org/techniques/T1567/002/</a></li>
+  <li>Kubernetes Documentation, Secrets. <a href="https://kubernetes.io/docs/concepts/configuration/secret/">https://kubernetes.io/docs/concepts/configuration/secret/</a></li>
+  <li>Kubernetes Documentation, Ingress. <a href="https://kubernetes.io/docs/concepts/services-networking/ingress/">https://kubernetes.io/docs/concepts/services-networking/ingress/</a></li>
+  <li>Kubernetes Blog, CVE-2025-1974 ingress-nginx. <a href="https://kubernetes.io/blog/2025/03/24/ingress-nginx-CVE-2025-1974/">https://kubernetes.io/blog/2025/03/24/ingress-nginx-CVE-2025-1974/</a></li> 
+</ol>
+      <footer class="footer">
+        Spacebar Project. This page is not affiliated with MITRE ATT&amp;CK.
+      </footer>
+    </main>
+  </div>
+  <script>
+    const techFilter = document.querySelector("#techFilter");
+    const techRows = document.querySelectorAll("#techTable tbody tr");
+
+    if (techFilter) {
+      techFilter.addEventListener("input", () => {
+        const query = techFilter.value.trim().toLowerCase();
+        techRows.forEach((row) => {
+          row.hidden = query !== "" && !row.textContent.toLowerCase().includes(query);
+        });
+      });
+    }
+  </script>
+</body>
+</html>

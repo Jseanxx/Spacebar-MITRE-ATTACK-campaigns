@@ -4,17 +4,17 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Spacebar Log Catalog</title>
-  <link rel="stylesheet" href="../assets/campaign.css">
+  <link rel="stylesheet" href="/assets/campaign.css">
 </head>
 <body>
   <header class="topbar">
     <div class="topbar-inner">
-      <a class="brand" href="./"><img class="brand-logo" src="../assets/spacebarLogo.png" alt="Spacebar"><span>Spacebar Campaigns</span></a>
+      <a class="brand" href="/campaigns/"><img class="brand-logo" src="/assets/spacebarLogo.png" alt="Spacebar"><span>Spacebar Campaigns</span></a>
     </div>
   </header>
 
   <main class="page">
-    <div class="breadcrumbs"><a href="../campaigns/">Home</a> / <span>Log Catalog</span></div>
+    <div class="breadcrumbs"><a href="/campaigns/">Home</a> / <span>Log Catalog</span></div>
     <h1>Log Catalog</h1>
     <p class="summary">
       각 로그 문서는 원본 위치, 수집 방식, 로그 포맷, 주요 필드 의미, 커버 가능한 Technique을 분리해 정리한다.
@@ -22,7 +22,7 @@
     </p>
     <div class="cards">
       <article class="card">
-        <h3><a href="AWSL-001.html">AWSL-001 AWS VPC Flow Log</a></h3>
+        <h3><a href="AWSL-001/">AWSL-001 AWS VPC Flow Log</a></h3>
         <p>AWS VPC 네트워크 흐름에서 외부 전송과 서버 간 통신을 확인하는 로그.</p>
         <div class="tag-row">
           <span class="tag">T1048.002</span>
@@ -30,7 +30,7 @@
         </div>
       </article>
       <article class="card">
-        <h3><a href="DBL-001.html">DBL-001 PostgreSQL Connection and Query Log</a></h3>
+        <h3><a href="DBL-001/">DBL-001 PostgreSQL Connection and Query Log</a></h3>
         <p>PostgreSQL 접속과 쿼리 실행 흔적을 확인하는 데이터베이스 로그.</p>
         <div class="tag-row">
           <span class="tag">T1213.006</span>
@@ -38,7 +38,7 @@
         </div>
       </article>
       <article class="card">
-        <h3><a href="HFA-001.html">HFA-001 Linux auditd Execve Log</a></h3>
+        <h3><a href="HFA-001/">HFA-001 Linux auditd Execve Log</a></h3>
         <p>Linux auditd execve 이벤트로 shell/python 실행, discovery 명령, tool transfer 명령을 확인하는 로그.</p>
         <div class="tag-row">
           <span class="tag">T1059</span>
@@ -50,7 +50,7 @@
         </div>
       </article>
       <article class="card">
-        <h3><a href="HFA-002.html">HFA-002 Linux auditd Sensitive File Access Log</a></h3>
+        <h3><a href="HFA-002/">HFA-002 Linux auditd Sensitive File Access Log</a></h3>
         <p>auditd로 `/etc/passwd`, `/etc/shadow`, `/etc/sudoers` 등 민감 파일 접근을 확인하는 로그.</p>
         <div class="tag-row">
           <span class="tag">T1005</span>
@@ -58,21 +58,21 @@
         </div>
       </article>
       <article class="card">
-        <h3><a href="HFA-003.html">HFA-003 Linux auditd Docker Socket Access Log</a></h3>
+        <h3><a href="HFA-003/">HFA-003 Linux auditd Docker Socket Access Log</a></h3>
         <p>auditd로 `/var/run/docker.sock` 접근을 확인하여 container escape 또는 host Docker 제어 시도를 분석하는 로그.</p>
         <div class="tag-row">
           <span class="tag">T1611</span>
         </div>
       </article>
       <article class="card">
-        <h3><a href="HFA-004.html">HFA-004 Linux auditd Tool Transfer Log</a></h3>
+        <h3><a href="HFA-004/">HFA-004 Linux auditd Tool Transfer Log</a></h3>
         <p>auditd에서 `curl`, `wget` 실행을 추적하여 RCE 이후 도구 다운로드 시도를 확인하는 로그.</p>
         <div class="tag-row">
           <span class="tag">T1105</span>
         </div>
       </article>
       <article class="card">
-        <h3><a href="HFC-001.html">HFC-001 CloudTrail Management Event</a></h3>
+        <h3><a href="HFC-001/">HFC-001 CloudTrail Management Event</a></h3>
         <p>AWS API 사용, IAM/보안그룹 변경, EC2 start/stop, CloudTrail/WAF/GuardDuty 설정 변경을 추적하는 보조 로그.</p>
         <div class="tag-row">
           <span class="tag">T1078</span>
@@ -81,7 +81,7 @@
         </div>
       </article>
       <article class="card">
-        <h3><a href="HFE-001.html">HFE-001 Logstash Ingested Event</a></h3>
+        <h3><a href="HFE-001/">HFE-001 Logstash Ingested Event</a></h3>
         <p>Logstash HTTP input으로 수집된 Hanguel IR Agent 이벤트의 수집 상태와 저장 index를 확인하는 로그.</p>
         <div class="tag-row">
           <span class="tag">T1190</span>
@@ -93,7 +93,7 @@
         </div>
       </article>
       <article class="card">
-        <h3><a href="HFE-002.html">HFE-002 Sequential Correlator Alert</a></h3>
+        <h3><a href="HFE-002/">HFE-002 Sequential Correlator Alert</a></h3>
         <p>시간창 내 복수 이벤트를 묶어 RCE confirmed, RCE to collection, recon to exploit 같은 incident 후보를 생성하는 상관분석 알림.</p>
         <div class="tag-row">
           <span class="tag">T1595</span>
@@ -105,7 +105,7 @@
         </div>
       </article>
       <article class="card">
-        <h3><a href="HFL-001.html">HFL-001 Langflow/Nginx Access Log</a></h3>
+        <h3><a href="HFL-001/">HFL-001 Langflow/Nginx Access Log</a></h3>
         <p>Langflow 앞단 Nginx 및 Docker JSON access log에서 API 접근, 스캐닝, 취약 API 호출, path traversal, SSRF 의심 요청을 확인하는 로그.</p>
         <div class="tag-row">
           <span class="tag">T1595</span>
@@ -115,7 +115,7 @@
         </div>
       </article>
       <article class="card">
-        <h3><a href="HFL-002.html">HFL-002 Langflow App Container Log</a></h3>
+        <h3><a href="HFL-002/">HFL-002 Langflow App Container Log</a></h3>
         <p>Langflow application/container stdout에서 application error, command output, discovery command 흔적을 확인하는 로그.</p>
         <div class="tag-row">
           <span class="tag">T1059</span>
@@ -127,7 +127,7 @@
         </div>
       </article>
       <article class="card">
-        <h3><a href="HFL-003.html">HFL-003 Hanguel IR Agent Enriched Event</a></h3>
+        <h3><a href="HFL-003/">HFL-003 Hanguel IR Agent Enriched Event</a></h3>
         <p>Hanguel IR Agent가 Docker log, host log, auditd log를 ECS 유사 JSON으로 enrich하여 Logstash로 전송한 정규화 이벤트.</p>
         <div class="tag-row">
           <span class="tag">T1595</span>
@@ -145,7 +145,7 @@
         </div>
       </article>
       <article class="card">
-        <h3><a href="HFL-004.html">HFL-004 Linux SSH Auth Log</a></h3>
+        <h3><a href="HFL-004/">HFL-004 Linux SSH Auth Log</a></h3>
         <p>Linux `/var/log/auth.log`에서 SSH 실패, 성공, 세션 이벤트를 확인하는 로그. 현재 Hanguel agent는 실패 탐지가 우선 구현되어 있다.</p>
         <div class="tag-row">
           <span class="tag">T1110</span>
@@ -154,7 +154,7 @@
         </div>
       </article>
       <article class="card">
-        <h3><a href="HFW-001.html">HFW-001 AWS WAF Log</a></h3>
+        <h3><a href="HFW-001/">HFW-001 AWS WAF Log</a></h3>
         <p>ALB 앞단 AWS WAF에서 web attack, scanning, known bad input 판단을 확인하는 보조 로그.</p>
         <div class="tag-row">
           <span class="tag">T1190</span>
@@ -162,7 +162,7 @@
         </div>
       </article>
       <article class="card">
-        <h3><a href="HFW-002.html">HFW-002 VPC Flow Log</a></h3>
+        <h3><a href="HFW-002/">HFW-002 VPC Flow Log</a></h3>
         <p>VPC 네트워크 흐름에서 내부 통신, 외부 통신, C2 의심 연결, 비정상 egress를 분석하는 보조 로그.</p>
         <div class="tag-row">
           <span class="tag">T1041</span>
@@ -173,7 +173,7 @@
         </div>
       </article>
       <article class="card">
-        <h3><a href="JL-001.html">JL-001 Jenkins HTTP Access Log</a></h3>
+        <h3><a href="JL-001/">JL-001 Jenkins HTTP Access Log</a></h3>
         <p>Jenkins Web UI와 CLI jar 접근 흔적을 확인하는 HTTP access log.</p>
         <div class="tag-row">
           <span class="tag">T1592</span>
@@ -182,7 +182,7 @@
         </div>
       </article>
       <article class="card">
-        <h3><a href="JL-002.html">JL-002 Jenkins Docker and System Log</a></h3>
+        <h3><a href="JL-002/">JL-002 Jenkins Docker and System Log</a></h3>
         <p>Jenkins 컨테이너 표준 출력과 내부 시스템 이벤트를 확인하는 로그.</p>
         <div class="tag-row">
           <span class="tag">T1078</span>
@@ -192,7 +192,7 @@
         </div>
       </article>
       <article class="card">
-        <h3><a href="LL-001.html">LL-001 Linux SSH Auth Log</a></h3>
+        <h3><a href="LL-001/">LL-001 Linux SSH Auth Log</a></h3>
         <p>Linux SSH 인증 성공/실패와 세션 이벤트를 확인하는 로그.</p>
         <div class="tag-row">
           <span class="tag">T1021.004</span>
@@ -201,7 +201,7 @@
         </div>
       </article>
       <article class="card">
-        <h3><a href="LL-002.html">LL-002 Linux auditd File Access Log</a></h3>
+        <h3><a href="LL-002/">LL-002 Linux auditd File Access Log</a></h3>
         <p>Linux auditd로 민감 경로 접근과 명령 실행을 추적하는 로그.</p>
         <div class="tag-row">
           <span class="tag">T1083</span>

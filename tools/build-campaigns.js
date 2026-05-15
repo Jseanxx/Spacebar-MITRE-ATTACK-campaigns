@@ -7,8 +7,8 @@ const detectionDir = path.join(root, "content", "detections");
 const logCatalogDir = path.join(root, "content", "log-catalog");
 const outDir = path.join(root, "campaigns");
 const logsOutDir = path.join(root, "logs");
-const assetHref = "../assets/campaign.css";
-const logoSrc = "../assets/spacebarLogo.png";
+const assetHref = "/assets/campaign.css";
+const logoSrc = "/assets/spacebarLogo.png";
 
 function escapeHtml(value) {
   return String(value ?? "")
@@ -83,6 +83,15 @@ function renderMetadataGrid(rows) {
     .join("\n");
 
   return `<div class="meta-grid" aria-label="Campaign metadata">\n${body}\n</div>`;
+}
+
+function normalizeInternalLinks(html) {
+  return html
+    .replace(/href="(?:\.\.\/)?logs\/([A-Z]+-\d+)\.html"/g, 'href="/logs/$1/"')
+    .replace(/href="(?:\.\.\/)?campaigns\/(SB-\d+)\.html"/g, 'href="/campaigns/$1/"')
+    .replace(/href="(?:\.\.\/)?campaigns\/(SB-\d+)-detection-map\.html"/g, 'href="/campaigns/$1/detection-map/"')
+    .replace(/href="(SB-\d+)\.html"/g, 'href="/campaigns/$1/"')
+    .replace(/href="(SB-\d+)-detection-map\.html"/g, 'href="/campaigns/$1/detection-map/"');
 }
 
 function headingId(text) {
@@ -288,10 +297,21 @@ function readCampaigns() {
       const parsed = parseFrontmatter(source, file);
       return {
         file,
-        slug: file.replace(/\.md$/, ".html"),
+        slug: file.replace(/\.md$/, "/"),
         ...parsed,
       };
     });
+}
+
+function writeSitePage(baseDir, slug, html) {
+  const pageDir = path.join(baseDir, slug);
+  fs.mkdirSync(pageDir, { recursive: true });
+  fs.writeFileSync(path.join(pageDir, "index.html"), html);
+}
+
+function cleanGeneratedDir(dir) {
+  fs.rmSync(dir, { recursive: true, force: true });
+  fs.mkdirSync(dir, { recursive: true });
 }
 
 function readContentCollection(dir, pattern, slugFactory) {
@@ -312,7 +332,7 @@ function readContentCollection(dir, pattern, slugFactory) {
 }
 
 function renderSidebar(campaigns, currentId, options = {}) {
-  const { detectionSlug, logIndexHref = "../logs/" } = options;
+  const { detectionSlug, logIndexHref = "/logs/" } = options;
   return `
     <aside class="campaign-sidebar" aria-label="Campaign navigation">
       <div class="sidebar-block">
@@ -321,7 +341,7 @@ function renderSidebar(campaigns, currentId, options = {}) {
           ${campaigns
             .map((campaign) => {
               const active = campaign.data.id === currentId ? " active" : "";
-              return `<a class="sidebar-link${active}" href="${campaign.slug}"><span>${escapeHtml(campaign.data.id)}</span>${escapeHtml(campaign.data.name)}</a>`;
+              return `<a class="sidebar-link${active}" href="/campaigns/${campaign.slug}"><span>${escapeHtml(campaign.data.id)}</span>${escapeHtml(campaign.data.name)}</a>`;
             })
             .join("\n          ")}
         </nav>
@@ -329,7 +349,7 @@ function renderSidebar(campaigns, currentId, options = {}) {
       <div class="sidebar-block sidebar-sections">
         <div class="sidebar-title">On This Page</div>
         <nav class="sidebar-links">
-          ${detectionSlug ? `<a class="sidebar-link" href="${detectionSlug}">Detection Map</a>` : ""}
+          ${detectionSlug ? `<a class="sidebar-link" href="/campaigns/${detectionSlug}">Detection Map</a>` : ""}
           <a class="sidebar-link" href="#techniques-used">Techniques Used</a>
           <a class="sidebar-link" href="#software">Software</a>
           <a class="sidebar-link" href="#references">References</a>
@@ -351,21 +371,21 @@ function renderHeader(title, cssHref = assetHref, logo = logoSrc) {
 <body>
   <header class="topbar">
     <div class="topbar-inner">
-      <a class="brand" href="./"><img class="brand-logo" src="${logo}" alt="Spacebar"><span>Spacebar Campaigns</span></a>
+      <a class="brand" href="/campaigns/"><img class="brand-logo" src="${logo}" alt="Spacebar"><span>Spacebar Campaigns</span></a>
     </div>
   </header>`;
 }
 
 function renderCampaignPage(campaigns, campaign, detectionByCampaign = new Map()) {
   const { data, body } = campaign;
-  const bodyHtml = wrapCampaignHero(data.format === "html" ? body : markdownToHtml(body));
+  const bodyHtml = normalizeInternalLinks(wrapCampaignHero(data.format === "html" ? body : markdownToHtml(body)));
   const detectionSlug = detectionByCampaign.get(data.id)?.slug;
   return `${renderHeader(`${data.name} | Spacebar Campaigns`)}
 
   <div class="page-shell">
 ${renderSidebar(campaigns, data.id, { detectionSlug })}
     <main class="page campaign-content">
-      <div class="breadcrumbs"><a href="./">Home</a> / <a href="./">Campaigns</a> / <span>${escapeHtml(data.name)}</span></div>
+      <div class="breadcrumbs"><a href="/campaigns/">Home</a> / <a href="/campaigns/">Campaigns</a> / <span>${escapeHtml(data.name)}</span></div>
 ${bodyHtml}
       <footer class="footer">
         Spacebar Project. This page is not affiliated with MITRE ATT&amp;CK.
@@ -392,15 +412,15 @@ ${bodyHtml}
 
 function renderDetectionPage(campaigns, detection) {
   const { data, body } = detection;
-  const bodyHtml = data.format === "html" ? body : markdownToHtml(body);
+  const bodyHtml = normalizeInternalLinks(data.format === "html" ? body : markdownToHtml(body));
   const campaign = campaigns.find((item) => item.data.id === data.campaign);
   const campaignName = campaign ? campaign.data.name : data.campaign;
   return `${renderHeader(`${data.name} | Spacebar Detection Map`)}
 
   <div class="page-shell">
-${renderSidebar(campaigns, data.campaign, { logIndexHref: "../logs/" })}
+${renderSidebar(campaigns, data.campaign, { logIndexHref: "/logs/" })}
     <main class="page campaign-content">
-      <div class="breadcrumbs"><a href="./">Home</a> / <a href="./">Campaigns</a> / <a href="${data.campaign}.html">${escapeHtml(campaignName)}</a> / <span>Detection Map</span></div>
+      <div class="breadcrumbs"><a href="/campaigns/">Home</a> / <a href="/campaigns/">Campaigns</a> / <a href="/campaigns/${data.campaign}/">${escapeHtml(campaignName)}</a> / <span>Detection Map</span></div>
 ${bodyHtml}
       <footer class="footer">
         Spacebar Project. This detection map is an educational analysis artifact.
@@ -418,11 +438,11 @@ function renderLogSidebar(logs, currentId, detections = []) {
       <div class="sidebar-block">
         <div class="sidebar-title">Log Catalog</div>
         <nav class="sidebar-links">
-          <a class="sidebar-link" href="./">Index</a>
+          <a class="sidebar-link" href="/logs/">Index</a>
           ${logs
             .map((log) => {
               const active = log.data.id === currentId ? " active" : "";
-              return `<a class="sidebar-link${active}" href="${log.slug}"><span>${escapeHtml(log.data.id)}</span>${escapeHtml(log.data.name)}</a>`;
+              return `<a class="sidebar-link${active}" href="/logs/${log.slug}"><span>${escapeHtml(log.data.id)}</span>${escapeHtml(log.data.name)}</a>`;
             })
             .join("\n          ")}
         </nav>
@@ -430,11 +450,11 @@ function renderLogSidebar(logs, currentId, detections = []) {
       <div class="sidebar-block">
         <div class="sidebar-title">Campaigns</div>
         <nav class="sidebar-links">
-          <a class="sidebar-link" href="../campaigns/">Campaign Index</a>
+          <a class="sidebar-link" href="/campaigns/">Campaign Index</a>
           ${detections
             .map(
               (detection) =>
-                `<a class="sidebar-link" href="../campaigns/${detection.slug}"><span>${escapeHtml(detection.data.campaign)}</span>${escapeHtml(detection.data.name)}</a>`
+                `<a class="sidebar-link" href="/campaigns/${detection.slug}"><span>${escapeHtml(detection.data.campaign)}</span>${escapeHtml(detection.data.name)}</a>`
             )
             .join("\n          ")}
         </nav>
@@ -444,13 +464,13 @@ function renderLogSidebar(logs, currentId, detections = []) {
 
 function renderLogPage(logs, log, detections = []) {
   const { data, body } = log;
-  const bodyHtml = data.format === "html" ? body : markdownToHtml(body);
-  return `${renderHeader(`${data.id} ${data.name} | Spacebar Log Catalog`, "../assets/campaign.css", "../assets/spacebarLogo.png")}
+  const bodyHtml = normalizeInternalLinks(data.format === "html" ? body : markdownToHtml(body));
+  return `${renderHeader(`${data.id} ${data.name} | Spacebar Log Catalog`)}
 
   <div class="page-shell">
 ${renderLogSidebar(logs, data.id, detections)}
     <main class="page campaign-content">
-      <div class="breadcrumbs"><a href="../campaigns/">Home</a> / <a href="./">Log Catalog</a> / <span>${escapeHtml(data.id)}</span></div>
+      <div class="breadcrumbs"><a href="/campaigns/">Home</a> / <a href="/logs/">Log Catalog</a> / <span>${escapeHtml(data.id)}</span></div>
 ${bodyHtml}
       <footer class="footer">
         Spacebar Project. Log IDs are project-defined analysis identifiers, not MITRE ATT&amp;CK IDs.
@@ -463,10 +483,10 @@ ${bodyHtml}
 }
 
 function renderLogIndex(logs) {
-  return `${renderHeader("Spacebar Log Catalog", "../assets/campaign.css", "../assets/spacebarLogo.png")}
+  return `${renderHeader("Spacebar Log Catalog")}
 
   <main class="page">
-    <div class="breadcrumbs"><a href="../campaigns/">Home</a> / <span>Log Catalog</span></div>
+    <div class="breadcrumbs"><a href="/campaigns/">Home</a> / <span>Log Catalog</span></div>
     <h1>Log Catalog</h1>
     <p class="summary">
       각 로그 문서는 원본 위치, 수집 방식, 로그 포맷, 주요 필드 의미, 커버 가능한 Technique을 분리해 정리한다.
@@ -545,25 +565,25 @@ ${campaigns
 function main() {
   const campaigns = readCampaigns();
   const detections = readContentCollection(detectionDir, /^SB-\d+\.md$/, (file) =>
-    file.replace(/\.md$/, "-detection-map.html")
+    file.replace(/\.md$/, "/detection-map/")
   );
   const detectionByCampaign = new Map(detections.map((detection) => [detection.data.campaign, detection]));
   const logs = readContentCollection(logCatalogDir, /^[A-Z]+-\d+\.md$/, (file) =>
-    file.replace(/\.md$/, ".html")
+    file.replace(/\.md$/, "/")
   );
-  fs.mkdirSync(outDir, { recursive: true });
-  fs.mkdirSync(logsOutDir, { recursive: true });
+  cleanGeneratedDir(outDir);
+  cleanGeneratedDir(logsOutDir);
 
   campaigns.forEach((campaign) => {
-    fs.writeFileSync(path.join(outDir, campaign.slug), renderCampaignPage(campaigns, campaign, detectionByCampaign));
+    writeSitePage(outDir, campaign.slug, renderCampaignPage(campaigns, campaign, detectionByCampaign));
   });
 
   detections.forEach((detection) => {
-    fs.writeFileSync(path.join(outDir, detection.slug), renderDetectionPage(campaigns, detection));
+    writeSitePage(outDir, detection.slug, renderDetectionPage(campaigns, detection));
   });
 
   logs.forEach((log) => {
-    fs.writeFileSync(path.join(logsOutDir, log.slug), renderLogPage(logs, log, detections));
+    writeSitePage(logsOutDir, log.slug, renderLogPage(logs, log, detections));
   });
 
   fs.writeFileSync(path.join(outDir, "index.html"), renderIndex(campaigns, detectionByCampaign));

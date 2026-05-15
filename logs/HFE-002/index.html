@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>HFE-002 Sequential Correlator Alert | Spacebar Log Catalog</title>
+  <link rel="stylesheet" href="/assets/campaign.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="/campaigns/"><img class="brand-logo" src="/assets/spacebarLogo.png" alt="Spacebar"><span>Spacebar Campaigns</span></a>
+    </div>
+  </header>
+
+  <div class="page-shell">
+
+    <aside class="campaign-sidebar" aria-label="Log catalog navigation">
+      <div class="sidebar-block">
+        <div class="sidebar-title">Log Catalog</div>
+        <nav class="sidebar-links">
+          <a class="sidebar-link" href="/logs/">Index</a>
+          <a class="sidebar-link" href="/logs/AWSL-001/"><span>AWSL-001</span>AWS VPC Flow Log</a>
+          <a class="sidebar-link" href="/logs/DBL-001/"><span>DBL-001</span>PostgreSQL Connection and Query Log</a>
+          <a class="sidebar-link" href="/logs/HFA-001/"><span>HFA-001</span>Linux auditd Execve Log</a>
+          <a class="sidebar-link" href="/logs/HFA-002/"><span>HFA-002</span>Linux auditd Sensitive File Access Log</a>
+          <a class="sidebar-link" href="/logs/HFA-003/"><span>HFA-003</span>Linux auditd Docker Socket Access Log</a>
+          <a class="sidebar-link" href="/logs/HFA-004/"><span>HFA-004</span>Linux auditd Tool Transfer Log</a>
+          <a class="sidebar-link" href="/logs/HFC-001/"><span>HFC-001</span>CloudTrail Management Event</a>
+          <a class="sidebar-link" href="/logs/HFE-001/"><span>HFE-001</span>Logstash Ingested Event</a>
+          <a class="sidebar-link active" href="/logs/HFE-002/"><span>HFE-002</span>Sequential Correlator Alert</a>
+          <a class="sidebar-link" href="/logs/HFL-001/"><span>HFL-001</span>Langflow/Nginx Access Log</a>
+          <a class="sidebar-link" href="/logs/HFL-002/"><span>HFL-002</span>Langflow App Container Log</a>
+          <a class="sidebar-link" href="/logs/HFL-003/"><span>HFL-003</span>Hanguel IR Agent Enriched Event</a>
+          <a class="sidebar-link" href="/logs/HFL-004/"><span>HFL-004</span>Linux SSH Auth Log</a>
+          <a class="sidebar-link" href="/logs/HFW-001/"><span>HFW-001</span>AWS WAF Log</a>
+          <a class="sidebar-link" href="/logs/HFW-002/"><span>HFW-002</span>VPC Flow Log</a>
+          <a class="sidebar-link" href="/logs/JL-001/"><span>JL-001</span>Jenkins HTTP Access Log</a>
+          <a class="sidebar-link" href="/logs/JL-002/"><span>JL-002</span>Jenkins Docker and System Log</a>
+          <a class="sidebar-link" href="/logs/LL-001/"><span>LL-001</span>Linux SSH Auth Log</a>
+          <a class="sidebar-link" href="/logs/LL-002/"><span>LL-002</span>Linux auditd File Access Log</a>
+        </nav>
+      </div>
+      <div class="sidebar-block">
+        <div class="sidebar-title">Campaigns</div>
+        <nav class="sidebar-links">
+          <a class="sidebar-link" href="/campaigns/">Campaign Index</a>
+          <a class="sidebar-link" href="/campaigns/SB-01/detection-map/"><span>SB-01</span>SB-01 Detection Map</a>
+          <a class="sidebar-link" href="/campaigns/SB-06/detection-map/"><span>SB-06</span>SB-06 Detection Map</a>
+        </nav>
+      </div>
+    </aside>
+    <main class="page campaign-content">
+      <div class="breadcrumbs"><a href="/campaigns/">Home</a> / <a href="/logs/">Log Catalog</a> / <span>HFE-002</span></div>
+<h1>HFE-002 Sequential Correlator Alert</h1>
+<div class="meta-grid" aria-label="Campaign metadata">
+<div class="meta-label">Source Alias:</div>
+<div class="meta-value">ELK-002</div>
+<div class="meta-label">발생 위치:</div>
+<div class="meta-value">ELK 서버 <code>elk-langflow-correlator</code></div>
+<div class="meta-label">저장 index:</div>
+<div class="meta-value"><code>langflow-alerts-*</code></div>
+<div class="meta-label">주요 event.action:</div>
+<div class="meta-value"><code>langflow_rce_confirmed_sequence</code>, <code>langflow_rce_to_collection_sequence</code>, <code>langflow_recon_to_exploit_sequence</code></div>
+<div class="meta-label">주요 필드:</div>
+<div class="meta-value"><code>hanguel.alert_type</code>, <code>hanguel.risk_score</code>, <code>related.events</code>, <code>threat.technique</code></div>
+<div class="meta-label">커버 Technique:</div>
+<div class="meta-value">T1190 + T1059 + T1005/T1105 등 복합 시나리오</div>
+</div>
+<h2 id="분석-포인트">분석 포인트</h2>
+<ul>
+<li>단일 로그가 아니라 시간창 내 복수 이벤트를 묶어 incident로 판단한다.</li>
+<li>예: <code>langflow_rce_attempt</code> 이후 <code>hanguel_shell_exec</code>가 발생하면 RCE confirmed sequence가 생성된다.</li>
+</ul>
+<h2 id="kql">KQL</h2>
+<pre><code>_index : &quot;langflow-alerts-*&quot; and event.action : &quot;langflow_rce_confirmed_sequence&quot;</code></pre>
+      <footer class="footer">
+        Spacebar Project. Log IDs are project-defined analysis identifiers, not MITRE ATT&amp;CK IDs.
+      </footer>
+    </main>
+  </div>
+</body>
+</html>
