@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SB-01 LL-002 Linux auditd File Access Log | Spacebar Campaign Logs</title>
+  <link rel="stylesheet" href="/assets/campaign.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="/campaigns/"><img class="brand-logo" src="/assets/spacebarLogo.png" alt="Spacebar"><span>Spacebar Campaigns</span></a>
+    </div>
+  </header>
+
+  <div class="page-shell">
+
+    <aside class="campaign-sidebar" aria-label="Campaign log navigation">
+      <div class="sidebar-block">
+        <div class="sidebar-title">SB-01 Logs</div>
+        <nav class="sidebar-links">
+          <a class="sidebar-link" href="/campaigns/SB-01/">Campaign Page</a>
+          <a class="sidebar-link" href="/campaigns/SB-01/logs/">Campaign Logs</a>
+          <a class="sidebar-link active" href="/campaigns/SB-01/logs/LL-002/"><span>LL-002</span>Linux auditd File Access Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-01/logs/LL-001/"><span>LL-001</span>Linux SSH Auth Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-01/logs/DBL-001/"><span>DBL-001</span>PostgreSQL Connection Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-01/logs/AWSL-001/"><span>AWSL-001</span>AWS VPC Flow Log</a>
+        </nav>
+      </div>
+      <div class="sidebar-block">
+        <div class="sidebar-title">Global Catalog</div>
+        <nav class="sidebar-links">
+          <a class="sidebar-link" href="/logs/">All Logs</a>
+        </nav>
+      </div>
+    </aside>
+    <main class="page campaign-content">
+      <div class="breadcrumbs"><a href="/campaigns/">Home</a> / <a href="/campaigns/SB-01/">2024 PipelineKey</a> / <a href="/campaigns/SB-01/logs/">Campaign Logs</a> / <span>LL-002</span></div>
+<h1>LL-002 Linux auditd File Access Log</h1>
+<div class="meta-grid" aria-label="Campaign metadata">
+<div class="meta-label">Log ID:</div>
+<div class="meta-value">LL-002</div>
+<div class="meta-label">Source:</div>
+<div class="meta-value">SB-01 App server</div>
+<div class="meta-label">Representative Path:</div>
+<div class="meta-value"><code>/var/log/audit/audit.log</code></div>
+<div class="meta-label">Collection:</div>
+<div class="meta-value">Filebeat 8.13.4 custom input으로 <code>/var/log/audit/audit.log</code> 직접 수집</div>
+<div class="meta-label">Primary Use:</div>
+<div class="meta-value">App 운영 경로 탐색, 설정/credential 후보 파일 접근, staging 경로 생성, 외부 전송 명령 실행 확인</div>
+</div>
+<h2 id="공격-행위-요약">공격 행위 요약</h2>
+<p>SSH 인증 로그는 서버에 들어온 사실만 보여준다. 공격자는 App 서버에 들어온 뒤 보통 현재 권한, 서비스 경로, 컨테이너 구성, 설정 파일, 로그 위치, DB 연결 정보를 차례로 확인한다. auditd는 이 중 파일 접근과 명령 실행 흔적을 <code>PATH</code>, <code>SYSCALL</code>, <code>PROCTITLE</code> 이벤트로 남겨, SSH 이후 실제 행위를 설명하는 핵심 로그가 된다.</p>
+<h2 id="로그-발생-위치">로그 발생 위치</h2>
+<div class="table-wrap wide-table">
+<table>
+<thead><tr><th>구분</th><th>위치</th><th>설명</th></tr></thead>
+<tbody>
+<tr><td>App 서버</td><td><code>/var/log/audit/audit.log</code></td><td>App 운영 경로, 설정 파일, staging 경로 접근 이벤트</td></tr>
+<tr><td>App 서버</td><td><code>/opt/spacebar-booking</code></td><td>애플리케이션 운영 경로 탐색 여부 확인</td></tr>
+<tr><td>App 서버</td><td><code>/opt/spacebar-booking/.env</code></td><td>DB 접속 정보 등 credential 후보 파일 접근 여부 확인</td></tr>
+<tr><td>App 서버</td><td><code>/opt/spacebar-booking/docker-compose.yml</code></td><td>컨테이너 구성, volume, network, 환경변수 참조 확인</td></tr>
+<tr><td>App 서버</td><td><code>/tmp</code>, <code>/var/tmp</code></td><td>수집 데이터 staging 또는 archive 생성 여부 확인</td></tr>
+</tbody></table></div>
+<h2 id="수집-방식">수집 방식</h2>
+<div class="table-wrap wide-table">
+<table>
+<thead><tr><th>구분</th><th>방식</th></tr></thead>
+<tbody>
+<tr><td>App 서버</td><td>auditd rule key를 지정해 관심 파일/명령 실행을 수집</td></tr>
+<tr><td>App 서버</td><td>Filebeat 8.13.4 custom input으로 <code>/var/log/audit/audit.log</code> 직접 수집</td></tr>
+<tr><td>ELK</td><td><code>auditd.log.key</code>, <code>auditd.log.name</code>, <code>process.executable</code>, <code>user.name</code> 기준으로 탐지룰 작성</td></tr>
+</tbody></table></div>
+<h2 id="실제-관측-로그-예시">실제 관측 로그 예시</h2>
+<pre><code>type=SYSCALL msg=audit(1715153182.123:420): arch=c000003e syscall=257 success=yes exe=&quot;/usr/bin/ls&quot; key=&quot;sb01_app_path_read&quot;
+type=PATH msg=audit(1715153182.123:420): item=0 name=&quot;/opt/spacebar-booking&quot; inode=393221 dev=ca:01 mode=040755
+type=PROCTITLE msg=audit(1715153182.123:420): proctitle=6C73002F6F70742F73706163656261722D626F6F6B696E67</code></pre>
+<h2 id="주요-필드">주요 필드</h2>
+<div class="table-wrap wide-table">
+<table>
+<thead><tr><th>필드</th><th>의미</th><th>예시</th></tr></thead>
+<tbody>
+<tr><td><code>auditd.log.sequence</code></td><td>같은 행위를 묶는 audit event sequence</td><td><code>420</code></td></tr>
+<tr><td><code>auditd.log.key</code></td><td>audit rule key</td><td><code>sb01_app_path_read</code></td></tr>
+<tr><td><code>auditd.log.name</code></td><td>접근 대상 경로</td><td><code>/opt/spacebar-booking</code></td></tr>
+<tr><td><code>process.executable</code></td><td>실행 파일</td><td><code>/usr/bin/ls</code></td></tr>
+<tr><td><code>process.args</code></td><td>실행 인자</td><td><code>/opt/spacebar-booking</code></td></tr>
+<tr><td><code>process.working_directory</code></td><td>명령 실행 위치</td><td><code>/home/deploy</code></td></tr>
+<tr><td><code>user.audit.name</code></td><td>감사 이벤트 기준 사용자</td><td><code>deploy</code></td></tr>
+<tr><td><code>message</code></td><td>원본 auditd 로그</td><td><code>type=SYSCALL ... key=&quot;sb01_app_path_read&quot;</code></td></tr>
+</tbody></table></div>
+<h2 id="커버하는-techniques-used">커버하는 Techniques Used</h2>
+<div class="table-wrap wide-table">
+<table>
+<thead><tr><th>Technique</th><th>Mapping Reason</th></tr></thead>
+<tbody>
+<tr><td><a href="https://attack.mitre.org/techniques/T1083/">T1083 File and Directory Discovery</a></td><td>App 운영 경로, 설정 파일, 컨테이너 구성 파일 등에 대한 탐색 흔적을 <code>PATH</code>, <code>SYSCALL</code>, <code>PROCTITLE</code> 이벤트로 확인한다.</td></tr>
+<tr><td><a href="https://attack.mitre.org/techniques/T1552/001/">T1552.001 Unsecured Credentials: Credentials In Files</a></td><td><code>.env</code>, app 설정 파일, compose 파일 등 credential 후보 파일에 대한 read 접근을 확인한다.</td></tr>
+<tr><td><a href="https://attack.mitre.org/techniques/T1074/001/">T1074.001 Data Staged: Local Data Staging</a></td><td>수집 데이터를 임시 경로에 모으거나 archive로 묶는 과정에서 발생하는 파일 생성, 읽기, 쓰기 이벤트를 확인한다.</td></tr>
+</tbody></table></div>
+<h2 id="탐지-포인트">탐지 포인트</h2>
+<div class="table-wrap wide-table">
+<table>
+<thead><tr><th>Technique</th><th>관찰할 행위</th><th>주요 필드</th></tr></thead>
+<tbody>
+<tr><td>T1083 File and Directory Discovery</td><td><code>deploy</code> 계정이 SSH 이후 <code>/opt/spacebar-booking</code>, <code>nginx/</code>, <code>booking-api/</code>, <code>/var/log/spacebar-booking</code>을 탐색한다. 실제 공격자는 <code>ls</code>, <code>find</code>, <code>pwd</code>, <code>docker ps</code>, <code>docker compose ps</code>처럼 서비스 구조와 실행 상태를 확인하는 명령을 함께 사용한다.</td><td><code>auditd.log.key</code>, <code>auditd.log.name</code>, <code>process.executable</code>, <code>process.args</code></td></tr>
+<tr><td>T1552.001 Credentials in Files</td><td><code>.env</code>, <code>docker-compose.yml</code>, app 설정 파일에서 <code>POSTGRES</code>, <code>DB</code>, <code>PASSWORD</code>, <code>TOKEN</code> 같은 키워드를 확인한다. 단순 파일 read 하나만으로 단정하지 않고, SSH 직후 탐색 흐름과 함께 본다.</td><td><code>auditd.log.name</code>, <code>process.executable</code>, <code>process.args</code>, <code>user.name</code></td></tr>
+<tr><td>T1074.001 Local Data Staging</td><td><code>/tmp/sb01-stage</code> 또는 <code>/var/tmp</code>에 결과 파일을 만들고 <code>tar</code>, <code>gzip</code>, <code>zip</code> 등으로 묶는다. DB 조회 직후 archive 생성이 이어지면 우선순위가 높다.</td><td><code>auditd.log.key</code>, <code>auditd.log.name</code>, <code>process.executable</code>, <code>file.path</code></td></tr>
+<tr><td>T1048.002 Exfiltration Over Alternative Protocol</td><td>archive 생성 직후 <code>scp</code>, <code>sftp</code>, <code>curl</code>, <code>wget</code> 등 정상 프로토콜 기반 전송 도구가 실행되는지 확인한다. VPC Flow Log의 App 서버 outbound 22/443 흐름과 함께 봐야 한다.</td><td><code>auditd.log.key</code>, <code>process.executable</code>, <code>process.args</code>, <code>destination.ip</code></td></tr>
+</tbody></table></div>
+      <footer class="footer">
+        Spacebar Project. This campaign log page is scoped to SB-01.
+      </footer>
+    </main>
+  </div>
+</body>
+</html>

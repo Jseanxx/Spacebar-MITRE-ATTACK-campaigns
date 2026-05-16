@@ -5,6 +5,7 @@ const root = path.resolve(__dirname, "..");
 const contentDir = path.join(root, "content", "campaigns");
 const detectionDir = path.join(root, "content", "detections");
 const logCatalogDir = path.join(root, "content", "log-catalog");
+const campaignLogDir = path.join(root, "content", "campaign-logs");
 const outDir = path.join(root, "campaigns");
 const logsOutDir = path.join(root, "logs");
 const assetHref = "/assets/campaign.css";
@@ -71,6 +72,24 @@ function renderInline(text) {
     .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');
 }
 
+function createLogLookup(logs) {
+  return new Map(logs.map((log) => [log.data.id, log]));
+}
+
+function replaceLogShortcodes(source, campaignId, logs, format = "markdown") {
+  const lookup = createLogLookup(logs);
+  return source.replace(/\[\[([A-Z0-9-]+)\]\]/g, (_match, id) => {
+    if (!lookup.has(id)) {
+      return format === "html"
+        ? `<span class="tag">${escapeHtml(id)} missing</span>`
+        : `${id} missing`;
+    }
+
+    const href = `/campaigns/${campaignId}/logs/${id}/`;
+    return format === "html" ? `<a href="${href}">${escapeHtml(id)}</a>` : `[${id}](${href})`;
+  });
+}
+
 function renderMetadataGrid(rows) {
   const body = rows
     .map(([label, value]) => {
@@ -108,6 +127,169 @@ function headingId(text) {
   };
   const key = text.trim().toLowerCase();
   return known[key] || key.replace(/[^a-z0-9\uAC00-\uD7A3]+/gi, "-").replace(/^-|-$/g, "").toLowerCase();
+}
+
+const tacticOrder = [
+  "Reconnaissance",
+  "Resource Development",
+  "Initial Access",
+  "Execution",
+  "Persistence",
+  "Privilege Escalation",
+  "Defense Evasion",
+  "Credential Access",
+  "Discovery",
+  "Lateral Movement",
+  "Collection",
+  "Command and Control",
+  "Exfiltration",
+  "Impact",
+];
+
+const techniqueTactics = {
+  T1592: "Reconnaissance",
+  T1552: "Credential Access",
+  "T1552.001": "Credential Access",
+  "T1552.004": "Credential Access",
+  T1078: "Initial Access",
+  T1190: "Initial Access",
+  T1213: "Collection",
+  "T1213.006": "Collection",
+  T1021: "Lateral Movement",
+  "T1021.004": "Lateral Movement",
+  T1083: "Discovery",
+  T1074: "Collection",
+  "T1074.001": "Collection",
+  T1048: "Exfiltration",
+  "T1048.002": "Exfiltration",
+  "T1059.004": "Execution",
+  "T1059.006": "Execution",
+  T1005: "Collection",
+  T1105: "Command and Control",
+  T1110: "Credential Access",
+  T1098: "Persistence",
+  T1562: "Defense Evasion",
+  T1595: "Reconnaissance",
+  T1041: "Exfiltration",
+};
+
+function attackTechniqueHref(id) {
+  const parts = id.split(".");
+  return `https://attack.mitre.org/techniques/${parts.join("/")}/`;
+}
+
+function extractTechniqueRows(markdown) {
+  const lines = markdown.split(/\r?\n/);
+  const headingIndex = lines.findIndex((line) => line.trim().toLowerCase() === "## techniques used");
+  if (headingIndex === -1) return [];
+
+  for (let i = headingIndex + 1; i < lines.length - 1; i += 1) {
+    const current = lines[i].trim();
+    const next = lines[i + 1].trim();
+    if (/^\|.+\|$/.test(current) && /^\|?[\s:\-|]+\|?$/.test(next)) {
+      const headers = splitTableRow(current).map((header) => header.trim().toLowerCase());
+      const rows = [];
+      i += 2;
+      while (i < lines.length && /^\|.+\|$/.test(lines[i].trim())) {
+        const cells = splitTableRow(lines[i]);
+        const row = Object.fromEntries(headers.map((header, index) => [header, cells[index] || ""]));
+        rows.push({
+          name: row.name || row.technique || "",
+          id: row.id || "",
+          use: row.use || row["use in demo"] || row["use in campaign"] || "",
+          logs: row["primary logs"] || "",
+        });
+        i += 1;
+      }
+      return rows.filter((row) => row.id && row.name);
+    }
+  }
+
+  return [];
+}
+
+function renderMatrixPanel(techniques, campaignId) {
+  const byTactic = new Map(tacticOrder.map((tactic) => [tactic, []]));
+  techniques.forEach((technique) => {
+    const tactic = techniqueTactics[technique.id] || "Collection";
+    if (!byTactic.has(tactic)) byTactic.set(tactic, []);
+    byTactic.get(tactic).push(technique);
+  });
+
+  return `<section id="matrix" class="view-panel">
+  <h2>Matrix View</h2>
+  <div class="matrix-scroll">
+    <section class="attack-matrix" aria-label="${escapeHtml(campaignId)} ATT&CK matrix">
+${tacticOrder
+  .map((tactic) => {
+    const cards = byTactic.get(tactic) || [];
+    const body = cards.length
+      ? cards
+          .map(
+            (technique) => `        <div class="technique-card used"><strong><a href="${attackTechniqueHref(
+              technique.id
+            )}" target="_blank" rel="noopener noreferrer"><code>${escapeHtml(technique.id)}</code></a> ${escapeHtml(
+              technique.name
+            )}</strong><span>${escapeHtml(technique.use)}</span></div>`
+          )
+          .join("\n")
+      : `        <div class="technique-card"><strong>No ${escapeHtml(campaignId)} Technique</strong><span>현재 캠페인에서 이 tactic에 매핑된 Technique 없음</span></div>`;
+    return `      <div class="tactic">
+        <div class="tactic-header">${escapeHtml(tactic)}</div>
+${body}
+      </div>`;
+  })
+  .join("\n")}
+    </section>
+  </div>
+</section>`;
+}
+
+function renderCampaignLogsPanel(campaign, logs) {
+  return `<section id="campaign-logs" class="view-panel">
+  <h2>${escapeHtml(campaign.data.id)} Campaign Logs</h2>
+  <p class="summary">이 캠페인에서 현재 검증하거나 작성 중인 로그 상세 페이지를 한눈에 확인한다.</p>
+  <div class="cards">
+${logs
+  .map(
+    (log) => `    <article class="card">
+      <h3><a href="/campaigns/${campaign.data.id}/logs/${log.data.id}/">${escapeHtml(log.data.id)} ${escapeHtml(
+      log.data.name
+    )}</a></h3>
+      <p>${escapeHtml(log.data.description || "")}</p>
+      <div class="tag-row">
+        ${(log.data.techniques || "")
+          .split(",")
+          .map((item) => item.trim())
+          .filter(Boolean)
+          .map((item) => `<span class="tag">${escapeHtml(item)}</span>`)
+          .join("\n        ")}
+      </div>
+    </article>`
+  )
+  .join("\n")}
+  </div>
+</section>`;
+}
+
+function enhanceCampaignViews(html, campaign, logs) {
+  if (!logs.length || html.includes('class="view-switch"')) return html;
+  const techniques = extractTechniqueRows(campaign.body);
+  if (!techniques.length) return html;
+
+  const h2Pattern = /<h2 id="techniques-used">Techniques Used<\/h2>\s*<div class="table-wrap wide-table">[\s\S]*?<\/tbody><\/table><\/div>/;
+  const match = html.match(h2Pattern);
+  if (!match) return html;
+
+  const tableSection = `<section id="table" class="view-panel active">
+${match[0]}
+</section>`;
+  const switchHtml = `<div class="view-switch" role="tablist" aria-label="${escapeHtml(campaign.data.id)} campaign views">
+  <button class="active" type="button" data-view="table">Table View</button>
+  <button type="button" data-view="matrix">Matrix View</button>
+  <button type="button" data-view="campaign-logs">Campaign Logs</button>
+</div>`;
+  return html.replace(match[0], `${switchHtml}\n${tableSection}\n${renderMatrixPanel(techniques, campaign.data.id)}\n${renderCampaignLogsPanel(campaign, logs)}`);
 }
 
 function markdownToHtml(markdown) {
@@ -333,13 +515,66 @@ function readContentCollection(dir, pattern, slugFactory) {
     });
 }
 
-function getCampaignLogs(detection, logs) {
-  if (!detection) return [];
-  return logs.filter((log) => detection.body.includes(log.data.id));
+function readCampaignLogCollections(campaigns) {
+  const byCampaign = new Map(campaigns.map((campaign) => [campaign.data.id, []]));
+  if (!fs.existsSync(campaignLogDir)) return byCampaign;
+
+  fs.readdirSync(campaignLogDir, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory() && byCampaign.has(entry.name))
+    .forEach((entry) => {
+      const campaignId = entry.name;
+      const dir = path.join(campaignLogDir, campaignId);
+      const logs = fs
+        .readdirSync(dir)
+        .filter((file) => /^[A-Z0-9-]+\.md$/.test(file))
+        .sort()
+        .map((file) => {
+          const source = fs.readFileSync(path.join(dir, file), "utf8");
+          const parsed = parseFrontmatter(source, file);
+          return {
+            campaignId,
+            file,
+            slug: file.replace(/\.md$/, "/"),
+            ...parsed,
+          };
+        });
+      byCampaign.set(campaignId, logs);
+    });
+
+  return byCampaign;
+}
+
+function getReferencedCampaignLogs(campaign, logs) {
+  if (!campaign || !logs?.length) return [];
+  const ids = [...campaign.body.matchAll(/\[\[([A-Z0-9-]+)\]\]/g)].map((match) => match[1]);
+  const uniqueIds = [...new Set(ids)];
+  const lookup = createLogLookup(logs);
+  return uniqueIds.map((id) => lookup.get(id)).filter(Boolean);
+}
+
+function getLegacyCampaignLogs(source, logs) {
+  if (!source) return [];
+  return logs.filter((log) => source.body.includes(log.data.id));
+}
+
+function mergeCampaignLogSources(campaign, detection) {
+  return {
+    body: [campaign?.body || "", detection?.body || ""].join("\n"),
+  };
 }
 
 function renderSidebar(campaigns, currentId, options = {}) {
-  const { detectionSlug, logIndexHref = "/logs/", campaignLogsHref } = options;
+  const { logIndexHref = "/logs/", campaignLogsHref } = options;
+  const logLinks =
+    campaignLogsHref || logIndexHref
+      ? `      <div class="sidebar-block sidebar-sections">
+        <div class="sidebar-title">Logs</div>
+        <nav class="sidebar-links">
+          ${campaignLogsHref ? `<a class="sidebar-link" href="${campaignLogsHref}">Campaign Logs</a>` : ""}
+          <a class="sidebar-link" href="${logIndexHref}">Global Log Catalog</a>
+        </nav>
+      </div>`
+      : "";
   return `
     <aside class="campaign-sidebar" aria-label="Campaign navigation">
       <div class="sidebar-block">
@@ -353,17 +588,7 @@ function renderSidebar(campaigns, currentId, options = {}) {
             .join("\n          ")}
         </nav>
       </div>
-      <div class="sidebar-block sidebar-sections">
-        <div class="sidebar-title">On This Page</div>
-        <nav class="sidebar-links">
-          ${detectionSlug ? `<a class="sidebar-link" href="/campaigns/${detectionSlug}">Detection Map</a>` : ""}
-          ${campaignLogsHref ? `<a class="sidebar-link" href="${campaignLogsHref}">Campaign Logs</a>` : ""}
-          <a class="sidebar-link" href="#techniques-used">Techniques Used</a>
-          <a class="sidebar-link" href="#software">Software</a>
-          <a class="sidebar-link" href="#references">References</a>
-          <a class="sidebar-link" href="${logIndexHref}">Global Log Catalog</a>
-        </nav>
-      </div>
+${logLinks}
     </aside>`;
 }
 
@@ -384,15 +609,17 @@ function renderHeader(title, cssHref = assetHref, logo = logoSrc) {
   </header>`;
 }
 
-function renderCampaignPage(campaigns, campaign, detectionByCampaign = new Map()) {
+function renderCampaignPage(campaigns, campaign, campaignLogsByCampaign = new Map()) {
   const { data, body } = campaign;
-  const bodyHtml = normalizeInternalLinks(wrapCampaignHero(data.format === "html" ? body : markdownToHtml(body)), data.id);
-  const detectionSlug = detectionByCampaign.get(data.id)?.slug;
-  const campaignLogsHref = detectionSlug ? `/campaigns/${data.id}/logs/` : null;
+  const logs = campaignLogsByCampaign.get(data.id) || [];
+  const resolvedBody = replaceLogShortcodes(body, data.id, logs, data.format === "html" ? "html" : "markdown");
+  let bodyHtml = normalizeInternalLinks(wrapCampaignHero(data.format === "html" ? resolvedBody : markdownToHtml(resolvedBody)), data.id);
+  bodyHtml = enhanceCampaignViews(bodyHtml, campaign, logs);
+  const campaignLogsHref = campaignLogsByCampaign.get(data.id)?.length ? `/campaigns/${data.id}/logs/` : null;
   return `${renderHeader(`${data.name} | Spacebar Campaigns`)}
 
   <div class="page-shell">
-${renderSidebar(campaigns, data.id, { detectionSlug, campaignLogsHref })}
+${renderSidebar(campaigns, data.id, { campaignLogsHref })}
     <main class="page campaign-content">
       <div class="breadcrumbs"><a href="/campaigns/">Home</a> / <a href="/campaigns/">Campaigns</a> / <span>${escapeHtml(data.name)}</span></div>
 ${bodyHtml}
@@ -402,6 +629,17 @@ ${bodyHtml}
     </main>
   </div>
   <script>
+    document.querySelectorAll("[data-view]").forEach((button) => {
+      button.addEventListener("click", () => {
+        const target = button.dataset.view;
+        const switcher = button.closest(".view-switch");
+        if (switcher) {
+          switcher.querySelectorAll("[data-view]").forEach((item) => item.classList.toggle("active", item === button));
+        }
+        document.querySelectorAll(".view-panel").forEach((panel) => panel.classList.toggle("active", panel.id === target));
+      });
+    });
+
     const techFilter = document.querySelector("#techFilter");
     const techRows = document.querySelectorAll("#techTable tbody tr");
 
@@ -448,7 +686,6 @@ function renderCampaignLogSidebar(campaign, logs, currentId = null) {
         <div class="sidebar-title">${escapeHtml(campaign.data.id)} Logs</div>
         <nav class="sidebar-links">
           <a class="sidebar-link" href="/campaigns/${campaign.data.id}/">Campaign Page</a>
-          <a class="sidebar-link" href="/campaigns/${campaign.data.id}/detection-map/">Detection Map</a>
           <a class="sidebar-link${currentId ? "" : " active"}" href="/campaigns/${campaign.data.id}/logs/">Campaign Logs</a>
           ${logs
             .map((log) => {
@@ -513,10 +750,6 @@ function renderCampaignLogPage(campaign, logs, log) {
 ${renderCampaignLogSidebar(campaign, logs, data.id)}
     <main class="page campaign-content">
       <div class="breadcrumbs"><a href="/campaigns/">Home</a> / <a href="/campaigns/${campaign.data.id}/">${escapeHtml(campaign.data.name)}</a> / <a href="/campaigns/${campaign.data.id}/logs/">Campaign Logs</a> / <span>${escapeHtml(data.id)}</span></div>
-      <div class="concept-banner">
-        <b>Campaign-scoped Log</b>
-        <span>이 페이지는 ${escapeHtml(campaign.data.id)} 기준으로 보는 로그 설명이다. 공통 원본은 <a href="/logs/${escapeHtml(data.id)}/">Global Log Catalog</a>에서도 확인할 수 있다.</span>
-      </div>
 ${bodyHtml}
       <footer class="footer">
         Spacebar Project. This campaign log page is scoped to ${escapeHtml(campaign.data.id)}.
@@ -637,15 +870,11 @@ function renderIndex(campaigns, detectionByCampaign = new Map()) {
         <tbody>
 ${campaigns
   .map((campaign) => {
-    const detection = detectionByCampaign.get(campaign.data.id);
-    const ownerCell = detection
-      ? `${escapeHtml(campaign.data.owner || "")}<br><a href="${detection.slug}">Detection Map</a>`
-      : escapeHtml(campaign.data.owner || "");
     return `          <tr>
             <td class="id-cell">${escapeHtml(campaign.data.id)}</td>
             <td><a href="${campaign.slug}">${escapeHtml(campaign.data.name)}</a></td>
             <td>${escapeHtml(campaign.data.description || "")}</td>
-            <td>${ownerCell}</td>
+            <td>${escapeHtml(campaign.data.owner || "")}</td>
           </tr>`;
   })
   .join("\n")}
@@ -667,11 +896,23 @@ function main() {
   const logs = readContentCollection(logCatalogDir, /^[A-Z]+-\d+\.md$/, (file) =>
     file.replace(/\.md$/, "/")
   );
+  const allCampaignLogsByCampaign = readCampaignLogCollections(campaigns);
+  const campaignLogsByCampaign = new Map(
+    campaigns.map((campaign) => {
+      const campaignSpecificLogs = allCampaignLogsByCampaign.get(campaign.data.id) || [];
+      if (campaignSpecificLogs.length) {
+        return [campaign.data.id, getReferencedCampaignLogs(campaign, campaignSpecificLogs)];
+      }
+
+      const detection = detectionByCampaign.get(campaign.data.id);
+      return [campaign.data.id, getLegacyCampaignLogs(mergeCampaignLogSources(campaign, detection), logs)];
+    })
+  );
   cleanGeneratedDir(outDir);
   cleanGeneratedDir(logsOutDir);
 
   campaigns.forEach((campaign) => {
-    writeSitePage(outDir, campaign.slug, renderCampaignPage(campaigns, campaign, detectionByCampaign));
+    writeSitePage(outDir, campaign.slug, renderCampaignPage(campaigns, campaign, campaignLogsByCampaign));
   });
 
   detections.forEach((detection) => {
@@ -682,10 +923,8 @@ function main() {
     writeSitePage(logsOutDir, log.slug, renderLogPage(logs, log, detections));
   });
 
-  detections.forEach((detection) => {
-    const campaign = campaigns.find((item) => item.data.id === detection.data.campaign);
-    if (!campaign) return;
-    const campaignLogs = getCampaignLogs(detection, logs);
+  campaigns.forEach((campaign) => {
+    const campaignLogs = campaignLogsByCampaign.get(campaign.data.id) || [];
     if (!campaignLogs.length) return;
 
     const campaignLogsBase = path.join(outDir, campaign.data.id, "logs");

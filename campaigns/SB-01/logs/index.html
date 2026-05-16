@@ -20,9 +20,11 @@
         <div class="sidebar-title">SB-01 Logs</div>
         <nav class="sidebar-links">
           <a class="sidebar-link" href="/campaigns/SB-01/">Campaign Page</a>
-          <a class="sidebar-link" href="/campaigns/SB-01/detection-map/">Detection Map</a>
           <a class="sidebar-link active" href="/campaigns/SB-01/logs/">Campaign Logs</a>
+          <a class="sidebar-link" href="/campaigns/SB-01/logs/LL-002/"><span>LL-002</span>Linux auditd File Access Log</a>
           <a class="sidebar-link" href="/campaigns/SB-01/logs/LL-001/"><span>LL-001</span>Linux SSH Auth Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-01/logs/DBL-001/"><span>DBL-001</span>PostgreSQL Connection Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-01/logs/AWSL-001/"><span>AWSL-001</span>AWS VPC Flow Log</a>
         </nav>
       </div>
       <div class="sidebar-block">
@@ -41,12 +43,37 @@
       </p>
       <div class="cards">
         <article class="card">
+          <h3><a href="/campaigns/SB-01/logs/LL-002/">LL-002 Linux auditd File Access Log</a></h3>
+          <p>SB-01 App 서버의 운영 경로, 설정 파일, 임시 staging 경로 접근을 auditd로 확인하는 로그.</p>
+          <div class="tag-row">
+            <span class="tag">T1083</span>
+            <span class="tag">T1552.001</span>
+            <span class="tag">T1074.001</span>
+            <span class="tag">T1048.002</span>
+          </div>
+        </article>
+        <article class="card">
           <h3><a href="/campaigns/SB-01/logs/LL-001/">LL-001 Linux SSH Auth Log</a></h3>
-          <p>Linux SSH 인증 성공/실패와 세션 이벤트를 확인하는 로그.</p>
+          <p>SB-01 App 서버 SSH 인증 성공/실패와 세션 이벤트를 확인하는 로그.</p>
           <div class="tag-row">
             <span class="tag">T1021.004</span>
             <span class="tag">T1078</span>
-            <span class="tag">T1110</span>
+          </div>
+        </article>
+        <article class="card">
+          <h3><a href="/campaigns/SB-01/logs/DBL-001/">DBL-001 PostgreSQL Connection Log</a></h3>
+          <p>SB-01 DB 서버의 PostgreSQL 접속, 계정, database 접근 흔적을 확인하는 로그.</p>
+          <div class="tag-row">
+            <span class="tag">T1213.006</span>
+            <span class="tag">T1078</span>
+          </div>
+        </article>
+        <article class="card">
+          <h3><a href="/campaigns/SB-01/logs/AWSL-001/">AWSL-001 AWS VPC Flow Log</a></h3>
+          <p>SB-01 VPC 네트워크 흐름에서 App 서버의 외부 전송 정황과 서버 간 통신을 확인하는 로그.</p>
+          <div class="tag-row">
+            <span class="tag">T1048.002</span>
+            <span class="tag">T1021.004</span>
           </div>
         </article>
       </div>
