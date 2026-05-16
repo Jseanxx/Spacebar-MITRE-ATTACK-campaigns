@@ -29,13 +29,9 @@
         </nav>
       </div>
       <div class="sidebar-block sidebar-sections">
-        <div class="sidebar-title">On This Page</div>
+        <div class="sidebar-title">Logs</div>
         <nav class="sidebar-links">
           
-          
-          <a class="sidebar-link" href="#techniques-used">Techniques Used</a>
-          <a class="sidebar-link" href="#software">Software</a>
-          <a class="sidebar-link" href="#references">References</a>
           <a class="sidebar-link" href="/logs/">Global Log Catalog</a>
         </nav>
       </div>
@@ -335,6 +331,17 @@
     </main>
   </div>
   <script>
+    document.querySelectorAll("[data-view]").forEach((button) => {
+      button.addEventListener("click", () => {
+        const target = button.dataset.view;
+        const switcher = button.closest(".view-switch");
+        if (switcher) {
+          switcher.querySelectorAll("[data-view]").forEach((item) => item.classList.toggle("active", item === button));
+        }
+        document.querySelectorAll(".view-panel").forEach((panel) => panel.classList.toggle("active", panel.id === target));
+      });
+    });
+
     const techFilter = document.querySelector("#techFilter");
     const techRows = document.querySelectorAll("#techTable tbody tr");
 
