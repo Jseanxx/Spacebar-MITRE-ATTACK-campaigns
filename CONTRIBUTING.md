@@ -11,21 +11,20 @@
 
 ## 담당 파일
 
-| 담당자 | Campaign Page 1 | Detection Map |
+| 담당자 | Campaign Page | Campaign Logs |
 | --- | --- | --- |
-| 임준서 | `content/campaigns/SB-01.md` | `content/detections/SB-01.md` |
-| 김정현 | `content/campaigns/SB-02.md` | 필요 시 추가 |
-| 신가현 | `content/campaigns/SB-03.md` | 필요 시 추가 |
-| 서현재 | `content/campaigns/SB-04.md` | 필요 시 추가 |
-| 강지윤 | `content/campaigns/SB-05.md` | 필요 시 추가 |
-| 오한결 | `content/campaigns/SB-06.md` | `content/detections/SB-06.md` |
+| 임준서 | `content/campaigns/SB-01.md` | `content/campaign-logs/SB-01/` |
+| 김정현 | `content/campaigns/SB-02.md` | `content/campaign-logs/SB-02/` |
+| 신가현 | `content/campaigns/SB-03.md` | `content/campaign-logs/SB-03/` |
+| 서현재 | `content/campaigns/SB-04.md` | `content/campaign-logs/SB-04/` |
+| 강지윤 | `content/campaigns/SB-05.md` | `content/campaign-logs/SB-05/` |
+| 오한결 | `content/campaigns/SB-06.md` | `content/campaign-logs/SB-06/` |
 
 ## URL 구조
 
 ```text
 /campaigns/                       # Campaign 목록
 /campaigns/SB-01/                 # Campaign Page 1
-/campaigns/SB-01/detection-map/   # Campaign Page 2
 /campaigns/SB-01/logs/            # Campaign에서 쓰는 로그 묶음
 /campaigns/SB-01/logs/LL-001/     # Campaign 기준 로그 상세
 /logs/                            # Log Catalog 목록
