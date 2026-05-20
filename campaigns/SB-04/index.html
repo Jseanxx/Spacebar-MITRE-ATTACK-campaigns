@@ -56,6 +56,7 @@
 <tr><td>Enterprise</td><td>T1552.007</td><td>Unsecured Credentials: Container API Credentials</td><td>캠페인 당시 공격 그룹은 장악한 파드 내부에 automountServiceAccountToken: true 설정으로 인해 기본 마운트되어 있던 ServiceAccount 토큰 및 인증서를 수집했다.</td></tr>
 <tr><td>Enterprise</td><td>T1613</td><td>Container and Resource Discovery</td><td>캠페인 당시 공격 그룹은 획득한 SA 토큰을 사용하여 K8s API 서버와 통신하며, 클러스터 내부망의 서비스 구조와 자신에게 부여된 RBAC 권한을 정찰했다.</td></tr>
 <tr><td>Enterprise</td><td>T1068</td><td>Exploitation for Privilege Escalation</td><td>캠페인 당시 공격 그룹은 제한된 파드 권한의 한계를 극복하기 위해, K8s 워커 노드의 공유 Linux 커널 취약점(CVE-2026-31431, Copy Fail)을 타격하여 파드 내부의 루트(Root) 권한을 확보했다.</td></tr>
+<tr><td>Enterprise</td><td>T1552.001</td><td>Unsecured Credentials: Credentials In Files</td><td>캠페인 당시 공격 그룹은 권한 상승 이후 파드 내부의 <code>/root/.kube/config</code> 파일을 정찰하여 관리자용 Kubernetes 토큰이 포함되어 있음을 확인했다. 이후 해당 토큰을 사용해 kube-system 네임스페이스 내 파드 생성 권한을 확인하고 컨테이너 탈출 단계로 이어갔다.</td></tr>
 <tr><td>Enterprise</td><td>T1611</td><td>Escape to Host</td><td>캠페인 당시 공격 그룹은 과도하게 부여된 kube-system 내 파드 생성 권한을 악용하여, 특권(Privileged) 파드를 강제 생성함으로써 컨테이너 경계를 탈출하고 노드(Node)의 제어권을 탈취했다.</td></tr>
 <tr><td>Enterprise</td><td>T1552.005</td><td>Unsecured Credentials: Cloud Instance Metadata API</td><td>캠페인 당시 공격 그룹은 장악한 K8s 워커 노드에서 AWS 인스턴스 메타데이터 서비스(IMDS)에 접근하여 노드에 할당된 IAM Role(Instance Profile) 자격 증명을 탈취했다.</td></tr>
 <tr><td>Enterprise</td><td>T1213.006</td><td>Data from Information Repositories: Databases</td><td>캠페인 당시 공격 그룹은 탈취한 IAM Role 권한을 이용해 내부망의 RDS 데이터베이스에 접근하고, 타겟 고객 데이터(JSON)를 대량으로 조회 및 유출했다.</td></tr>
