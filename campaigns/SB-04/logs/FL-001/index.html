@@ -85,7 +85,7 @@ gparent=next-server (v ggparent=containerd-shim gggparent=systemd fd.sip=43.201.
 <tr><td><code>rule/message</code></td><td>Falco가 탐지한 행위명</td><td><code>nodefall_shell_spawn [NF1] Shell Spawn</code>, <code>Redirect stdout/stdin to network connection</code></td></tr>
 <tr><td><code>user</code> / <code>user_uid</code></td><td>행위를 수행한 컨테이너 내부 사용자</td><td><code>nextjs</code>, <code>1001</code></td></tr>
 <tr><td><code>proc</code> / <code>process</code></td><td>실행된 프로세스</td><td><code>sh</code>, <code>python3</code></td></tr>
-<tr><td><code>cmd</code> / <code>command</code></td><td>실행된 명령어 또는 인자</td><td><code>sh -c echo ...</code></td><td><code>base64 -d..</code></td><td><code>python3...</code>, <code>python3..</code></td></tr>
+<tr><td><code>cmd</code> / <code>command</code></td><td>실행된 명령어 또는 인자</td><td><code>sh -c echo ...</code></td><td><code>base64 -d</code></td><td><code>python3</code>, <code>python3</code></td></tr>
 <tr><td><code>parent</code></td><td>현재 프로세스를 실행한 부모 프로세스</td><td><code>sh</code></td></tr>
 <tr><td><code>gparent</code></td><td>상위 부모 프로세스</td><td><code>next-server</code></td></tr>
 <tr><td><code>container_name</code></td><td>행위가 발생한 컨테이너 이름</td><td><code>react-app</code></td></tr>
