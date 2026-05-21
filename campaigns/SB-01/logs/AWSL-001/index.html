@@ -21,8 +21,10 @@
         <nav class="sidebar-links">
           <a class="sidebar-link" href="/campaigns/SB-01/">Campaign Page</a>
           <a class="sidebar-link" href="/campaigns/SB-01/logs/">Campaign Logs</a>
+          <a class="sidebar-link" href="/campaigns/SB-01/logs/JL-001/"><span>JL-001</span>Jenkins Access and Controller Log</a>
           <a class="sidebar-link" href="/campaigns/SB-01/logs/LL-002/"><span>LL-002</span>Linux auditd File Access Log</a>
           <a class="sidebar-link" href="/campaigns/SB-01/logs/LL-001/"><span>LL-001</span>Linux SSH Auth Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-01/logs/JL-002/"><span>JL-002</span>Jenkins Build Log</a>
           <a class="sidebar-link" href="/campaigns/SB-01/logs/DBL-001/"><span>DBL-001</span>PostgreSQL Connection Log</a>
           <a class="sidebar-link active" href="/campaigns/SB-01/logs/AWSL-001/"><span>AWSL-001</span>AWS VPC Flow Log</a>
         </nav>
@@ -45,7 +47,9 @@
 <div class="meta-label">Representative Path:</div>
 <div class="meta-value">CloudWatch Logs <code>/aws/vpc/flowlogs/sb01</code></div>
 <div class="meta-label">Collection:</div>
-<div class="meta-value">VPC Flow Logs -&gt; CloudWatch Logs</div>
+<div class="meta-value">VPC Flow Logs -&gt; CloudWatch Logs -&gt; SB-01 collector -&gt; Elasticsearch</div>
+<div class="meta-label">Current Status:</div>
+<div class="meta-value">1차 collector 기반 ELK 적재 및 BAS evidence 검증 완료</div>
 <div class="meta-label">Primary Use:</div>
 <div class="meta-value">App 서버 outbound 전송 정황, Jenkins/App/DB/ELK 간 통신, REJECT 스캔성 트래픽 확인</div>
 </div>
@@ -71,9 +75,10 @@
 <tr><td>AWS</td><td>VPC Flow Logs를 VPC 단위로 생성</td></tr>
 <tr><td>Destination</td><td>CloudWatch Logs로 전송</td></tr>
 <tr><td>Filter</td><td><code>ALL</code>로 설정해 ACCEPT/REJECT 흐름 모두 수집</td></tr>
-<tr><td>분석 위치</td><td>1차 확인은 CloudWatch Logs Insights, 최종 상관분석은 ELK 연동 후보</td></tr>
+<tr><td>1차 collector</td><td>로컬 AWS CLI 기반 수집 스크립트로 최근 Flow Log를 Elasticsearch에 bulk ingest</td></tr>
+<tr><td>분석 위치</td><td>Elasticsearch index <code>sb01-awsl-001-vpc-flowlogs</code></td></tr>
 </tbody></table></div>
-<p>VPC Flow Log는 현재 CloudWatch Logs에서 먼저 확인한다. ELK까지 통합하려면 이후 AWS integration, CloudWatch Logs subscription, Firehose, Lambda forwarder 중 하나로 Elasticsearch에 전송하면 된다.</p>
+<p>현재는 1차 검증을 위해 로컬 AWS CLI collector를 사용한다. 장기 운영형 구성에서는 IAM Role 기반 Filebeat AWS input, Elastic Agent AWS integration, CloudWatch Logs subscription, Firehose, Lambda forwarder 중 하나로 전환한다.</p>
 <h2 id="실제-관측-로그-예시">실제 관측 로그 예시</h2>
 <pre><code>2 142636331738 eni-06aca8e8d42592a24 172.31.4.70 93.184.216.34 45620 443 6 12 15240 1778958200 1778958260 ACCEPT OK</code></pre>
 <p>기본 형식 순서:</p>
@@ -130,6 +135,10 @@
 <tr><td>T1048.002 Exfiltration Over Alternative Protocol</td><td>App 서버 <code>172.31.4.70</code>이 외부 IP의 22 또는 443 포트로 평소보다 큰 outbound traffic을 발생시킨다. <code>LL-002</code>의 archive 생성, <code>scp</code>, <code>curl</code> 실행 직후 발생하면 우선순위가 높다.</td><td><code>srcaddr</code>, <code>dstaddr</code>, <code>dstport</code>, <code>bytes</code>, <code>action</code>, <code>start</code>, <code>end</code></td></tr>
 <tr><td>T1021.004 Remote Services: SSH</td><td>Jenkins <code>172.31.13.239</code>에서 App <code>172.31.4.70</code>의 22 포트로 접속 흐름이 발생한다. 단독으로는 정상 배포일 수 있으므로 <code>LL-001</code>의 계정/시간대와 함께 본다.</td><td><code>srcaddr</code>, <code>dstaddr</code>, <code>dstport</code>, <code>action</code></td></tr>
 </tbody></table></div>
+<h2 id="elk-query-예시">ELK Query 예시</h2>
+<pre><code>source.ip:&quot;172.31.13.239&quot; AND destination.ip:&quot;172.31.4.70&quot; AND destination.port:22 AND event.action:ACCEPT
+source.ip:&quot;172.31.4.70&quot; AND destination.port:(22 OR 443) AND event.action:ACCEPT
+sb01_log_type:vpc_flow AND network.bytes:&gt;100000</code></pre>
       <footer class="footer">
         Spacebar Project. This campaign log page is scoped to SB-01.
       </footer>

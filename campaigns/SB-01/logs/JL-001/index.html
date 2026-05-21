@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SB-01 JL-001 Jenkins Access and Controller Log | Spacebar Campaign Logs</title>
+  <link rel="stylesheet" href="/assets/campaign.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="/campaigns/"><img class="brand-logo" src="/assets/spacebarLogo.png" alt="Spacebar"><span>Spacebar Campaigns</span></a>
+    </div>
+  </header>
+
+  <div class="page-shell">
+
+    <aside class="campaign-sidebar" aria-label="Campaign log navigation">
+      <div class="sidebar-block">
+        <div class="sidebar-title">SB-01 Logs</div>
+        <nav class="sidebar-links">
+          <a class="sidebar-link" href="/campaigns/SB-01/">Campaign Page</a>
+          <a class="sidebar-link" href="/campaigns/SB-01/logs/">Campaign Logs</a>
+          <a class="sidebar-link active" href="/campaigns/SB-01/logs/JL-001/"><span>JL-001</span>Jenkins Access and Controller Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-01/logs/LL-002/"><span>LL-002</span>Linux auditd File Access Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-01/logs/LL-001/"><span>LL-001</span>Linux SSH Auth Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-01/logs/JL-002/"><span>JL-002</span>Jenkins Build Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-01/logs/DBL-001/"><span>DBL-001</span>PostgreSQL Connection Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-01/logs/AWSL-001/"><span>AWSL-001</span>AWS VPC Flow Log</a>
+        </nav>
+      </div>
+      <div class="sidebar-block">
+        <div class="sidebar-title">Global Catalog</div>
+        <nav class="sidebar-links">
+          <a class="sidebar-link" href="/logs/">All Logs</a>
+        </nav>
+      </div>
+    </aside>
+    <main class="page campaign-content">
+      <div class="breadcrumbs"><a href="/campaigns/">Home</a> / <a href="/campaigns/SB-01/">2024 PipelineKey</a> / <a href="/campaigns/SB-01/logs/">Campaign Logs</a> / <span>JL-001</span></div>
+<h1>JL-001 Jenkins Access and Controller Log</h1>
+<div class="meta-grid" aria-label="Campaign metadata">
+<div class="meta-label">Log ID:</div>
+<div class="meta-value">JL-001</div>
+<div class="meta-label">Source:</div>
+<div class="meta-value">SB-01 Jenkins server</div>
+<div class="meta-label">Representative Path:</div>
+<div class="meta-value"><code>/var/lib/docker/volumes/jenkins_jenkins_home/_data/logs/access_log</code>, <code>/var/lib/docker/containers/&lt;container-id&gt;/*-json.log</code></div>
+<div class="meta-label">Collection:</div>
+<div class="meta-value">Filebeat 8.19.15 custom inputs</div>
+<div class="meta-label">Current Status:</div>
+<div class="meta-value">ELK 수집 및 BAS evidence 검증 완료</div>
+<div class="meta-label">Primary Use:</div>
+<div class="meta-value">Jenkins UI/CLI 접근, Jenkins controller 동작, CVE-2024-23897 악용 전후 접근 흔적 확인</div>
+</div>
+<h2 id="공격-행위-요약">공격 행위 요약</h2>
+<p>SB-01에서 공격자는 Jenkins Web UI와 CLI 접근 가능성을 확인하고, 확보한 API Token으로 Jenkins CLI에 인증한다. 이후 Jenkins CLI 파일 읽기 취약점 악용 시도는 Jenkins access log와 controller log에서 HTTP 요청, CLI endpoint 접근, Java CLI client 흔적으로 확인한다.</p>
+<h2 id="로그-발생-위치">로그 발생 위치</h2>
+<div class="table-wrap wide-table">
+<table>
+<thead><tr><th>구분</th><th>위치</th><th>설명</th></tr></thead>
+<tbody>
+<tr><td>Jenkins access log</td><td><code>/var/lib/docker/volumes/jenkins_jenkins_home/_data/logs/access_log</code></td><td>Jenkins Web UI, CLI endpoint 접근 기록</td></tr>
+<tr><td>Jenkins Docker log</td><td><code>/var/lib/docker/containers/&lt;container-id&gt;/*-json.log</code></td><td>Jenkins controller 기동, plugin, 내부 오류 및 controller 이벤트</td></tr>
+<tr><td>Jenkins container</td><td><code>sb-jenkins</code></td><td>Jenkins controller가 Docker container로 실행됨</td></tr>
+</tbody></table></div>
+<h2 id="수집-방식">수집 방식</h2>
+<div class="table-wrap wide-table">
+<table>
+<thead><tr><th>구분</th><th>방식</th></tr></thead>
+<tbody>
+<tr><td>Jenkins access log</td><td>Filebeat filestream <code>sb01-jenkins-access-log</code>로 수집</td></tr>
+<tr><td>Jenkins Docker log</td><td>Filebeat filestream + container parser <code>sb01-jenkins-docker-log</code>로 수집</td></tr>
+<tr><td>ELK 필드</td><td><code>sb01_server: jenkins</code>, <code>sb01_log_type: jenkins_access</code> 또는 <code>jenkins_docker</code></td></tr>
+</tbody></table></div>
+<h2 id="실제-관측-로그-예시">실제 관측 로그 예시</h2>
+<pre><code>172.18.0.1 - - [21/May/2026:14:23:12 +0900] &quot;GET /login HTTP/1.1&quot; 200 1737 &quot;-&quot; &quot;curl/8.5.0&quot;
+127.0.0.1 - - [11/May/2026:19:50:44 +0900] &quot;POST /cli HTTP/1.1&quot; 200 80 &quot;-&quot; &quot;Java/17.0.9&quot;
+2026-05-21 04:57:27.694+0000 [id=24] INFO hudson.lifecycle.Lifecycle#onReady: Jenkins is fully up and running</code></pre>
+<h2 id="주요-필드">주요 필드</h2>
+<div class="table-wrap wide-table">
+<table>
+<thead><tr><th>필드</th><th>의미</th><th>예시</th></tr></thead>
+<tbody>
+<tr><td><code>@timestamp</code></td><td>Filebeat가 해석한 이벤트 시간</td><td><code>2026-05-21T05:23:19.373Z</code></td></tr>
+<tr><td><code>sb01_log_type</code></td><td>SB-01 자체 로그 분류</td><td><code>jenkins_access</code>, <code>jenkins_docker</code></td></tr>
+<tr><td><code>message</code></td><td>원본 Jenkins 로그 라인</td><td><code>POST /cli HTTP/1.1</code></td></tr>
+<tr><td><code>log.file.path</code></td><td>수집된 원본 파일 경로</td><td><code>.../logs/access_log</code></td></tr>
+<tr><td><code>host.name</code></td><td>로그 발생 서버</td><td><code>ip-172-31-13-239</code></td></tr>
+</tbody></table></div>
+<h2 id="커버하는-techniques-used">커버하는 Techniques Used</h2>
+<div class="table-wrap wide-table">
+<table>
+<thead><tr><th>Technique</th><th>Mapping Reason</th></tr></thead>
+<tbody>
+<tr><td><a href="https://attack.mitre.org/techniques/T1592/">T1592 Gather Victim Host Information</a></td><td>Jenkins UI, CLI endpoint, 버전/서비스 노출 여부를 확인하는 접근 흔적을 본다.</td></tr>
+<tr><td><a href="https://attack.mitre.org/techniques/T1078/">T1078 Valid Accounts</a></td><td>API Token 기반 Jenkins CLI 접근이 정상 계정 권한으로 수행됐는지 확인한다.</td></tr>
+<tr><td><a href="https://attack.mitre.org/techniques/T1190/">T1190 Exploit Public-Facing Application</a></td><td>Jenkins CLI 취약점 악용 흐름의 <code>POST /cli</code>, Java CLI client 흔적을 확인한다.</td></tr>
+</tbody></table></div>
+<h2 id="탐지-포인트">탐지 포인트</h2>
+<ol>
+<li>정상 배포 시간대가 아닌 <code>POST /cli</code> 요청이 있는지 확인한다.</li>
+<li>Jenkins CLI user-agent 또는 Java client 접근이 반복되는지 확인한다.</li>
+<li>Jenkins access log의 CLI 접근 직후 <code>JL-002</code> build/workspace 탐색 흔적이 이어지는지 확인한다.</li>
+<li>Jenkins 접근 이후 <code>LL-001</code>에서 App SSH 접속이 발생하는지 pivot한다.</li>
+</ol>
+<h2 id="elk-query-예시">ELK Query 예시</h2>
+<pre><code>sb01_server:jenkins AND sb01_log_type:jenkins_access
+sb01_server:jenkins AND sb01_log_type:jenkins_access AND message:&quot;POST /cli&quot;
+sb01_server:jenkins AND sb01_log_type:jenkins_docker AND message:&quot;Jenkins is fully up and running&quot;</code></pre>
+      <footer class="footer">
+        Spacebar Project. This campaign log page is scoped to SB-01.
+      </footer>
+    </main>
+  </div>
+</body>
+</html>

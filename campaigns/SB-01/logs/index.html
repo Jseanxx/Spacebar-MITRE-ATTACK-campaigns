@@ -21,8 +21,10 @@
         <nav class="sidebar-links">
           <a class="sidebar-link" href="/campaigns/SB-01/">Campaign Page</a>
           <a class="sidebar-link active" href="/campaigns/SB-01/logs/">Campaign Logs</a>
+          <a class="sidebar-link" href="/campaigns/SB-01/logs/JL-001/"><span>JL-001</span>Jenkins Access and Controller Log</a>
           <a class="sidebar-link" href="/campaigns/SB-01/logs/LL-002/"><span>LL-002</span>Linux auditd File Access Log</a>
           <a class="sidebar-link" href="/campaigns/SB-01/logs/LL-001/"><span>LL-001</span>Linux SSH Auth Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-01/logs/JL-002/"><span>JL-002</span>Jenkins Build Log</a>
           <a class="sidebar-link" href="/campaigns/SB-01/logs/DBL-001/"><span>DBL-001</span>PostgreSQL Connection Log</a>
           <a class="sidebar-link" href="/campaigns/SB-01/logs/AWSL-001/"><span>AWSL-001</span>AWS VPC Flow Log</a>
         </nav>
@@ -43,6 +45,15 @@
       </p>
       <div class="cards">
         <article class="card">
+          <h3><a href="/campaigns/SB-01/logs/JL-001/">JL-001 Jenkins Access and Controller Log</a></h3>
+          <p>SB-01 Jenkins Web/CLI 접근과 controller 이벤트를 확인하는 로그.</p>
+          <div class="tag-row">
+            <span class="tag">T1592</span>
+            <span class="tag">T1078</span>
+            <span class="tag">T1190</span>
+          </div>
+        </article>
+        <article class="card">
           <h3><a href="/campaigns/SB-01/logs/LL-002/">LL-002 Linux auditd File Access Log</a></h3>
           <p>SB-01 App 서버의 운영 경로, 설정 파일, 임시 staging 경로 접근을 auditd로 확인하는 로그.</p>
           <div class="tag-row">
@@ -58,6 +69,15 @@
           <div class="tag-row">
             <span class="tag">T1021.004</span>
             <span class="tag">T1078</span>
+          </div>
+        </article>
+        <article class="card">
+          <h3><a href="/campaigns/SB-01/logs/JL-002/">JL-002 Jenkins Build Log</a></h3>
+          <p>SB-01 Jenkins Job/build history에서 배포 대상, workspace, credential 사용 단서를 확인하는 로그.</p>
+          <div class="tag-row">
+            <span class="tag">T1213</span>
+            <span class="tag">T1552.004</span>
+            <span class="tag">T1021.004</span>
           </div>
         </article>
         <article class="card">

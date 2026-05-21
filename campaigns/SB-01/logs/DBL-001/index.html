@@ -21,8 +21,10 @@
         <nav class="sidebar-links">
           <a class="sidebar-link" href="/campaigns/SB-01/">Campaign Page</a>
           <a class="sidebar-link" href="/campaigns/SB-01/logs/">Campaign Logs</a>
+          <a class="sidebar-link" href="/campaigns/SB-01/logs/JL-001/"><span>JL-001</span>Jenkins Access and Controller Log</a>
           <a class="sidebar-link" href="/campaigns/SB-01/logs/LL-002/"><span>LL-002</span>Linux auditd File Access Log</a>
           <a class="sidebar-link" href="/campaigns/SB-01/logs/LL-001/"><span>LL-001</span>Linux SSH Auth Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-01/logs/JL-002/"><span>JL-002</span>Jenkins Build Log</a>
           <a class="sidebar-link active" href="/campaigns/SB-01/logs/DBL-001/"><span>DBL-001</span>PostgreSQL Connection Log</a>
           <a class="sidebar-link" href="/campaigns/SB-01/logs/AWSL-001/"><span>AWSL-001</span>AWS VPC Flow Log</a>
         </nav>
@@ -45,7 +47,9 @@
 <div class="meta-label">Representative Path:</div>
 <div class="meta-value"><code>/var/log/postgresql/postgresql-16-main.log</code></div>
 <div class="meta-label">Collection:</div>
-<div class="meta-value">Filebeat custom input 또는 PostgreSQL module</div>
+<div class="meta-value">Filebeat 8.13.4 custom input</div>
+<div class="meta-label">Current Status:</div>
+<div class="meta-value">ELK 수집 및 BAS evidence 검증 완료</div>
 <div class="meta-label">Primary Use:</div>
 <div class="meta-value">DB 접속 계정, 출발지, database, App 서버의 DB 사용 정황 확인</div>
 </div>
@@ -70,8 +74,8 @@
 <thead><tr><th>구분</th><th>방식</th></tr></thead>
 <tbody>
 <tr><td>DB 서버</td><td>PostgreSQL 로그를 <code>/var/log/postgresql/postgresql-16-main.log</code>에 기록</td></tr>
-<tr><td>ELK</td><td>후속 확장: Filebeat custom input 또는 PostgreSQL module로 수집</td></tr>
-<tr><td>조회 감사</td><td>후속 확장: 짧은 검증 시간 동안 <code>log_statement='all'</code> 또는 pgaudit 적용</td></tr>
+<tr><td>ELK</td><td>Filebeat custom input으로 PostgreSQL 로그와 DB 서버 auth log 수집</td></tr>
+<tr><td>조회 감사</td><td>현재 <code>log_connections=on</code>, <code>log_disconnections=on</code>, <code>log_statement='mod'</code> 기준. SELECT 본문이 필요하면 짧은 검증 시간 동안 <code>log_statement='all'</code> 또는 pgaudit 적용</td></tr>
 </tbody></table></div>
 <p>실무 환경에서 모든 SELECT를 항상 기록하면 로그량과 개인정보 노출 위험이 커질 수 있다. 따라서 운영 기준에서는 pgaudit, 특정 role/database 대상 감사, slow query, 또는 의심 세션 중심 로깅을 우선 고려한다.</p>
 <h2 id="실제-관측-로그-예시">실제 관측 로그 예시</h2>
@@ -109,6 +113,10 @@
 <tr><td>T1213.006 Databases</td><td>App 서버에서 DB 계정으로 <code>spacebar_booking</code>에 접속한다. 후속 감사 설정에서 <code>customers</code>, <code>reservations</code> 조회가 확인되면 우선순위가 높다.</td><td><code>source.ip</code>, <code>user.name</code>, <code>database.name</code>, <code>message</code></td></tr>
 <tr><td>T1078 Valid Accounts</td><td>유효한 DB 계정 <code>booking_app</code>으로 접속하지만, 시간대/출발지/클라이언트 프로그램이 평소 App API 패턴과 다르다.</td><td><code>user.name</code>, <code>source.ip</code>, <code>process.name</code>, <code>event.action</code></td></tr>
 </tbody></table></div>
+<h2 id="elk-query-예시">ELK Query 예시</h2>
+<pre><code>sb01_server:db AND sb01_log_type:postgresql
+sb01_server:db AND sb01_log_type:postgresql AND message:&quot;database=spacebar_booking&quot;
+sb01_server:db AND sb01_log_type:postgresql AND message:&quot;connection authorized&quot;</code></pre>
       <footer class="footer">
         Spacebar Project. This campaign log page is scoped to SB-01.
       </footer>

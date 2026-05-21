@@ -13,6 +13,7 @@ techniques: "TXXXX,TYYYY"
 | Source | 서버 또는 서비스 이름 |
 | Representative Path | `/path/to/log` 또는 CloudWatch 로그 그룹 |
 | Collection | Filebeat, auditd, CloudWatch 등 수집 방식 |
+| Current Status | 수집 전 / 수집 설정 완료 / ELK 검증 완료 |
 | Primary Use | 이 로그로 확인하려는 핵심 행위 |
 
 ## 공격 행위 요약
@@ -57,3 +58,9 @@ techniques: "TXXXX,TYYYY"
 
 1. 정상 행위와 비교했을 때 이상한 계정, 시간대, 출발지, 대상인지 확인한다.
 2. 같은 시간대의 다른 로그와 연결해 공격 흐름이 이어지는지 확인한다.
+
+## ELK Query 예시
+
+```text
+sbxx_log_type:"example" AND message:"keyword"
+```

@@ -12,7 +12,8 @@ techniques: "T1048.002,T1021.004"
 | Log ID | AWSL-001 |
 | Source | AWS VPC `vpc-027c43d14ecc78c52` |
 | Representative Path | CloudWatch Logs `/aws/vpc/flowlogs/sb01` |
-| Collection | VPC Flow Logs -> CloudWatch Logs |
+| Collection | VPC Flow Logs -> CloudWatch Logs -> SB-01 collector -> Elasticsearch |
+| Current Status | 1차 collector 기반 ELK 적재 및 BAS evidence 검증 완료 |
 | Primary Use | App 서버 outbound 전송 정황, Jenkins/App/DB/ELK 간 통신, REJECT 스캔성 트래픽 확인 |
 
 ## 공격 행위 요약
@@ -37,9 +38,10 @@ SB-01에서 공격자는 App 서버에서 고객 예약 데이터를 archive로 
 | AWS | VPC Flow Logs를 VPC 단위로 생성 |
 | Destination | CloudWatch Logs로 전송 |
 | Filter | `ALL`로 설정해 ACCEPT/REJECT 흐름 모두 수집 |
-| 분석 위치 | 1차 확인은 CloudWatch Logs Insights, 최종 상관분석은 ELK 연동 후보 |
+| 1차 collector | 로컬 AWS CLI 기반 수집 스크립트로 최근 Flow Log를 Elasticsearch에 bulk ingest |
+| 분석 위치 | Elasticsearch index `sb01-awsl-001-vpc-flowlogs` |
 
-VPC Flow Log는 현재 CloudWatch Logs에서 먼저 확인한다. ELK까지 통합하려면 이후 AWS integration, CloudWatch Logs subscription, Firehose, Lambda forwarder 중 하나로 Elasticsearch에 전송하면 된다.
+현재는 1차 검증을 위해 로컬 AWS CLI collector를 사용한다. 장기 운영형 구성에서는 IAM Role 기반 Filebeat AWS input, Elastic Agent AWS integration, CloudWatch Logs subscription, Firehose, Lambda forwarder 중 하나로 전환한다.
 
 ## 실제 관측 로그 예시
 
@@ -109,3 +111,11 @@ version account-id interface-id srcaddr dstaddr srcport dstport protocol packets
 | --- | --- | --- |
 | T1048.002 Exfiltration Over Alternative Protocol | App 서버 `172.31.4.70`이 외부 IP의 22 또는 443 포트로 평소보다 큰 outbound traffic을 발생시킨다. `LL-002`의 archive 생성, `scp`, `curl` 실행 직후 발생하면 우선순위가 높다. | `srcaddr`, `dstaddr`, `dstport`, `bytes`, `action`, `start`, `end` |
 | T1021.004 Remote Services: SSH | Jenkins `172.31.13.239`에서 App `172.31.4.70`의 22 포트로 접속 흐름이 발생한다. 단독으로는 정상 배포일 수 있으므로 `LL-001`의 계정/시간대와 함께 본다. | `srcaddr`, `dstaddr`, `dstport`, `action` |
+
+## ELK Query 예시
+
+```text
+source.ip:"172.31.13.239" AND destination.ip:"172.31.4.70" AND destination.port:22 AND event.action:ACCEPT
+source.ip:"172.31.4.70" AND destination.port:(22 OR 443) AND event.action:ACCEPT
+sb01_log_type:vpc_flow AND network.bytes:>100000
+```

@@ -21,8 +21,10 @@
         <nav class="sidebar-links">
           <a class="sidebar-link" href="/campaigns/SB-01/">Campaign Page</a>
           <a class="sidebar-link" href="/campaigns/SB-01/logs/">Campaign Logs</a>
+          <a class="sidebar-link" href="/campaigns/SB-01/logs/JL-001/"><span>JL-001</span>Jenkins Access and Controller Log</a>
           <a class="sidebar-link" href="/campaigns/SB-01/logs/LL-002/"><span>LL-002</span>Linux auditd File Access Log</a>
           <a class="sidebar-link active" href="/campaigns/SB-01/logs/LL-001/"><span>LL-001</span>Linux SSH Auth Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-01/logs/JL-002/"><span>JL-002</span>Jenkins Build Log</a>
           <a class="sidebar-link" href="/campaigns/SB-01/logs/DBL-001/"><span>DBL-001</span>PostgreSQL Connection Log</a>
           <a class="sidebar-link" href="/campaigns/SB-01/logs/AWSL-001/"><span>AWSL-001</span>AWS VPC Flow Log</a>
         </nav>
@@ -46,6 +48,8 @@
 <div class="meta-value"><code>/var/log/auth.log</code></div>
 <div class="meta-label">Collection:</div>
 <div class="meta-value">Filebeat 8.13.4 custom input (<code>/etc/filebeat/filebeat.yml</code>)</div>
+<div class="meta-label">Current Status:</div>
+<div class="meta-value">ELK 수집 및 BAS evidence 검증 완료</div>
 <div class="meta-label">Primary Use:</div>
 <div class="meta-value">SSH 인증 성공/실패, 세션 시작/종료 확인</div>
 </div>
@@ -66,17 +70,12 @@
 <thead><tr><th>구분</th><th>방식</th></tr></thead>
 <tbody>
 <tr><td>App 서버</td><td>Filebeat 8.13.4 custom input으로 <code>/var/log/auth.log</code> 직접 수집</td></tr>
-<tr><td>Jenkins 서버</td><td>후속 확장: Filebeat custom input으로 Jenkins build log 수집</td></tr>
-<tr><td>AWS</td><td>후속 확장: VPC Flow Log 수집</td></tr>
+<tr><td>Jenkins 서버</td><td>Filebeat custom input으로 Jenkins access/build log 수집</td></tr>
+<tr><td>AWS</td><td>VPC Flow Log를 CloudWatch 및 SB-01 collector를 통해 ELK로 수집</td></tr>
 </tbody></table></div>
 <h2 id="실제-관측-로그-예시">실제 관측 로그 예시</h2>
 <pre><code>May 08 13:25:41 sb01-app sshd[2841]: Accepted publickey for deploy from 10.10.40.21 port 51244 ssh2: RSA SHA256:...
 May 08 13:25:41 sb01-app sshd[2841]: pam_unix(sshd:session): session opened for user deploy(uid=1001) by (uid=0)
-May 08 13:27:02 sb01-app sshd[2841]: pam_unix(sshd:session): session closed for user deploy</code></pre>
-<pre><code>May 08 13:25:41 sb01-app sshd[2841]: Accepted publickey for deploy from 10.10.40.21 port 51244 ssh2: RSA SHA256:...
-May 08 13:25:41 sb01-app sshd[2841]: pam_unix(sshd:session):
-
-session opened for user deploy(uid=1001) by (uid=0)
 May 08 13:27:02 sb01-app sshd[2841]: pam_unix(sshd:session): session closed for user deploy</code></pre>
 <h2 id="주요-필드">주요 필드</h2>
 <div class="table-wrap wide-table">
@@ -105,6 +104,9 @@ May 08 13:27:02 sb01-app sshd[2841]: pam_unix(sshd:session): session closed for 
 <li>Jenkins 정상 배포 시간대와 SSH 접속 시간이 일치하는지 비교한다.</li>
 <li>SSH 성공 직후 <code>LL-002</code>에서 App 운영 경로 접근이나 staging 경로 생성이 이어졌는지 확인한다.</li>
 </ol>
+<h2 id="elk-query-예시">ELK Query 예시</h2>
+<pre><code>host.name:&quot;ip-172-31-4-70&quot; AND log.file.path:&quot;/var/log/auth.log&quot; AND message:&quot;Accepted publickey for deploy&quot; AND message:&quot;172.31.13.239&quot;
+sb01_server:app AND sb01_log_type:linux_auth AND message:&quot;Accepted publickey for deploy&quot;</code></pre>
       <footer class="footer">
         Spacebar Project. This campaign log page is scoped to SB-01.
       </footer>

@@ -76,12 +76,12 @@
 <table>
 <thead><tr><th>Name</th><th>ID</th><th>Use</th><th>Primary Logs</th></tr></thead>
 <tbody>
-<tr><td>Gather Victim Host Information</td><td>T1592</td><td>2024 PipelineKey 당시 BreadKimchi는 침해된 개발자 단말에서 내부 개발망의 Jenkins 응답 헤더, CLI jar 노출 여부, 서비스 포트, Jenkins UI 정보를 수집하여 CI/CD 서버의 역할과 취약 버전 여부를 식별했다.</td><td>작성 예정</td></tr>
+<tr><td>Gather Victim Host Information</td><td>T1592</td><td>2024 PipelineKey 당시 BreadKimchi는 침해된 개발자 단말에서 내부 개발망의 Jenkins 응답 헤더, CLI jar 노출 여부, 서비스 포트, Jenkins UI 정보를 수집하여 CI/CD 서버의 역할과 취약 버전 여부를 식별했다.</td><td><a href="/campaigns/SB-01/logs/JL-001/">JL-001</a></td></tr>
 <tr><td>Unsecured Credentials: Credentials In Files</td><td>T1552.001</td><td>2024 PipelineKey 당시 BreadKimchi는 침해된 개발자 단말의 자동화 스크립트와 설정 파일에 남아 있던 Jenkins API Token을 수집했다. App 서버 이동 이후에는 애플리케이션 설정 파일에서 DB credential 후보를 확인했다.</td><td><a href="/campaigns/SB-01/logs/LL-002/">LL-002</a></td></tr>
-<tr><td>Valid Accounts</td><td>T1078</td><td>2024 PipelineKey 당시 BreadKimchi는 수집한 Jenkins API Token을 이용해 Jenkins CLI에 인증하고, 개발자 계정 권한으로 Jenkins controller와 상호작용했다.</td><td>작성 예정</td></tr>
-<tr><td>Exploit Public-Facing Application</td><td>T1190</td><td>2024 PipelineKey 당시 BreadKimchi는 Jenkins CLI의 CVE-2024-23897 파일 읽기 취약점을 악용하여 Jenkins controller 내부 파일을 읽었다.</td><td>작성 예정</td></tr>
-<tr><td>Data from Information Repositories</td><td>T1213</td><td>2024 PipelineKey 당시 BreadKimchi는 Jenkins를 CI/CD 정보 저장소로 활용하여 배포 대상, Job 실행 이력, workspace, credential metadata 등 App 서버 접근에 필요한 단서를 조사했다.</td><td>작성 예정</td></tr>
-<tr><td>Unsecured Credentials: Private Keys</td><td>T1552.004</td><td>2024 PipelineKey 당시 BreadKimchi는 Jenkins 내부의 배포 credential 및 관련 단서에서 App 서버 접근에 사용되는 SSH private key를 수집했다.</td><td>작성 예정</td></tr>
+<tr><td>Valid Accounts</td><td>T1078</td><td>2024 PipelineKey 당시 BreadKimchi는 수집한 Jenkins API Token을 이용해 Jenkins CLI에 인증하고, 개발자 계정 권한으로 Jenkins controller와 상호작용했다.</td><td><a href="/campaigns/SB-01/logs/JL-001/">JL-001</a>, <a href="/campaigns/SB-01/logs/LL-001/">LL-001</a></td></tr>
+<tr><td>Exploit Public-Facing Application</td><td>T1190</td><td>2024 PipelineKey 당시 BreadKimchi는 Jenkins CLI의 CVE-2024-23897 파일 읽기 취약점을 악용하여 Jenkins controller 내부 파일을 읽었다.</td><td><a href="/campaigns/SB-01/logs/JL-001/">JL-001</a></td></tr>
+<tr><td>Data from Information Repositories</td><td>T1213</td><td>2024 PipelineKey 당시 BreadKimchi는 Jenkins를 CI/CD 정보 저장소로 활용하여 배포 대상, Job 실행 이력, workspace, credential metadata 등 App 서버 접근에 필요한 단서를 조사했다.</td><td><a href="/campaigns/SB-01/logs/JL-002/">JL-002</a></td></tr>
+<tr><td>Unsecured Credentials: Private Keys</td><td>T1552.004</td><td>2024 PipelineKey 당시 BreadKimchi는 Jenkins 내부의 배포 credential 및 관련 단서에서 App 서버 접근에 사용되는 SSH private key를 수집했다.</td><td><a href="/campaigns/SB-01/logs/JL-002/">JL-002</a></td></tr>
 <tr><td>Remote Services: SSH</td><td>T1021.004</td><td>2024 PipelineKey 당시 BreadKimchi는 Jenkins에서 확보한 배포 키와 deploy 계정을 사용하여 SSH를 통해 App 서버에 접근했다.</td><td><a href="/campaigns/SB-01/logs/LL-001/">LL-001</a></td></tr>
 <tr><td>File and Directory Discovery</td><td>T1083</td><td>2024 PipelineKey 당시 BreadKimchi는 App 서버의 애플리케이션 경로, 컨테이너 구성, 환경 설정 파일, DB 연결 정보를 탐색했다.</td><td><a href="/campaigns/SB-01/logs/LL-002/">LL-002</a></td></tr>
 <tr><td>Data from Information Repositories: Databases</td><td>T1213.006</td><td>2024 PipelineKey 당시 BreadKimchi는 App 서버에서 확인한 PostgreSQL 접속 정보를 사용하여 DB 서버의 고객 예약 데이터베이스를 조회하고 고객/예약 데이터를 수집했다.</td><td><a href="/campaigns/SB-01/logs/DBL-001/">DBL-001</a></td></tr>
@@ -161,6 +161,15 @@
   <p class="summary">이 캠페인에서 현재 검증하거나 작성 중인 로그 상세 페이지를 한눈에 확인한다.</p>
   <div class="cards">
     <article class="card">
+      <h3><a href="/campaigns/SB-01/logs/JL-001/">JL-001 Jenkins Access and Controller Log</a></h3>
+      <p>SB-01 Jenkins Web/CLI 접근과 controller 이벤트를 확인하는 로그.</p>
+      <div class="tag-row">
+        <span class="tag">T1592</span>
+        <span class="tag">T1078</span>
+        <span class="tag">T1190</span>
+      </div>
+    </article>
+    <article class="card">
       <h3><a href="/campaigns/SB-01/logs/LL-002/">LL-002 Linux auditd File Access Log</a></h3>
       <p>SB-01 App 서버의 운영 경로, 설정 파일, 임시 staging 경로 접근을 auditd로 확인하는 로그.</p>
       <div class="tag-row">
@@ -176,6 +185,15 @@
       <div class="tag-row">
         <span class="tag">T1021.004</span>
         <span class="tag">T1078</span>
+      </div>
+    </article>
+    <article class="card">
+      <h3><a href="/campaigns/SB-01/logs/JL-002/">JL-002 Jenkins Build Log</a></h3>
+      <p>SB-01 Jenkins Job/build history에서 배포 대상, workspace, credential 사용 단서를 확인하는 로그.</p>
+      <div class="tag-row">
+        <span class="tag">T1213</span>
+        <span class="tag">T1552.004</span>
+        <span class="tag">T1021.004</span>
       </div>
     </article>
     <article class="card">

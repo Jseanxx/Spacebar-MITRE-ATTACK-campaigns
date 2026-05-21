@@ -21,8 +21,10 @@
         <nav class="sidebar-links">
           <a class="sidebar-link" href="/campaigns/SB-01/">Campaign Page</a>
           <a class="sidebar-link" href="/campaigns/SB-01/logs/">Campaign Logs</a>
+          <a class="sidebar-link" href="/campaigns/SB-01/logs/JL-001/"><span>JL-001</span>Jenkins Access and Controller Log</a>
           <a class="sidebar-link active" href="/campaigns/SB-01/logs/LL-002/"><span>LL-002</span>Linux auditd File Access Log</a>
           <a class="sidebar-link" href="/campaigns/SB-01/logs/LL-001/"><span>LL-001</span>Linux SSH Auth Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-01/logs/JL-002/"><span>JL-002</span>Jenkins Build Log</a>
           <a class="sidebar-link" href="/campaigns/SB-01/logs/DBL-001/"><span>DBL-001</span>PostgreSQL Connection Log</a>
           <a class="sidebar-link" href="/campaigns/SB-01/logs/AWSL-001/"><span>AWSL-001</span>AWS VPC Flow Log</a>
         </nav>
@@ -45,7 +47,9 @@
 <div class="meta-label">Representative Path:</div>
 <div class="meta-value"><code>/var/log/audit/audit.log</code></div>
 <div class="meta-label">Collection:</div>
-<div class="meta-value">Filebeat 8.13.4 custom input으로 <code>/var/log/audit/audit.log</code> 직접 수집</div>
+<div class="meta-value">auditd rule + Filebeat 8.13.4 auditd module</div>
+<div class="meta-label">Current Status:</div>
+<div class="meta-value">ELK 수집 및 BAS evidence 검증 완료</div>
 <div class="meta-label">Primary Use:</div>
 <div class="meta-value">App 운영 경로 탐색, 설정/credential 후보 파일 접근, staging 경로 생성, 외부 전송 명령 실행 확인</div>
 </div>
@@ -68,7 +72,7 @@
 <thead><tr><th>구분</th><th>방식</th></tr></thead>
 <tbody>
 <tr><td>App 서버</td><td>auditd rule key를 지정해 관심 파일/명령 실행을 수집</td></tr>
-<tr><td>App 서버</td><td>Filebeat 8.13.4 custom input으로 <code>/var/log/audit/audit.log</code> 직접 수집</td></tr>
+<tr><td>App 서버</td><td>Filebeat 8.13.4 auditd module로 <code>/var/log/audit/audit.log</code> 수집</td></tr>
 <tr><td>ELK</td><td><code>auditd.log.key</code>, <code>auditd.log.name</code>, <code>process.executable</code>, <code>user.name</code> 기준으로 탐지룰 작성</td></tr>
 </tbody></table></div>
 <h2 id="실제-관측-로그-예시">실제 관측 로그 예시</h2>
@@ -108,6 +112,10 @@ type=PROCTITLE msg=audit(1715153182.123:420): proctitle=6C73002F6F70742F73706163
 <tr><td>T1074.001 Local Data Staging</td><td><code>/tmp/sb01-stage</code> 또는 <code>/var/tmp</code>에 결과 파일을 만들고 <code>tar</code>, <code>gzip</code>, <code>zip</code> 등으로 묶는다. DB 조회 직후 archive 생성이 이어지면 우선순위가 높다.</td><td><code>auditd.log.key</code>, <code>auditd.log.name</code>, <code>process.executable</code>, <code>file.path</code></td></tr>
 <tr><td>T1048.002 Exfiltration Over Alternative Protocol</td><td>archive 생성 직후 <code>scp</code>, <code>sftp</code>, <code>curl</code>, <code>wget</code> 등 정상 프로토콜 기반 전송 도구가 실행되는지 확인한다. VPC Flow Log의 App 서버 outbound 22/443 흐름과 함께 봐야 한다.</td><td><code>auditd.log.key</code>, <code>process.executable</code>, <code>process.args</code>, <code>destination.ip</code></td></tr>
 </tbody></table></div>
+<h2 id="elk-query-예시">ELK Query 예시</h2>
+<pre><code>event.module:auditd AND process.executable:&quot;/usr/bin/ls&quot; AND auditd.log.key:*sb01_app_path_read*
+event.module:auditd AND auditd.log.name:&quot;/opt/spacebar-booking&quot;
+event.module:auditd AND auditd.log.key:*sb01_local_staging*</code></pre>
       <footer class="footer">
         Spacebar Project. This campaign log page is scoped to SB-01.
       </footer>
