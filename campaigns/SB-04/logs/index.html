@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SB-04 Logs | Spacebar Campaigns</title>
+  <link rel="stylesheet" href="/assets/campaign.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="/campaigns/"><img class="brand-logo" src="/assets/spacebarLogo.png" alt="Spacebar"><span>Spacebar Campaigns</span></a>
+    </div>
+  </header>
+
+  <div class="page-shell">
+
+    <aside class="campaign-sidebar" aria-label="Campaign log navigation">
+      <div class="sidebar-block">
+        <div class="sidebar-title">SB-04 Logs</div>
+        <nav class="sidebar-links">
+          <a class="sidebar-link" href="/campaigns/SB-04/">Campaign Page</a>
+          <a class="sidebar-link active" href="/campaigns/SB-04/logs/">Campaign Logs</a>
+          <a class="sidebar-link" href="/campaigns/SB-04/logs/FL-001/"><span>FL-001</span>Falco Runtime Log</a>
+        </nav>
+      </div>
+      <div class="sidebar-block">
+        <div class="sidebar-title">Global Catalog</div>
+        <nav class="sidebar-links">
+          <a class="sidebar-link" href="/logs/">All Logs</a>
+        </nav>
+      </div>
+    </aside>
+    <main class="page campaign-content">
+      <div class="breadcrumbs"><a href="/campaigns/">Home</a> / <a href="/campaigns/SB-04/">NodeFall</a> / <span>Campaign Logs</span></div>
+      <h1>SB-04 Campaign Logs</h1>
+      <p class="summary">
+        이 페이지는 NodeFall에서 실제로 참조하는 로그만 모아 보여준다.
+        전체 팀 공통 로그 목록은 Global Log Catalog에서 확인한다.
+      </p>
+      <div class="cards">
+        <article class="card">
+          <h3><a href="/campaigns/SB-04/logs/FL-001/">FL-001 Falco Runtime Log</a></h3>
+          <p>K8s 노드에서 발생한 컨테이너 및 호스트 런타임 행위를 Falco가 syscall 기반으로 확인하는 로그.</p>
+          <div class="tag-row">
+            <span class="tag">T1059</span>
+            <span class="tag">T1068</span>
+            <span class="tag">T1611</span>
+          </div>
+        </article>
+      </div>
+    </main>
+  </div>
+</body>
+</html>
