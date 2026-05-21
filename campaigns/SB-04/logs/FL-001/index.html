@@ -75,7 +75,6 @@ python3 container=react-app pod=react-app-685875587f-hv72r ns=default) container
 <pre><code>May 21 04:56:27 ip-10-0-133-48 falco[531]: 04:56:27.043672762: Notice Redirect stdout/stdin to network connection |
 gparent=next-server (v ggparent=containerd-shim gggparent=systemd fd.sip=43.201.29.226 connection=10.244.0.81:59016-&gt;43.201.29.226:9001 lport=59016 rport=9001 fd_type=ipv4 fd_proto=tcp evt_type=dup2 user=nextjs user_uid=1001 user_loginuid=-1 process=python3 proc_exepath=/usr/bin/python3.11 parent=sh command=python3 terminal=0 container_id=f4f7a83a75ac container_name=react-app container_image_repository=docker.io/library/react2shell-vulnlab-hi-react2shell-tribune container_image_tag=latest k8s_pod_name=react-app-685875587f-hv72r k8s_ns_name=default</code></pre>
 <h2 id="주요-필드">주요 필드</h2>
-<h2 id="주요-필드">주요 필드</h2>
 <div class="table-wrap wide-table">
 <table>
 <thead><tr><th>필드</th><th>의미</th><th>예시</th></tr></thead>
@@ -99,8 +98,8 @@ gparent=next-server (v ggparent=containerd-shim gggparent=systemd fd.sip=43.201.
 <tr><td><code>rport</code></td><td>원격 포트</td><td><code>9001</code></td></tr>
 <tr><td><code>fd_proto</code></td><td>네트워크 프로토콜</td><td><code>tcp</code></td></tr>
 <tr><td><code>evt_type</code></td><td>발생한 syscall 이벤트 유형</td><td><code>dup2</code></td></tr>
-<tr><td><code>message</code></td><td>journald에 기록된 Falco 원본 로그</td><td><code>Critical nodefall_shell_spawn ...</code>, <code>Notice Redirect stdout/stdin ...</code></td></tr>
 </tbody></table></div>
+<p>| <code>message</code> | journald에 기록된 Falco 원본 로그 | <code>Critical nodefall_shell_spawn ...</code>, <code>Notice Redirect stdout/stdin ...</code> |</p>
 <h2 id="커버하는-techniques-used">커버하는 Techniques Used</h2>
 <div class="table-wrap wide-table">
 <table>
