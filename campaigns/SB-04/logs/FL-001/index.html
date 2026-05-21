@@ -98,14 +98,14 @@ gparent=next-server (v ggparent=containerd-shim gggparent=systemd fd.sip=43.201.
 <tr><td><code>rport</code></td><td>원격 포트</td><td><code>9001</code></td></tr>
 <tr><td><code>fd_proto</code></td><td>네트워크 프로토콜</td><td><code>tcp</code></td></tr>
 <tr><td><code>evt_type</code></td><td>발생한 syscall 이벤트 유형</td><td><code>dup2</code></td></tr>
+<tr><td><code>message</code></td><td>journald에 기록된 Falco 원본 로그</td><td><code>Critical nodefall_shell_spawn ...</code>, <code>Notice Redirect stdout/stdin ...</code></td></tr>
 </tbody></table></div>
-<p>| <code>message</code> | journald에 기록된 Falco 원본 로그 | <code>Critical nodefall_shell_spawn ...</code>, <code>Notice Redirect stdout/stdin ...</code> |</p>
 <h2 id="커버하는-techniques-used">커버하는 Techniques Used</h2>
 <div class="table-wrap wide-table">
 <table>
 <thead><tr><th>Technique</th><th>Mapping Reason</th></tr></thead>
 <tbody>
-<tr><td><a href="https://attack.mitre.org/techniques/TXXXX/">TXXXX Technique Name</a></td><td>이 로그가 해당 Technique을 어떻게 설명하거나 검증하는지 작성</td></tr>
+<tr><td>T1190 Exploit Public-Facing Application</td><td>React/Next.js 취약 애플리케이션을 통한 RCE 이후 <code>sh</code>, <code>python3</code> 실행 및 reverse shell 연결이 발생했는지 확인한다.</td></tr>
 </tbody></table></div>
 <h2 id="탐지-포인트">탐지 포인트</h2>
 <ol>
