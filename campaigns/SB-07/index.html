@@ -43,11 +43,11 @@
   <div class="campaign-description">
 <h1>OZZY PMS Chain</h1>
 <p class="summary">
-  OZZY PMS Chain은 AWS 기반 AD 실습 환경에서 JBoss/PMS 업데이트 경로의 신뢰 체인을 악용하는 침해 캠페인이다.
-  공격자는 bastion을 통해 내부망으로 진입한 뒤 hanguel-ops-pms의 JBoss AS 6 취약 표면을 이용해 PMS 업데이트 파일과 manifest를 변조한다.
-  이후 hanguel-win01의 Hanguel PMS Agent가 변조된 패치를 <code>nt authority\system</code> 권한으로 실행하면서 DC 접근용 credential artifact를 확보하고,
-  <code>HANGUEL\Administrator</code> 권한으로 hanguel-dc01의 관리자 공유(C$)와 WinRM 원격 관리 채널에 접근할 수 있게 되며,
-  PMS 업데이트 경로의 신뢰 훼손이 도메인 컨트롤러 credential access 위험으로 확산되는 파급력을 보인다.
+  OZZY PMS Chain은 AD 환경과 JBoss/PMS 업데이트 경로 간의 신뢰 관계를 악용하는 침해 캠페인이다.
+공격자는 bastion을 통해 내부망에 진입한 뒤 hanguel-ops-pms의 JBoss AS 6 취약 표면을 이용해 PMS 업데이트 파일과 manifest를 변조한다.
+hanguel-win01의 Hanguel PMS Agent는 변조된 패치를 <code>nt authority\system</code> 권한으로 실행하고, 이 과정에서 DC 접근에 필요한 credential artifact가 노출된다.
+이후 공격자는 <code>HANGUEL\Administrator</code> 권한으로 hanguel-dc01의 관리자 공유(C$)와 WinRM 원격 관리 채널에 접근 가능한 상태가 되며,
+PMS 업데이트 체인의 신뢰 훼손은 도메인 컨트롤러 credential access 위험으로 확대된다.
 </p>
   </div>
 <div class="meta-grid" aria-label="Campaign metadata">
@@ -294,19 +294,19 @@
       <tr>
         <td class="id-cell">S-SB-007-01</td>
         <td>JBoss AS 6</td>
-        <td>PMS 서버의 애플리케이션 런타임으로, 업데이트 파일 배포 경로와 명령 실행 취약 표면이 결합된 대상으로 모델링된다.</td>
+        <td>PMS 서버의 애플리케이션 런타임으로, 업데이트 파일 배포 경로와 명령 실행 취약 표면이 결합된 대상이다.</td>
         <td>PMS application server</td>
       </tr>
       <tr>
         <td class="id-cell">S-SB-007-02</td>
         <td>Hanguel PMS Agent</td>
-        <td>Windows 클라이언트에서 PMS 업데이트 manifest와 patch를 주기적으로 확인하고 실행하는 에이전트다.</td>
+        <td>Windows 클라이언트에서 PMS 업데이트 manifest와 patch를 주기적으로 확인하고 실행하는 에이전트이다.</td>
         <td>Trusted update executor</td>
       </tr>
       <tr>
         <td class="id-cell">S-SB-007-03</td>
         <td>Windows Scheduled Task</td>
-        <td>win01 PMS Agent 실행과 DC SYSTEM 컨텍스트 작업 등록에 사용된 Windows 작업 스케줄러 기능이다.</td>
+        <td>win01의 PMS Agent 실행과 DC SYSTEM 컨텍스트 작업 등록에 사용된 Windows 작업 스케줄러 기능이다.</td>
         <td>Execution mechanism</td>
       </tr>
       <tr>
