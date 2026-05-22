@@ -75,6 +75,28 @@
 <pre><code>May 22 01:59:51 ip-10-0-133-48 falco[530]: 01:59:51.523409266: Notice nodefall_rbac_manifest_staged [NF2] RBAC Manifest (user=nextjs proc=bash cmd=bash cwd=/tmp/ file=/tmp/check-create.json container=react-app pod=react-app-685875587f-hv72r ns=default) container_id=283cb33c1045 container_name=react-app container_image_repository=docker.io/library/react2shell-vulnlab-hi-react2shell-tribune container_image_tag=latest k8s_pod_name=react-app-685875587f-hv72r k8s_ns_name=default</code></pre>
 <pre><code>May 22 02:00:05 ip-10-0-133-48 falco[530]: 02:00:05.238379653: Error nodefall_rbac_ssar_submitted [NF2] RBAC Check (user=nextjs proc=curl cmd=curl -k -H Authorization: Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6ImdvZlBXTC1kUlpjUHdocmJZZnNmaHNxaUFtTFJuS3JSM1FtQWxfek5BOTgifQ.eyJhdWQiOlsiaHR0cHM6Ly9rdWJlcm5ldGVzLmRlZmF1bHQuc3ZjLmNsdXN0ZXIubG9jYWwiXSwiZXhwIjoxODEwOTQ3OTE0LCJpYXQiOjE3Nzk0MTE5MTQsImlzcyI6Imh0dHBzOi8va3ViZXJuZXRlcy5kZWZhdWx0LnN2Yy5jbHVzdGVyLmxvY2FsIiwianRpIjoiNjMyOTFlNGQtMzllMi00ZjAzLWFiOTYtZGJkMTJlYWFlMWVhIiwia3ViZXJuZXRlcy5pbyI6eyJuYW1lc3BhY2UiOiJkZWZhdWx0Iiwibm9kZSI6eyJuYW1lIjoiaXAtMTAtMC0xMzMtNDgiLCJ1aWQiOiIwNGZjMDU0Ny1mYTNkLTRlZGYtOGYxMi04NDU1YWE1MTgzZjkifSwicG9kIjp7Im5hbWUiOiJyZWFjdC1hcHAtNjg1ODc1NTg3Zi1odjcyciIsInVpZCI6IjUyZjMyODI5LWU2YzAtNGJiNS1hNjY0LTM2OTE0MmNlNzdjYSJ9LCJzZXJ2aWNlYWNjb3VudCI6eyJuYW1lIjoiZGVmYXVsdCIsInVpZCI6IjIwNDI1Mjk5LTRjZTQtNGY3ZS05YzBmLTBiZTVhOGE0MDk5ZSJ9LCJ3YXJuYWZ0ZXIiOjE3Nzk0MTU1MjF9LCJuYmYiOjE3Nzk0MTE5MTQsInN1YiI6InN5c3RlbTpzZXJ2aWNlYWNjb3VudDpkZWZhdWx0OmRlZmF1bHQifQ.MKX4gpO4cG9NW4cey8rMj1QBv4ro4Smv5F6ZLf2E8XcvVhVQHFHdgArYwcv_szaMFM-kJtpDk4Vbzcb5SHR253MNUKY8NSjSYG6pv-dyaZXkw76q3OtolVVQucdnKGUkTNEkn4rbdSgpGnk7tkeseqJbJP5rvndmwpdJ9FPf6gPGTGznFC48LBAhPNStSdXXZG7F-HWx5lDrIEX--ptpnozUGKAsu6GBOki1tiA7yN_wV0TCmgzHD0dqBOx3x4D2JfpNgThqFb6E_BqRDNfy6N6qJL2M5v5RAHwtTZQ7-56UkJGpFydnTIEdfINlEb1x1Vxzd3MNZfQHqEOdWo-fww -H 
 Content-Type: application/json -X POST https://kubernetes.default.svc/apis/authorization.k8s.io/v1/selfsubjectaccessreviews -d @check-create.json container=react-app pod=react-app-685875587f-hv72r ns=default) container_id=283cb33c1045 container_name=react-app container_image_repository=docker.io/library/react2shell-vulnlab-hi-react2shell-tribune container_image_tag=latest k8s_pod_name=react-app-685875587f-hv72r k8s_ns_name=default</code></pre>
+<h2 id="주요-필드">주요 필드</h2>
+<div class="table-wrap wide-table">
+<table>
+<thead><tr><th>필드</th><th>의미</th><th>예시</th></tr></thead>
+<tbody>
+<tr><td><code>evt.time</code></td><td>Falco 탐지 이벤트 발생 시간</td><td><code>01:59:51.523409266</code>, <code>02:00:05.238379653</code></td></tr>
+<tr><td><code>priority</code></td><td>Falco 탐지 심각도</td><td><code>Notice</code>, <code>Error</code></td></tr>
+<tr><td><code>rule/message</code></td><td>Falco가 탐지한 행위명</td><td><code>nodefall_rbac_manifest_staged [NF2] RBAC Manifest</code>, <code>nodefall_rbac_ssar_submitted [NF2] RBAC Check</code></td></tr>
+<tr><td><code>user</code></td><td>행위를 수행한 컨테이너 내부 사용자</td><td><code>nextjs</code></td></tr>
+<tr><td><code>proc</code></td><td>실행된 프로세스</td><td><code>bash</code>, <code>curl</code></td></tr>
+<tr><td><code>cmd</code></td><td>실행된 명령어 또는 인자</td><td><code>bash</code>, <code>curl -k -H Authorization: Bearer &lt;REDACTED&gt; ... selfsubjectaccessreviews -d @check-create.json</code></td></tr>
+<tr><td><code>cwd</code></td><td>명령 실행 위치</td><td><code>/tmp/</code></td></tr>
+<tr><td><code>file</code></td><td>생성 또는 참조된 파일</td><td><code>/tmp/check-create.json</code>, <code>check-create.json</code></td></tr>
+<tr><td><code>api_path</code></td><td>Kubernetes 권한 확인 요청 대상</td><td><code>/apis/authorization.k8s.io/v1/selfsubjectaccessreviews</code></td></tr>
+<tr><td><code>container_name</code></td><td>행위가 발생한 컨테이너 이름</td><td><code>react-app</code></td></tr>
+<tr><td><code>container_id</code></td><td>컨테이너 식별자</td><td><code>283cb33c1045</code></td></tr>
+<tr><td><code>container_image_repository</code></td><td>컨테이너 이미지 저장소</td><td><code>docker.io/library/react2shell-vulnlab-hi-react2shell-tribune</code></td></tr>
+<tr><td><code>container_image_tag</code></td><td>컨테이너 이미지 태그</td><td><code>latest</code></td></tr>
+<tr><td><code>k8s_pod_name</code></td><td>행위가 발생한 Kubernetes Pod</td><td><code>react-app-685875587f-hv72r</code></td></tr>
+<tr><td><code>k8s_ns_name</code></td><td>Pod가 속한 namespace</td><td><code>default</code></td></tr>
+<tr><td><code>message</code></td><td>journald에 기록된 Falco 원본 로그</td><td><code>Notice nodefall_rbac_manifest_staged ...</code>, <code>Error nodefall_rbac_ssar_submitted ...</code></td></tr>
+</tbody></table></div>
 <h2 id="커버-대상-techniques-used">커버 대상 Techniques Used</h2>
 <div class="table-wrap wide-table">
 <table>
