@@ -59,8 +59,8 @@
 <thead><tr><th>Domain</th><th>ID</th><th>Name</th><th>Use</th><th>Primary Logs</th></tr></thead>
 <tbody>
 <tr><td>Enterprise</td><td>T1190</td><td>Exploit Public-Facing Application</td><td>Application	캠페인 당시 공격 그룹은 K8s 환경에 퍼블릭하게 노출된 React 19 / Next.js 15 프론트엔드 파드의 RSC 역직렬화 취약점(CVE-2025-55182)을 악용하여 단일 HTTP 요청으로 초기 침투(RCE)를 수행했다.</td><td><a href="/campaigns/SB-04/logs/FL-001/">FL-001</a></td></tr>
-<tr><td>Enterprise</td><td>T1552.007</td><td>Unsecured Credentials: Container API Credentials</td><td>캠페인 당시 공격 그룹은 장악한 파드 내부에 <code>automountServiceAccountToken: true</code> 설정으로 인해 기본 마운트되어 있던 ServiceAccount 토큰 및 인증서를 수집했다.</td><td><a href="/campaigns/SB-04/logs/FL-002/">FL-002</a></td></tr>
-<tr><td>Enterprise</td><td>T1613</td><td>Container and Resource Discovery</td><td>캠페인 당시 공격 그룹은 획득한 SA 토큰을 사용하여 K8s API 서버와 통신하며, 클러스터 내부망의 서비스 구조와 자신에게 부여된 RBAC 권한을 정찰했다.</td></tr>
+<tr><td>Enterprise</td><td>T1552.007</td><td>Unsecured Credentials: Container API Credentials</td><td>캠페인 당시 공격 그룹은 장악한 파드 내부에 <code>automountServiceAccountToken: true</code> 설정으로 인해 기본 마운트되어 있던 ServiceAccount 토큰 및 인증서를 수집했다.</td><td>-</td></tr>
+<tr><td>Enterprise</td><td>T1613</td><td>Container and Resource Discovery</td><td>캠페인 당시 공격 그룹은 획득한 SA 토큰을 사용하여 K8s API 서버와 통신하며, 클러스터 내부망의 서비스 구조와 자신에게 부여된 RBAC 권한을 정찰했다.</td><td><a href="/campaigns/SB-04/logs/FL-002/">FL-002</a></td></tr>
 <tr><td>Enterprise</td><td>T1068</td><td>Exploitation for Privilege Escalation</td><td>캠페인 당시 공격 그룹은 제한된 파드 권한의 한계를 극복하기 위해, K8s 워커 노드의 공유 Linux 커널 취약점(CVE-2026-31431, Copy Fail)을 타격하여 파드 내부의 루트(Root) 권한을 확보했다.</td></tr>
 <tr><td>Enterprise</td><td>T1552.001</td><td>Unsecured Credentials: Credentials In Files</td><td>캠페인 당시 공격 그룹은 권한 상승 이후 파드 내부의 <code>/root/.kube/config</code> 파일을 정찰하여 관리자용 Kubernetes 토큰이 포함되어 있음을 확인했다. 이후 해당 토큰을 사용해 kube-system 네임스페이스 내 파드 생성 권한을 확인했다.</td></tr>
 <tr><td>Enterprise</td><td>T1611</td><td>Escape to Host</td><td>캠페인 당시 공격 그룹은 과도하게 부여된 kube-system 내 파드 생성 권한을 악용하여, 특권(Privileged) 파드를 강제 생성함으로써 컨테이너 경계를 탈출하고 노드(Node)의 제어권을 탈취했다.</td></tr>
