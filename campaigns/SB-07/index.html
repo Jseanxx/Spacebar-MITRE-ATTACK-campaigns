@@ -43,10 +43,11 @@
   <div class="campaign-description">
 <h1>OZZY PMS Chain</h1>
 <p class="summary">
-  OZZY PMS Chain은 AWS 기반 AD 실습 환경에서 JBoss/PMS 업데이트 경로를 신뢰 체인으로 악용하는 침해 캠페인이다.
+  OZZY PMS Chain은 AWS 기반 AD 실습 환경에서 JBoss/PMS 업데이트 경로의 신뢰 체인을 악용하는 침해 캠페인이다.
   공격자는 bastion을 통해 내부망으로 진입한 뒤 hanguel-ops-pms의 JBoss AS 6 취약 표면을 이용해 PMS 업데이트 파일과 manifest를 변조한다.
   이후 hanguel-win01의 Hanguel PMS Agent가 변조된 패치를 <code>nt authority\system</code> 권한으로 실행하면서 DC 접근용 credential artifact를 확보하고,
-  <code>HANGUEL\Administrator</code> 권한으로 hanguel-dc01의 C$ 및 WinRM 경로를 이용해 manual-mapping loader 기반 LSASS dump 흐름으로 이어진다.
+  <code>HANGUEL\Administrator</code> 권한으로 hanguel-dc01의 관리자 공유(C$)와 WinRM 원격 관리 채널에 접근할 수 있게 되며,
+  PMS 업데이트 경로의 신뢰 훼손이 도메인 컨트롤러 credential access 위험으로 확산되는 파급력을 보인다.
 </p>
   </div>
 <div class="meta-grid" aria-label="Campaign metadata">
@@ -67,26 +68,24 @@
   <div class="meta-label">Last Modified:</div>
   <div class="meta-value">22 May 2026</div>
   <div class="meta-label">Target:</div>
-  <div class="meta-value">AWS-hosted AD / JBoss PMS update chain</div>
+  <div class="meta-value">AD server / JBoss PMS update chain</div>
   <div class="meta-label">Objective:</div>
   <div class="meta-value">Supply-chain execution, lateral movement, DC credential access</div>
 </div>
 </div>
 
 <div class="tag-row" aria-label="Campaign tags">
-  <span class="tag">AWS AD Lab</span>
   <span class="tag">JBoss AS 6</span>
   <span class="tag">PMS Update Chain</span>
   <span class="tag">Manual PE Loader</span>
-  <span class="tag">ATT&amp;CK Enterprise</span>
 </div>
 
 <h2 id="overview">Overview</h2>
 <p>
-  이 캠페인은 외부 접근 경로, Linux 기반 JBoss/PMS 서버, Windows PMS Agent, Active Directory 도메인 컨트롤러가 연결된 기업형 운영망 침해 흐름으로 모델링된다.
-  핵심 전개는 <code>hanguel-ops-pms</code>의 업데이트 경로를 변조해 <code>hanguel-win01</code>에서 SYSTEM 실행을 만들고,
-  win01에서 발견한 credential artifact를 복호화 가능한 컨텍스트로 처리하여 <code>HANGUEL\Administrator</code> 접근 재료를 확보하는 것이다.
-  이후 공격자는 DC의 관리 공유 및 WinRM 실행 경로를 이용해 로더와 암호화된 payload를 배치하고,
+  이 캠페인은 외부 접근 경로, Linux 기반 JBoss/PMS 서버, Windows PMS Agent, Active Directory 도메인 컨트롤러를 기업형 운영망 환경으로 구성하여 침해 흐름을 보여주는 캠페인이다. 
+  핵심 전개는 <code>hanguel-ops-pms</code>의 업데이트 경로의 패치파일을 변조해 <code>hanguel-win01</code>에서 SYSTEM 실행 흐름을 만들고,
+  <code>hanguel-win01</code>에서 발견한 credential artifact를 복호화 가능한 컨텍스트로 처리하여 <code>HANGUEL\Administrator</code> 접근 정보를 확보하는 것이다.
+  이후 공격자는 DC의 관리자 공유(C$) 및 WinRM 원격 실행 채널을 이용해 로더와 암호화된 payload를 배치하고,
   로더가 payload를 메모리에서 복호화 및 manual mapping하여 LSASS dump를 생성하는 흐름을 구성한다.
 </p>
 
@@ -131,8 +130,8 @@
     <tbody>
       <tr>
         <td class="id-cell">G-SB-007</td>
-        <td>HanguelPMSChain</td>
-        <td>OZZY PMS Chain 활동과 연결된 가상 공격 그룹이다. PMS 업데이트 신뢰 구조와 Windows 관리 채널을 결합해 AD 환경 credential access를 수행하는 형태로 모델링된다.</td>
+        <td>OZZY</td>
+        <td>OZZY PMS Chain 활동과 연결된 공격 그룹으로, PMS 업데이트 신뢰 구조와 Windows 관리 채널을 결합해 AD 환경 credential access를 수행한다.</td>
       </tr>
     </tbody>
   </table>
