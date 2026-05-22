@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SB-04 FL-RECON Falco Credential Recon Log | Spacebar Campaign Logs</title>
+  <link rel="stylesheet" href="/assets/campaign.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="/campaigns/"><img class="brand-logo" src="/assets/spacebarLogo.png" alt="Spacebar"><span>Spacebar Campaigns</span></a>
+    </div>
+  </header>
+
+  <div class="page-shell">
+
+    <aside class="campaign-sidebar" aria-label="Campaign log navigation">
+      <div class="sidebar-block">
+        <div class="sidebar-title">SB-04 Logs</div>
+        <nav class="sidebar-links">
+          <a class="sidebar-link" href="/campaigns/SB-04/">Campaign Page</a>
+          <a class="sidebar-link" href="/campaigns/SB-04/logs/">Campaign Logs</a>
+          <a class="sidebar-link" href="/campaigns/SB-04/logs/FL-001/"><span>FL-001</span>Falco RCE Log</a>
+          <a class="sidebar-link active" href="/campaigns/SB-04/logs/FL-RECON/"><span>FL-RECON</span>Falco Credential Recon Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-04/logs/FL-002/"><span>FL-002</span>Falco RBAC Check Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-04/logs/FL-003/"><span>FL-003</span>Falco Copy Fail on Log</a>
+        </nav>
+      </div>
+      <div class="sidebar-block">
+        <div class="sidebar-title">Global Catalog</div>
+        <nav class="sidebar-links">
+          <a class="sidebar-link" href="/logs/">All Logs</a>
+        </nav>
+      </div>
+    </aside>
+    <main class="page campaign-content">
+      <div class="breadcrumbs"><a href="/campaigns/">Home</a> / <a href="/campaigns/SB-04/">NodeFall</a> / <a href="/campaigns/SB-04/logs/">Campaign Logs</a> / <span>FL-RECON</span></div>
+<h1>FL-RECON Falco Credential Recon Log</h1>
+<div class="meta-grid" aria-label="Campaign metadata">
+<div class="meta-label">Log ID:</div>
+<div class="meta-value">FL-RECON</div>
+<div class="meta-label">Source:</div>
+<div class="meta-value">SB-04 K8s Node</div>
+<div class="meta-label">Representative Path:</div>
+<div class="meta-value"><code>journalctl -u falco-modern-bpf.service</code></div>
+<div class="meta-label">Collection:</div>
+<div class="meta-value">Wazuh agent journald input (<code>/var/ossec/etc/ossec.conf</code>)</div>
+<div class="meta-label">Primary Use:</div>
+<div class="meta-value">ServiceAccount 토큰/인증서 접근 및 <code>/root/.kube/config</code> 내 Kubernetes 자격 증명 확인</div>
+</div>
+<h2 id="공격-행위-요약">공격 행위 요약</h2>
+<p>FL-RECON은 NodeFall 캠페인에서 공격자가 장악한 컨테이너 내부에서 Kubernetes 자격 증명을 정찰하는 행위를 설명하는 로그이다. 공격자는 먼저 기본 마운트된 ServiceAccount 경로(<code>/var/run/secrets/kubernetes.io/serviceaccount/</code>)를 확인하여 <code>token</code>, <code>ca.crt</code>, <code>namespace</code> 파일 존재 여부를 탐색했다.</p>
+<p>이후 권한 상승이 이루어진 뒤에는 <code>/root/.kube/config</code> 파일을 확인하여 관리자용 Kubernetes 토큰이 포함되어 있는지 정찰했다. 이 로그는 단순 파일 탐색이 아니라, 공격자가 이후 Kubernetes API 접근과 권한 확인, 특권 Pod 생성으로 이어가기 위해 사용할 수 있는 자격 증명 후보를 찾는 단계의 증적이다.</p>
+<h2 id="로그-발생-위치">로그 발생 위치</h2>
+<div class="table-wrap wide-table">
+<table>
+<thead><tr><th>구분</th><th>위치</th><th>설명</th></tr></thead>
+<tbody>
+<tr><td>K8s Node</td><td><code>Linux Kernel syscall</code></td><td>컨테이너 내부에서 <code>ls</code>, <code>cat</code> 등의 프로세스 실행과 민감 경로 파일 접근 행위가 syscall로 발생</td></tr>
+<tr><td>K8s Node</td><td><code>falco-modern-bpf.service</code></td><td>Falco가 syscall을 관찰하고 ServiceAccount 또는 kubeconfig 접근 행위와 매칭되면 탐지 이벤트 생성</td></tr>
+<tr><td>K8s Node</td><td><code>journalctl -u falco-modern-bpf.service</code></td><td>Falco 탐지 이벤트가 systemd journal에 기록되는 대표 확인 위치</td></tr>
+</tbody></table></div>
+<h2 id="수집-방식">수집 방식</h2>
+<div class="table-wrap wide-table">
+<table>
+<thead><tr><th>구분</th><th>방식</th></tr></thead>
+<tbody>
+<tr><td>Falco</td><td>eBPF/driver를 통해 Linux Kernel syscall을 관찰하고, Falco rule의 <code>condition</code>과 매칭되면 <code>output</code> 형식의 탐지 이벤트를 생성</td></tr>
+<tr><td>journald</td><td>Falco가 생성한 탐지 이벤트를 <code>falco-modern-bpf.service</code>의 systemd journal 로그로 기록</td></tr>
+<tr><td>Wazuh agent</td><td><code>/var/ossec/etc/ossec.conf</code>의 journald 수집 설정을 통해 Falco 서비스 로그를 수집</td></tr>
+<tr><td>Wazuh manager</td><td>수집된 Falco 로그를 <code>/var/ossec/etc/rules/local_rules.xml</code>의 룰과 매칭하여 Wazuh alert로 변환</td></tr>
+<tr><td>Wazuh Dashboard</td><td>생성된 Wazuh alert를 분석자가 확인할 수 있는 대시보드 이벤트로 표시</td></tr>
+</tbody></table></div>
+<h2 id="로그-출력-명령어">로그 출력 명령어</h2>
+<pre><code>sudo journalctl -u falco-modern-bpf.service --no-pager | grep -E &quot;\[NF-RECON\] SA Credential Access|\[NF-RECON\] Kube-system Pod List&quot;</code></pre>
+<pre><code>sudo journalctl -u falco-modern-bpf.service --no-pager | grep -E &quot;\[NF4\] Kubeconfig Read&quot;</code></pre>
+<h2 id="실제-관측-로그">실제 관측 로그</h2>
+<pre><code>May 22 11:48:16 ip-10-0-133-48 falco[8979]: 11:48:16.562095080: Notice [NF-RECON] SA Credential Access (user=nextjs proc=cat cmd=cat /var/run/secrets/kubernetes.io/serviceaccount/token file=/var/run/secrets/kubernetes.io/serviceaccount/token container=react-app pod=react-app-685875587f-hv72r ns=default) 
+container_id=5ed6b4677c32 container_name=react-app container_image_repository=docker.io/library/react2shell-vulnlab-hi-react2shell-tribune container_image_tag=latest k8s_pod_name=react-app-685875587f-hv72r k8s_ns_name=default</code></pre>
+<pre><code>May 22 11:48:24 ip-10-0-133-48 falco[8979]: 11:48:24.796423993: Notice [NF-RECON] Kube-system Pod List (user=nextjs proc=curl cmd=curl -k -H Authorization: Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6ImdvZlBXTC1kUlpjUHdocmJZZnNmaHNxaUFtTFJuS3JSM1FtQWxfek5BOTgifQ.eyJhdWQiOlsiaHR0cHM6Ly9rdWJlcm5ldGVzLmRlZmF1bHQuc3ZjLmNsdXN0ZXIubG9jYWwiXSwiZXhwIjoxODEwOTg1NDIzLCJpYXQiOjE3Nzk0NDk0MjMsImlzcyI6Imh0dHBzOi8va3ViZXJuZXRlcy5kZWZhdWx0LnN2Yy5jbHVzdGVyLmxvY2FsIiwianRpIjoiNGViZmM2ZDctZTRjZC00Njc4LTlkZjUtMmZlZDk5Y2EzMTkwIiwia3ViZXJuZXRlcy5pbyI6eyJuYW1lc3BhY2UiOiJkZWZhdWx0Iiwibm9kZSI6eyJuYW1lIjoiaXAtMTAtMC0xMzMtNDgiLCJ1aWQiOiIwNGZjMDU0Ny1mYTNkLTRlZGYtOGYxMi04NDU1YWE1MTgzZjkifSwicG9kIjp7Im5hbWUiOiJyZWFjdC1hcHAtNjg1ODc1NTg3Zi1odjcyciIsInVpZCI6IjUyZjMyODI5LWU2YzAtNGJiNS1hNjY0LTM2OTE0MmNlNzdjYSJ9LCJzZXJ2aWNlYWNjb3VudCI6eyJuYW1lIjoiZGVmYXVsdCIsInVpZCI6IjIwNDI1Mjk5LTRjZTQtNGY3ZS05YzBmLTBiZTVhOGE0MDk5ZSJ9LCJ3YXJuYWZ0ZXIiOjE3Nzk0NTMwMzB9LCJuYmYiOjE3Nzk0NDk0MjMsInN1YiI6InN5c3RlbTpzZXJ2aWNlYWNjb3VudDpkZWZhdWx0OmRlZmF1bHQifQ.Db1BSArLvO_Mfv5HfZOXTiK071rrLmpyvxDi80CeNrCPCjFWVvRtjf9HwUeHAIFzXgf3mAmZz8ZzXIB7Ry8_k3HPuLl-jhoTDTXSLH4l2zI8QbtwL_6NMh-2A8GY4YPW3LmUvrNXlnk-qAt6CCvFpDRkPCUTpVAP4Qe3RTHJUUUljDXmdjtLJpM-g_vjKLCXqKBJBnMMvVDdzWsc1wqkZdCHpeXpKLr2Tz33fd5eOKImiTtArWmeGHkYuEF-8BU6eNCu1DDGFjvc_q8L77InvnjlpeyWDCWM731oCDkgaK2199V1R3a99pP3dPHzBjfqgt1bJreVCi7WDDPerJ-aWw https://kubernetes.default.svc/api/v1/namespaces/kube-system/pods container=react-app pod=react-app-685875587f-hv72r ns=default) 
+container_id=5ed6b4677c32 container_name=react-app container_image_repository=docker.io/library/react2shell-vulnlab-hi-react2shell-tribune container_image_tag=latest k8s_pod_name=react-app-685875587f-hv72r k8s_ns_name=default</code></pre>
+<pre><code>May 22 11:58:16 ip-10-0-133-48 falco[8979]: 11:58:16.123457477: Warning [NF4] Kubeconfig Read (user=root proc=cat .kube/config file=/root/.kube/config container=react-app pod=react-app-685875587f-hv72r ns=default) 
+container_id=5ed6b4677c32 container_name=react-app container_image_repository=docker.io/library/react2shell-vulnlab-hi-react2shell-tribune container_image_tag=latest k8s_pod_name=react-app-685875587f-hv72r k8s_ns_name=default</code></pre>
+<h2 id="주요-필드">주요 필드</h2>
+<div class="table-wrap wide-table">
+<table>
+<thead><tr><th>필드</th><th>의미</th><th>예시</th></tr></thead>
+<tbody>
+<tr><td><code>evt.time</code></td><td>Falco 탐지 이벤트 발생 시간</td><td><code>11:48:16.562095080</code>, <code>11:48:24.796423993</code>, <code>11:58:16.123457477</code></td></tr>
+<tr><td><code>priority</code></td><td>Falco 탐지 심각도</td><td><code>Notice</code>, <code>Warning</code></td></tr>
+<tr><td><code>rule/message</code></td><td>Falco가 탐지한 정찰 행위명</td><td><code>[NF-RECON] SA Credential Access</code>, <code>[NF-RECON] Kube-system Pod List</code>, <code>[NF4] Kubeconfig Read</code></td></tr>
+<tr><td><code>user</code></td><td>행위를 수행한 컨테이너 내부 사용자</td><td><code>nextjs</code>, <code>root</code></td></tr>
+<tr><td><code>proc</code></td><td>실행된 프로세스</td><td><code>cat</code>, <code>curl</code></td></tr>
+<tr><td><code>cmd</code></td><td>실행된 명령어 또는 인자</td><td><code>cat /var/run/secrets/kubernetes.io/serviceaccount/token</code>, <code>curl -k -H Authorization: Bearer &lt;REDACTED&gt; https://kubernetes.default.svc/api/v1/namespaces/kube-system/pods</code>, <code>cat .kube/config</code></td></tr>
+<tr><td><code>file</code></td><td>접근한 자격 증명 파일 또는 민감 파일</td><td><code>/var/run/secrets/kubernetes.io/serviceaccount/token</code>, <code>/root/.kube/config</code></td></tr>
+<tr><td><code>api_path</code></td><td>Kubernetes API 요청 대상</td><td><code>/api/v1/namespaces/kube-system/pods</code></td></tr>
+<tr><td><code>container_name</code></td><td>행위가 발생한 컨테이너 이름</td><td><code>react-app</code></td></tr>
+<tr><td><code>container_id</code></td><td>컨테이너 식별자</td><td><code>5ed6b4677c32</code></td></tr>
+<tr><td><code>container_image_repository</code></td><td>컨테이너 이미지 저장소</td><td><code>docker.io/library/react2shell-vulnlab-hi-react2shell-tribune</code></td></tr>
+<tr><td><code>container_image_tag</code></td><td>컨테이너 이미지 태그</td><td><code>latest</code></td></tr>
+<tr><td><code>k8s_pod_name</code></td><td>행위가 발생한 Kubernetes Pod</td><td><code>react-app-685875587f-hv72r</code></td></tr>
+<tr><td><code>k8s_ns_name</code></td><td>Pod가 속한 namespace</td><td><code>default</code></td></tr>
+<tr><td><code>message</code></td><td>journald에 기록된 Falco 원본 로그</td><td><code>Notice [NF-RECON] SA Credential Access ...</code>, <code>Notice [NF-RECON] Kube-system Pod List ...</code>, <code>Warning [NF4] Kubeconfig Read ...</code></td></tr>
+</tbody></table></div>
+<h2 id="커버-대상-techniques-used">커버 대상 Techniques Used</h2>
+<div class="table-wrap wide-table">
+<table>
+<thead><tr><th>Technique</th><th>Mapping Reason</th></tr></thead>
+<tbody>
+<tr><td>T1552.007 Unsecured Credentials: Container API Credentials</td><td>장악한 Pod 내부에서 기본 마운트된 ServiceAccount 토큰 및 인증서 경로에 접근했는지 확인한다.</td></tr>
+<tr><td>T1552.001 Unsecured Credentials: Credentials In Files</td><td>권한 상승 이후 <code>/root/.kube/config</code> 파일을 확인하여 관리자용 Kubernetes 토큰이 포함되어 있는지 정찰한 행위를 확인한다.</td></tr>
+</tbody></table></div>
+<h2 id="탐지-포인트">탐지 포인트</h2>
+<div class="table-wrap wide-table">
+<table>
+<thead><tr><th>Technique</th><th>관찰 행위</th><th>주요 필드</th></tr></thead>
+<tbody>
+<tr><td>T1552.007 Unsecured Credentials: Container API Credentials</td><td>컨테이너 내부에서 <code>/var/run/secrets/kubernetes.io/serviceaccount/</code> 하위의 <code>token</code>, <code>ca.crt</code>, <code>namespace</code> 파일에 접근하는지 확인한다. 이는 기본 마운트된 ServiceAccount 자격 증명을 확인하는 초기 정찰 행위다.</td><td><code>rule/message</code>, <code>user</code>, <code>proc</code>, <code>cmd</code>, <code>file</code>, <code>container_name</code>, <code>k8s_pod_name</code>, <code>k8s_ns_name</code></td></tr>
+<tr><td>T1552.007 Unsecured Credentials: Container API Credentials</td><td>확보한 ServiceAccount 토큰을 이용해 Kubernetes API 서버의 <code>kube-system</code> Pod 목록을 조회하는지 확인한다. 단순 파일 접근보다 실제 API 정찰로 이어졌는지를 판단하는 지점이다.</td><td><code>rule/message</code>, <code>user</code>, <code>proc</code>, <code>cmd</code>, <code>api_path</code>, <code>container_id</code>, <code>container_name</code>, <code>k8s_pod_name</code>, <code>k8s_ns_name</code></td></tr>
+<tr><td>T1552.001 Unsecured Credentials: Credentials In Files</td><td>권한 상승 이후 <code>/root/.kube/config</code> 파일을 읽어 관리자용 Kubernetes 토큰이나 cluster/user/context 정보를 확인하는지 본다. 일반 ServiceAccount 토큰이 아니라 파일에 저장된 별도 자격 증명 확인 행위로 구분한다.</td><td><code>rule/message</code>, <code>user</code>, <code>proc</code>, <code>cmd</code>, <code>file</code>, <code>container_name</code>, <code>k8s_pod_name</code>, <code>k8s_ns_name</code></td></tr>
+<tr><td>T1552.001 Unsecured Credentials: Credentials In Files</td><td>kubeconfig 확인 이후 RBAC 권한 확인이나 특권 Pod 생성으로 이어지는지 타임라인상 연결한다. 이 행위는 단독으로도 민감하지만, 이후 <code>SelfSubjectAccessReview</code> 또는 Pod 생성 요청과 이어질 때 공격 단계 전환의 증거가 된다.</td><td><code>message</code>, <code>cmd</code>, <code>file</code>, <code>k8s_pod_name</code>, <code>k8s_ns_name</code>, <code>container_id</code></td></tr>
+</tbody></table></div>
+      <footer class="footer">
+        Spacebar Project. This campaign log page is scoped to SB-04.
+      </footer>
+    </main>
+  </div>
+</body>
+</html>
