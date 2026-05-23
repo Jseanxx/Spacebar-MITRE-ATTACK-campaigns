@@ -127,7 +127,7 @@ container_id=f3a18f7ee9a8 container_name=pwned container_image_repository=docker
 <tr><td>T1611 Escape to Host</td><td>실행된 프로세스가 <code>nsenter</code>인지 확인한다. <code>nsenter</code>는 대상 프로세스의 mount, UTS, IPC, network, PID namespace에 진입할 때 사용되므로 컨테이너 경계 탈출의 핵심 행위다.</td><td><code>proc</code>, <code>user</code></td></tr>
 <tr><td>T1611 Escape to Host</td><td><code>proc</code> 필드에 <code>-t 1</code>, <code>-m</code>, <code>-u</code>, <code>-i</code>, <code>-n</code>, <code>-p</code> 옵션이 포함되어 있는지 확인한다. 이는 PID 1을 대상으로 여러 호스트 namespace에 진입하려는 명령임을 보여준다.</td><td><code>proc</code></td></tr>
 <tr><td>T1611 Escape to Host</td><td>해당 행위가 어떤 컨테이너와 Pod에서 발생했는지 확인한다. 공격자가 생성한 위험 Pod에서 발생했다면 KL-001의 위험 Pod 생성 이벤트와 연결할 수 있다.</td><td><code>container</code>, <code>pod</code>, <code>ns</code>, <code>container_id</code>, <code>k8s_pod_name</code>, <code>k8s_ns_name</code></td></tr>
-<tr><td>T1611 Escape to Host</td><td>컨테이너 이미지와 namespace를 확인하여 일반 업무 Pod가 아니라 공격 목적으로 생성된 Pod 또는 특권 Pod에서 발생한 이벤트인지 식별한다.</td><td><code>container_image_repository</code>, <code>container_image_tag</code>, <code>k8s_ns_name</code></td></tr>
+<tr><td>T1611 Escape to Host</td><td>컨테이너 이미지와 namespace를 확인하여 공격 목적으로 생성된 Pod 또는 특권 Pod에서 발생한 이벤트인지 식별한다.</td><td><code>container_image_repository</code>, <code>container_image_tag</code>, <code>k8s_ns_name</code></td></tr>
 </tbody></table></div>
       <footer class="footer">
         Spacebar Project. This campaign log page is scoped to SB-04.
