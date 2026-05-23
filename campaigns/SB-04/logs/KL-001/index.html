@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SB-04 KL-001 Kyverno Unsafe Pod Creation Log | Spacebar Campaign Logs</title>
+  <link rel="stylesheet" href="/assets/campaign.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="/campaigns/"><img class="brand-logo" src="/assets/spacebarLogo.png" alt="Spacebar"><span>Spacebar Campaigns</span></a>
+    </div>
+  </header>
+
+  <div class="page-shell">
+
+    <aside class="campaign-sidebar" aria-label="Campaign log navigation">
+      <div class="sidebar-block">
+        <div class="sidebar-title">SB-04 Logs</div>
+        <nav class="sidebar-links">
+          <a class="sidebar-link" href="/campaigns/SB-04/">Campaign Page</a>
+          <a class="sidebar-link" href="/campaigns/SB-04/logs/">Campaign Logs</a>
+          <a class="sidebar-link" href="/campaigns/SB-04/logs/FL-001/"><span>FL-001</span>Falco RCE Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-04/logs/FL-RECON/"><span>FL-RECON</span>Falco Credential Recon Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-04/logs/FL-002/"><span>FL-002</span>Falco RBAC Check Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-04/logs/FL-003/"><span>FL-003</span>Falco Copy Fail Log</a>
+          <a class="sidebar-link active" href="/campaigns/SB-04/logs/KL-001/"><span>KL-001</span>Kyverno Unsafe Pod Creation Log</a>
+        </nav>
+      </div>
+      <div class="sidebar-block">
+        <div class="sidebar-title">Global Catalog</div>
+        <nav class="sidebar-links">
+          <a class="sidebar-link" href="/logs/">All Logs</a>
+        </nav>
+      </div>
+    </aside>
+    <main class="page campaign-content">
+      <div class="breadcrumbs"><a href="/campaigns/">Home</a> / <a href="/campaigns/SB-04/">NodeFall</a> / <a href="/campaigns/SB-04/logs/">Campaign Logs</a> / <span>KL-001</span></div>
+<h1>KL-001 Kyverno Unsafe Pod Creation Log</h1>
+<div class="meta-grid" aria-label="Campaign metadata">
+<div class="meta-label">Log ID:</div>
+<div class="meta-value">KL-001</div>
+<div class="meta-label">Source:</div>
+<div class="meta-value">SB-04 K8s Node</div>
+<div class="meta-label">Representative Path:</div>
+<div class="meta-value"><code>/var/log/nodefall/nodefall-events.log</code></div>
+<div class="meta-label">Collection:</div>
+<div class="meta-value">Wazuh agent file input (<code>/var/log/nodefall/nodefall-events.log</code>)</div>
+<div class="meta-label">Primary Use:</div>
+<div class="meta-value">특권 Pod 생성 및 호스트 네임스페이스 접근이 가능한 위험 Pod 스펙 생성 행위 확인</div>
+</div>
+<h2 id="공격-행위-요약">공격 행위 요약</h2>
+<p>KL-001은 NodeFall 캠페인에서 공격자가 Kubernetes API 권한을 악용해 컨테이너 탈출에 사용할 수 있는 위험한 Pod를 생성한 행위를 설명하는 Kyverno 기반 로그이다.</p>
+<p>공격자는 확보한 Kubernetes 자격 증명과 권한을 이용해 <code>privileged</code>, <code>hostPID</code>, <code>hostNetwork</code>, <code>hostIPC</code>, <code>hostPath</code>와 같은 위험한 Pod 스펙을 포함한 Pod 생성을 시도했다. 이러한 설정은 컨테이너가 호스트의 네임스페이스나 파일 시스템에 접근할 수 있게 만들어 컨테이너 격리 경계를 약화시킨다.</p>
+<p>Kyverno는 Kubernetes API admission 단계에서 Pod 생성 또는 수정 요청을 검사하며, 위험한 스펙이 포함된 요청이 정책 조건과 매칭되면 PolicyViolation 이벤트를 생성한다. 이 로그는 실제 런타임 탈출 행위가 발생하기 전, 공격자가 호스트 접근을 가능하게 하는 실행 환경을 준비했다는 증거로 사용된다.</p>
+<h2 id="로그-발생-위치">로그 발생 위치</h2>
+<div class="table-wrap wide-table">
+<table>
+<thead><tr><th>구분</th><th>위치</th><th>설명</th></tr></thead>
+<tbody>
+<tr><td>Kubernetes API</td><td>kube-apiserver AdmissionReview</td><td>공격자의 Pod 생성/수정 요청이 admission 단계로 전달됨</td></tr>
+<tr><td>Kyverno</td><td>ClusterPolicy <code>nodefall-kl-001-suspicious-pod</code></td><td><code>validate.deny.conditions</code>가 Pod 스펙의 위험 설정을 검사</td></tr>
+<tr><td>Kyverno</td><td><code>validate.message</code></td><td>조건 매칭 시 <code>[KL-001] Suspicious Pod Created</code> 메시지를 가진 PolicyViolation 이벤트 생성</td></tr>
+<tr><td>Kubernetes Event</td><td><code>reason=PolicyViolation</code></td><td>Kyverno 정책 위반 결과가 Kubernetes Event로 저장됨</td></tr>
+<tr><td>K8s Node</td><td><code>/usr/local/bin/nodefall-kyverno-event-watch.sh</code></td><td>watcher가 PolicyViolation 이벤트를 감시</td></tr>
+<tr><td>K8s Node</td><td><code>/var/log/nodefall/nodefall-events.log</code></td><td>watcher가 Kyverno 이벤트를 파일 로그로 저장</td></tr>
+</tbody></table></div>
+<h2 id="수집-방식">수집 방식</h2>
+<div class="table-wrap wide-table">
+<table>
+<thead><tr><th>구분</th><th>방식</th></tr></thead>
+<tbody>
+<tr><td>Kyverno 탐지 기준</td><td>ClusterPolicy의 <code>validate.deny.conditions</code>가 <code>privileged</code>, <code>hostPID</code>, <code>hostNetwork</code>, <code>hostIPC</code>, <code>hostPath</code> 설정을 검사</td></tr>
+<tr><td>Kyverno 탐지 메시지</td><td>조건 매칭 시 <code>validate.message</code> 값인 <code>[KL-001] Suspicious Pod Created</code>가 PolicyViolation 이벤트에 포함됨</td></tr>
+<tr><td>Kubernetes Event</td><td>Kyverno가 <code>reason=PolicyViolation</code> 이벤트를 생성</td></tr>
+<tr><td>nodefall watcher</td><td><code>/usr/local/bin/nodefall-kyverno-event-watch.sh</code>가 PolicyViolation 이벤트를 감시</td></tr>
+<tr><td>파일 저장</td><td>watcher가 <code>/var/log/nodefall/nodefall-events.log</code>에 이벤트를 저장</td></tr>
+<tr><td>Wazuh agent</td><td>K8s node의 <code>/var/ossec/etc/ossec.conf</code>에서 <code>/var/log/nodefall/nodefall-events.log</code>를 <code>syslog</code> 형식으로 수집</td></tr>
+<tr><td>Wazuh manager</td><td>Docker 컨테이너 <code>single-node_wazuh.manager_1</code> 내부 <code>/var/ossec/etc/rules/local_rules.xml</code>에서 KL-001 룰과 매칭</td></tr>
+<tr><td>Wazuh Dashboard</td><td>매칭된 alert를 <code>[KL-001] Suspicious Pod Created</code> 이벤트로 표시</td></tr>
+</tbody></table></div>
+      <footer class="footer">
+        Spacebar Project. This campaign log page is scoped to SB-04.
+      </footer>
+    </main>
+  </div>
+</body>
+</html>
