@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SB-03 WL-001 Sysmon 1 Process Creation | Spacebar Campaign Logs</title>
+  <link rel="stylesheet" href="/assets/campaign.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="/campaigns/"><img class="brand-logo" src="/assets/spacebarLogo.png" alt="Spacebar"><span>Spacebar Campaigns</span></a>
+    </div>
+  </header>
+
+  <div class="page-shell">
+
+    <aside class="campaign-sidebar" aria-label="Campaign log navigation">
+      <div class="sidebar-block">
+        <div class="sidebar-title">SB-03 Logs</div>
+        <nav class="sidebar-links">
+          <a class="sidebar-link" href="/campaigns/SB-03/">Campaign Page</a>
+          <a class="sidebar-link" href="/campaigns/SB-03/logs/">Campaign Logs</a>
+          <a class="sidebar-link active" href="/campaigns/SB-03/logs/WL-001/"><span>WL-001</span>Sysmon 1 Process Creation</a>
+          <a class="sidebar-link" href="/campaigns/SB-03/logs/WL-002/"><span>WL-002</span>Sysmon 3 Network Connection</a>
+        </nav>
+      </div>
+      <div class="sidebar-block">
+        <div class="sidebar-title">Global Catalog</div>
+        <nav class="sidebar-links">
+          <a class="sidebar-link" href="/logs/">All Logs</a>
+        </nav>
+      </div>
+    </aside>
+    <main class="page campaign-content">
+      <div class="breadcrumbs"><a href="/campaigns/">Home</a> / <a href="/campaigns/SB-03/">Operation MyCompany Dominance</a> / <a href="/campaigns/SB-03/logs/">Campaign Logs</a> / <span>WL-001</span></div>
+<h1>WL-001 Sysmon 1 Process Creation</h1>
+<div class="meta-grid" aria-label="Campaign metadata">
+<div class="meta-label">Log ID:</div>
+<div class="meta-value">WL-001</div>
+<div class="meta-label">Source:</div>
+<div class="meta-value">Sysmon</div>
+<div class="meta-label">Representative Path:</div>
+<div class="meta-value"><code>Applications and Services Logs &gt; Microsoft &gt; Windows &gt; Sysmon &gt; Operational (Event ID 1)</code></div>
+<div class="meta-label">Collection:</div>
+<div class="meta-value">Winlogbeat</div>
+<div class="meta-label">Primary Use:</div>
+<div class="meta-value">신규 프로세스 생성 행위 모니터링을 통한 악성코드 실행, 공격자의 명령어 실행(리버스 쉘), 및 내부 정찰 행위 탐지</div>
+</div>
+<h2 id="주요-필드">주요 필드</h2>
+<div class="table-wrap wide-table">
+<table>
+<thead><tr><th>필드</th><th>의미</th><th>예시</th></tr></thead>
+<tbody>
+<tr><td>winlog.event_id</td><td>Sysmon의 이벤트 식별자 (프로세스 생성 이벤트의 경우 값은 1)</td><td>1</td></tr>
+<tr><td>winlog.computer_name</td><td>이벤트가 발생한 대상 호스트(PC 또는 서버)의 컴퓨터 이름</td><td>PC01.mycompany.local</td></tr>
+<tr><td>winlog.event_data.Image</td><td>새롭게 생성되어 실행된 프로세스의 실행 파일 전체 경로</td><td>C:\\Windows\\System32\\net1.exe</td></tr>
+<tr><td>winlog.event_data.ParentImage</td><td>새 프로세스를 생성(호출)한 부모 프로세스의 실행 파일 전체 경로</td><td>C:\\Windows\\System32\\net.exe</td></tr>
+<tr><td>winlog.event_data.CommandLine</td><td>프로세스가 실행될 때 전달된 인자를 포함한 전체 명령행 문자열</td><td>C:\\Windows\\system32\\net1  user /domain</td></tr>
+<tr><td>winlog.event_data.User</td><td>해당 프로세스를 실행한 사용자의 계정명 및 도메인 정보</td><td>MYCOMPANY\\employee1</td></tr>
+</tbody></table></div>
+<h2 id="커버하는-techniques-used">커버하는 Techniques Used</h2>
+<div class="table-wrap wide-table">
+<table>
+<thead><tr><th>Technique</th><th>Mapping Reason</th></tr></thead>
+<tbody>
+<tr><td><a href="https://attack.mitre.org/techniques/T1059/003/">T1059.003 - Command and Scripting Interpreter: Windows Command Shell</a></td><td>악성 executable(예: SecurityUpdate.exe)이나 의심스러운 부모 프로세스가 윈도우 표준 명령 프롬프트(cmd.exe)를 자식 프로세스로 생성하여 공격자가 후속 명령을 실행할 수 있는 리버스 쉘 환경을 확보하는 행위를 식별한다.</td></tr>
+<tr><td><a href="https://attack.mitre.org/techniques/T1087/002/">T1087.002 - Account Discovery: Domain Account</a></td><td>공격자가 내부 이동(Lateral Movement) 대상을 물색하기 위해 Active Directory(AD) 도메인 내의 사용자 계정 구조, 관리자 계정, 서비스 계정 목록을 정찰하는 행위를 매핑한다.</td></tr>
+<tr><td><a href="https://attack.mitre.org/techniques/T1018/">T1018 - Remote System Discovery</a></td><td>공격자가 네트워크 인프라 내 핵심 자산의 위치를 파악하기 위해 도메인 컨트롤러(DC) 및 주요 구성원 서버(파일 서버 등)의 호스트명, IP 주소, 신뢰 관계를 정찰하는 행위를 식별한다.</td></tr>
+<tr><td><a href="https://attack.mitre.org/techniques/T1033/">T1033 - System Owner/User Discovery</a></td><td>공격자가 AD 환경 내에서 권한 상승 및 목표 달성 경로를 설계하기 위해 로컬 및 도메인의 주요 보안 그룹(예: Administrators, Domain Admins)의 구성원 목록을 확인하는 행위를 매핑한다.</td></tr>
+<tr><td><a href="https://attack.mitre.org/techniques/T1135/">T1135 - Network Share Discovery</a></td><td>공격자가 다른 시스템으로 접근하거나 중요 데이터를 탐색하기 전, 현재 권한으로 접근 가능한 네트워크 공유 자원(SMB 공유 폴더 등) 목록을 정찰하는 행위를 식별한다.</td></tr>
+<tr><td><a href="https://attack.mitre.org/techniques/T1069/">T1069 - Permission Groups Discovery</a></td><td>공격자가 AD 환경 내에서 권한 상승 및 목표 달성 경로를 설계하기 위해 로컬 및 도메인의 주요 보안 그룹(예: Administrators, Domain Admins)의 구성원 목록을 확인하는 행위를 매핑한다.</td></tr>
+</tbody></table></div>
+<h2 id="탐지-포인트">탐지 포인트</h2>
+<div class="table-wrap wide-table">
+<table>
+<thead><tr><th>Technique</th><th>관찰할 행위</th><th>주요 필드</th></tr></thead>
+<tbody>
+<tr><td>T1059.003 - Command and Scripting Interpreter: Windows Command Shell</td><td>정상적인 사용자 쉘 환경(explorer.exe)이나 개발 도구(devenv.exe, code.exe)가 아닌, 비정상적인 프로세스에 의해 cmd.exe가 자식 프로세스로 실행되는 행위 감시</td><td>winlog.event_id, winlog.computer_name, winlog.event_data.Image, winlog.event_data.ParentImage, winlog.event_data.User</td></tr>
+<tr><td>T1087.002 - Account Discovery: Domain Account</td><td>관리자가 아닌 계정이 시스템 명령어 유틸리티(net.exe, net1.exe, wmic.exe 등)를 사용하여 명령행에 domain, group, useraccount 등의 키워드를 입력해 도메인 계정 구조를 조회하는 행위 감시</td><td>winlog.event_id, winlog.computer_name, winlog.event_data.Image, winlog.event_data.ParentImage, winlog.event_data.CommandLine, winlog.event_data.User</td></tr>
+<tr><td>T1018 - Remote System Discovery</td><td>관리자가 아닌 계정이 시스템 및 네트워크 정찰 도구(nltest.exe, nslookup.exe, net.exe 등)를 이용해 dclist, domain_trusts, view 등의 인자를 전달하여 도메인 컨트롤러 및 자산 목록을 매핑하려는 행위 감시</td><td>winlog.event_id, winlog.computer_name, winlog.event_data.Image, winlog.event_data.ParentImage, winlog.event_data.CommandLine, winlog.event_data.User</td></tr>
+<tr><td>T1033 - System Owner/User Discovery</td><td>관리자가 아닌 계정이 세션 정보를 확인하기 위해 whoami.exe, quser.exe, qwinsta.exe 등의 명령어를 실행하는 행위 감시</td><td>winlog.event_id, winlog.computer_name, winlog.event_data.Image, winlog.event_data.ParentImage, winlog.event_data.CommandLine, winlog.event_data.User</td></tr>
+<tr><td>T1135 - Network Share Discovery</td><td>관리자가 아닌 계정이 네트워크 공유 정보를 수집하기 위해 net.exe, powershell.exe 등을 실행하고 명령행 인자에 view, share, Get-SmbShare 등의 공유 자원 탐색 키워드를 사용하는 행위 감시</td><td>winlog.event_id, winlog.computer_name, winlog.event_data.Image, winlog.event_data.ParentImage, winlog.event_data.CommandLine, winlog.event_data.User</td></tr>
+<tr><td>T1069 - Permission Groups Discovery</td><td>관리자가 아닌 계정이 net.exe, wmic.exe, powershell.exe 등을 통해 group, localgroup, Get-LocalGroupMember 등의 명령어로 특정 보안 그룹의 구성원 권한 정보를 조회하는 행위 감시</td><td>winlog.event_id, winlog.computer_name, winlog.event_data.Image, winlog.event_data.ParentImage, winlog.event_data.CommandLine, winlog.event_data.User</td></tr>
+</tbody></table></div>
+<h2 id="elk-query-예시">ELK Query 예시</h2>
+<pre><code>winlog.channel :&quot;Microsoft-Windows-Sysmon/Operational&quot;
+and winlog.event_id: 1
+and winlog.event_data.Image: &quot;C:\\Windows\\System32\\cmd.exe&quot;
+and not winlog.event_data.ParentImage : (&quot;C:\\Windows\\explorer.exe&quot; or *\\devenv.exe or *\\code.exe)</code></pre>
+<pre><code>winlog.channel : &quot;Microsoft-Windows-Sysmon/Operational&quot;
+  and winlog.event_id : 1
+  and winlog.event_data.Image : (*net.exe or *net1.exe or *wmic.exe or *nltest.exe or *dsquery.exe or *powershell.exe)
+  and winlog.event_data.CommandLine : (*domain* or *group* or *useraccount* or *enterprise_admins*)
+  and not winlog.event_data.User : (&quot;NT AUTHORITY\SYSTEM&quot; or &quot;MYCOMPANY\user_admin&quot;)
+  and not winlog.event_data.ParentImage : (*devenv.exe or *code.exe)</code></pre>
+<pre><code>winlog.channel : &quot;Microsoft-Windows-Sysmon/Operational&quot;
+  and winlog.event_id : 1
+  and winlog.event_data.Image : (*nltest.exe or *nslookup.exe or *net.exe or *net1.exe or *ping.exe or *arp.exe)
+  and winlog.event_data.CommandLine : (*dsgetdc* or *dclist* or *domain_trusts* or *view* or *type=srv* or *nslookup *)
+  and not winlog.event_data.User : (&quot;NT AUTHORITY\SYSTEM&quot; or &quot;MYCOMPANY\admin_user&quot;)
+  and not winlog.event_data.ParentImage : (*devenv.exe or *code.exe)</code></pre>
+<pre><code>winlog.channel : &quot;Microsoft-Windows-Sysmon/Operational&quot;
+  and winlog.event_id : 1
+  and winlog.event_data.Image : (*whoami.exe or *quser.exe or *qwinsta.exe)
+  and winlog.event_data.CommandLine : (*whoami* or *quser* or *qwinsta*)
+  and not winlog.event_data.User : (&quot;NT AUTHORITY\SYSTEM&quot; or &quot;MYCOMPANY\user_admin&quot;)
+  and not winlog.event_data.ParentImage : (*devenv.exe or *code.exe)</code></pre>
+<pre><code>winlog.channel : &quot;Microsoft-Windows-Sysmon/Operational&quot;
+  and winlog.event_id : 1
+  and winlog.event_data.Image : (*net.exe or *net1.exe or *wmic.exe or *powershell.exe)
+  and winlog.event_data.CommandLine : (*view * or *share* or *Get-SmbShare* or *Get-SmbConnection*)
+  and not winlog.event_data.User : (&quot;NT AUTHORITY\SYSTEM&quot; or &quot;MYCOMPANY\admin_user&quot;)
+  and not winlog.event_data.ParentImage : (*devenv.exe or *code.exe)</code></pre>
+<pre><code>winlog.channel : &quot;Microsoft-Windows-Sysmon/Operational&quot;
+and winlog.event_id : 1
+and winlog.event_data.Image : (*net.exe or *net1.exe or *wmic.exe or *powershell.exe)
+and winlog.event_data.CommandLine : (*group* or *localgroup* or *Get-LocalGroupMember* or *Get-ADGroupMember*)
+and not winlog.event_data.User : (&quot;NT AUTHORITY\SYSTEM&quot; or &quot;MYCOMPANY\admin_user&quot;)
+and not winlog.event_data.ParentImage : (*devenv.exe or *code.exe)</code></pre>
+      <footer class="footer">
+        Spacebar Project. This campaign log page is scoped to SB-03.
+      </footer>
+    </main>
+  </div>
+</body>
+</html>
