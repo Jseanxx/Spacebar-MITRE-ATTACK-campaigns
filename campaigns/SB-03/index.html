@@ -58,7 +58,7 @@
 <div class="meta-label">Created:</div>
 <div class="meta-value">02 May 2026</div>
 <div class="meta-label">Last Modified:</div>
-<div class="meta-value">12 May 2026</div>
+<div class="meta-value">24 May 2026</div>
 </div>
 </div>
 <h2 id="groups">Groups</h2>
@@ -77,19 +77,31 @@
 <h2 id="techniques-used">Techniques Used</h2>
 <div class="table-wrap wide-table">
 <table>
-<thead><tr><th>Domain</th><th>ID</th><th>Name</th><th>Use</th></tr></thead>
+<thead><tr><th>Domain</th><th>ID</th><th>Name</th><th>Use</th><th>Primary Logs</th></tr></thead>
 <tbody>
-<tr><td>Enterprise</td><td>T1204.002</td><td>User Execution: Malicious File</td><td>Operation MyCompany Dominance 당시 Gsin1626는 직원PC에 악성 실행 파일을 배포했고, 직원PC의 사용자가 배포된 악성 실행 파일을 실행하면서 리버스 쉘을 통한 초기 침투가 발생했다.</td></tr>
-<tr><td>Enterprise</td><td>T1059.001</td><td>Command and Scripting Interpreter: PowerShell</td><td>Operation MyCompany Dominance 당시 Gsin1626는 WinRM 원격 접속, 데이터 유출 등 전 과정에 걸쳐 PowerShell을 활용했다.</td></tr>
-<tr><td>Enterprise</td><td>T1087.002</td><td>Account Discovery: Domain Account</td><td>Operation MyCompany Dominance 당시 Gsin1626는 net user /domain 등의 명령을 통해 AD 내 도메인 계정 목록, 도메인 관리자 식별 등의 정보 수집 활동을 수행했다.</td></tr>
-<tr><td>Enterprise</td><td>T1558.003</td><td>Steal or Forge Kerberos Tickets: Kerberoasting</td><td>Operation MyCompany Dominance 당시 Gsin1626는 Rubeus를 이용하여 서비스 계정의 Kerberos 서비스 티켓 해시를 추출하고 Hashcat을 이용한 커스텀 사전 공격으로 평문 암호를 복원했다.</td></tr>
-<tr><td>Enterprise</td><td>T1021.006</td><td>Remote Services: Windows Remote Management</td><td>Operation MyCompany Dominance 당시 Gsin1626는 탈취한 서비스 계정의 자격 증명으로 WinRM을 사용하여 파일 서버에 원격으로 접속했다.</td></tr>
-<tr><td>Enterprise</td><td>T1003.001</td><td>OS Credential Dumping: LSASS Memory</td><td>Operation MyCompany Dominance 당시 Gsin1626는 Windows 내장 도구인 comsvcs.dll을 이용하여 LSASS 프로세스 메모리를 덤프하고 도메인 관리자의 자격 증명을 탈취했다.</td></tr>
-<tr><td>Enterprise</td><td>T1074.001</td><td>Data Staged: Local Data Staging</td><td>Operation MyCompany Dominance 당시 Gsin1626는 파일 서버의 내부 공유 폴더를 경유지로 삼아 직원PC로 데이터를 스테이징했다.</td></tr>
-<tr><td>Enterprise</td><td>T1041</td><td>Exfiltration Over C2 Channel</td><td>Operation MyCompany Dominance 당시 Gsin1626는 Invoke-WebRequest를 이용한 HTTP POST 방식으로 LSASS 덤프, 고객 목록 파일 등 내부 정보를 자신의 서버로 유출했다.</td></tr>
-<tr><td>Enterprise</td><td>T1003.006</td><td>OS Credential Dumping: DCSync</td><td>Operation MyCompany Dominance 당시 Gsin1626는 Impacket의 DCSync 기능을 이용하여 DC로부터 krbtgt의 AES256 키를 탈취했다.</td></tr>
-<tr><td>Enterprise</td><td>T1558.001</td><td>Steal or Forge Kerberos Tickets: Golden Ticket</td><td>Operation MyCompany Dominance 당시 Gsin1626는 탈취한 krbtgt 자격 증명으로 위조 TGT(Golden Ticket)를 생성하여 도메인 내 임의 권한을 행사하고 DC로의 장기 지속 접근을 확보했다.</td></tr>
-<tr><td>Enterprise</td><td>T1078.002</td><td>Valid Accounts: Domain Accounts</td><td>Operation MyCompany Dominance 당시 Gsin1626는 탈취한 도메인 관리자의 자격 증명과 골든 티켓을 이용하여 DC에 도메인 관리자 권한으로 접근했다.</td></tr>
+<tr><td>Enterprise</td><td>T1204.002</td><td>User Execution: Malicious File</td><td>Operation MyCompany Dominance 당시 Gsin1626는 직원PC에 악성 실행 파일을 배포했고, 직원PC의 사용자가 배포된 악성 실행 파일을 실행하면서 리버스 쉘을 통한 초기 침투가 발생했다.</td><td>-</td></tr>
+<tr><td>Enterprise</td><td>T1059.001</td><td>Command and Scripting Interpreter: PowerShell</td><td>Operation MyCompany Dominance 당시 Gsin1626는 WinRM 원격 접속, 데이터 유출 등 전 과정에 걸쳐 PowerShell을 활용했다.</td><td><a href="/campaigns/SB-03/logs/WL-001/">WL-001</a></td></tr>
+<tr><td>Enterprise</td><td>T1095</td><td>Non-Application Layer Protocol</td><td>Operation MyCompany Dominance 당시 Gsin1626는 리버스 쉘을 통해 공격자 서버 IP의 4444 포트로 아웃바운드 TCP 커넥션을 수립했다.</td><td><a href="/campaigns/SB-03/logs/WL-002/">WL-002</a></td></tr>
+<tr><td>Enterprise</td><td>T1087.002</td><td>Account Discovery: Domain Account</td><td>Operation MyCompany Dominance 당시 Gsin1626는 net user /domain 등의 명령을 통해 AD 내 도메인 계정 목록, 도메인 관리자 식별 등의 정보 수집 활동을 수행했다.</td><td><a href="/campaigns/SB-03/logs/WL-001/">WL-001</a></td></tr>
+<tr><td>Enterprise</td><td>T1018</td><td>Remote System Discovery</td><td>Operation MyCompany Dominance 당시 Gsin1626는 nltest, nslookup 등의 명령을 통해 주요 서버와 인프라 구조를 특정했다.</td><td><a href="/campaigns/SB-03/logs/WL-001/">WL-001</a></td></tr>
+<tr><td>Enterprise</td><td>T1033</td><td>System Owner/User Discovery</td><td>Operation MyCompany Dominance 당시 Gsin1626는 whoami, quser 등의 명령을 통해 시스템 내 권한 수준과 계정을 확인했다.</td><td><a href="/campaigns/SB-03/logs/WL-001/">WL-001</a></td></tr>
+<tr><td>Enterprise</td><td>T1135</td><td>Network Share Discovery</td><td>Operation MyCompany Dominance 당시 Gsin1626는 net view, net share 등의 명령을 통해 네트워크 공유 자원에 대한 정보를 수집했다.</td><td><a href="/campaigns/SB-03/logs/WL-001/">WL-001</a></td></tr>
+<tr><td>Enterprise</td><td>T1069</td><td>Permission Groups Discovery</td><td>Operation MyCompany Dominance 당시 Gsin1626는 net localgroup Administrators 등의 명령을 통ㅇ해 로컬 관리자 그룹 구성원과 도메인 관리자 계정 목록을 파악했다.</td><td><a href="/campaigns/SB-03/logs/WL-001/">WL-001</a></td></tr>
+<tr><td>Enterprise</td><td>T1558.003</td><td>Steal or Forge Kerberos Tickets: Kerberoasting</td><td>Operation MyCompany Dominance 당시 Gsin1626는 Rubeus를 이용하여 서비스 계정의 Kerberos 서비스 티켓 해시를 추출하고 Hashcat을 이용한 커스텀 사전 공격으로 평문 암호를 복원했다.</td><td><a href="/campaigns/SB-03/logs/WL-003/">WL-003</a></td></tr>
+<tr><td>Enterprise</td><td>T1021.006</td><td>Remote Services: Windows Remote Management</td><td>Operation MyCompany Dominance 당시 Gsin1626는 탈취한 서비스 계정의 자격 증명으로 WinRM을 사용하여 파일 서버에 원격으로 접속했다.</td><td><a href="/campaigns/SB-03/logs/WL-001/">WL-001</a></td></tr>
+<tr><td>Enterprise</td><td>T1059.001</td><td>Command and Scripting Interpreter: PowerShell</td><td>Operation MyCompany Dominance 당시 Gsin1626는 파일 서버 내부 이동 및 툴 반입 과정 전반에 걸쳐 PowerShell 인터프리터를 오용했다.</td><td><a href="/campaigns/SB-03/logs/WL-001/">WL-001</a></td></tr>
+<tr><td>Enterprise</td><td>T1105</td><td>Ingress Tool Transfer</td><td>Operation MyCompany Dominance 당시 Gsin1626는 Kerberosting 공격을 위한 도구(Rubeus.exe)를 직원PC 내부로 반입했다.</td><td><a href="/campaigns/SB-03/logs/WL-004/">WL-004</a></td></tr>
+<tr><td>Enterprise</td><td>T1003.001</td><td>OS Credential Dumping: LSASS Memory</td><td>Operation MyCompany Dominance 당시 Gsin1626는 Windows 내장 도구인 comsvcs.dll을 이용하여 LSASS 프로세스 메모리를 덤프하고 도메인 관리자의 자격 증명을 탈취했다.</td><td>-</td></tr>
+<tr><td>Enterprise</td><td>T1218.011</td><td>System Binary Proxy Execution: Rundll32</td><td>Operation MyCompany Dominance 당시 Gsin1626는 마이크로소프트 서명이 완료된 신뢰할 수 있는 정상 시스템 파일인 rundll32.exe를 프록시로 악용했다.</td><td>-</td></tr>
+<tr><td>Enterprise</td><td>T1074.001</td><td>Data Staged: Local Data Staging</td><td>Operation MyCompany Dominance 당시 Gsin1626는 파일 서버의 내부 공유 폴더를 경유지로 삼아 직원PC로 데이터를 스테이징했다.</td><td>-</td></tr>
+<tr><td>Enterprise</td><td>T1041</td><td>Exfiltration Over C2 Channel</td><td>Operation MyCompany Dominance 당시 Gsin1626는 Invoke-WebRequest를 이용한 HTTP POST 방식으로 LSASS 덤프, 고객 목록 파일 등 내부 정보를 자신의 서버로 유출했다.</td><td>-</td></tr>
+<tr><td>Enterprise</td><td>T1036.005</td><td>Masquerading: Match Legitimate Resource Name or Location</td><td>Operation MyCompany Dominance 당시 Gsin1626는 데이터 유출 및 스테이징 과정에서 파일명을 정상 파일 패턴으로 위장했다.</td><td>-</td></tr>
+<tr><td>Enterprise</td><td>T1560.001</td><td>Archive Collected Data: Archive via Utility</td><td>Operation MyCompany Dominance 당시 Gsin1626는 여러 경로에서 수집한 파일들을 네트워크로 유출하기 용이하도록 단일 아카이브 파일로 압축했다.</td><td>-</td></tr>
+<tr><td>Enterprise</td><td>T1003.006</td><td>OS Credential Dumping: DCSync</td><td>Operation MyCompany Dominance 당시 Gsin1626는 Impacket의 DCSync 기능을 이용하여 DC로부터 krbtgt의 AES256 키를 탈취했다.</td><td>-</td></tr>
+<tr><td>Enterprise</td><td>T1558.001</td><td>Steal or Forge Kerberos Tickets: Golden Ticket</td><td>Operation MyCompany Dominance 당시 Gsin1626는 탈취한 krbtgt 자격 증명으로 위조 TGT(Golden Ticket)를 생성하여 도메인 내 임의 권한을 행사하고 DC로의 장기 지속 접근을 확보했다.</td><td>-</td></tr>
+<tr><td>Enterprise</td><td>T1078.002</td><td>Valid Accounts: Domain Accounts</td><td>Operation MyCompany Dominance 당시 Gsin1626는 탈취한 도메인 관리자의 자격 증명과 골든 티켓을 이용하여 DC에 도메인 관리자 권한으로 접근했다.</td><td>-</td></tr>
+<tr><td>Enterprise</td><td>T1569.002</td><td>System Services: Service Execution</td><td>Operation MyCompany Dominance 당시 Gsin1626는 위조된 골든 티켓과 Impacket의 psexec.py를 이용해 도메인 컨트롤러에 원격 접속했다.</td><td>-</td></tr>
+<tr><td>Enterprise</td><td>T1003.003</td><td>OS Credential Dumping: NTDS</td><td>Operation MyCompany Dominance 당시 Gsin1626는 위조된 골든 티켓과 Impacket의 secretdump.py를 이용해 AD 내부의 모든 계정의 데이터베이스(NTDS)를 탈취했다.</td><td>-</td></tr>
 </tbody></table></div>
 </section>
 <section id="matrix" class="view-panel">
@@ -140,18 +152,29 @@
         <div class="tactic-header">Collection</div>
         <div class="technique-card used"><strong><a href="https://attack.mitre.org/techniques/T1204/002/" target="_blank" rel="noopener noreferrer"><code>T1204.002</code></a> User Execution: Malicious File</strong><span>Operation MyCompany Dominance 당시 Gsin1626는 직원PC에 악성 실행 파일을 배포했고, 직원PC의 사용자가 배포된 악성 실행 파일을 실행하면서 리버스 쉘을 통한 초기 침투가 발생했다.</span></div>
         <div class="technique-card used"><strong><a href="https://attack.mitre.org/techniques/T1059/001/" target="_blank" rel="noopener noreferrer"><code>T1059.001</code></a> Command and Scripting Interpreter: PowerShell</strong><span>Operation MyCompany Dominance 당시 Gsin1626는 WinRM 원격 접속, 데이터 유출 등 전 과정에 걸쳐 PowerShell을 활용했다.</span></div>
+        <div class="technique-card used"><strong><a href="https://attack.mitre.org/techniques/T1095/" target="_blank" rel="noopener noreferrer"><code>T1095</code></a> Non-Application Layer Protocol</strong><span>Operation MyCompany Dominance 당시 Gsin1626는 리버스 쉘을 통해 공격자 서버 IP의 4444 포트로 아웃바운드 TCP 커넥션을 수립했다.</span></div>
         <div class="technique-card used"><strong><a href="https://attack.mitre.org/techniques/T1087/002/" target="_blank" rel="noopener noreferrer"><code>T1087.002</code></a> Account Discovery: Domain Account</strong><span>Operation MyCompany Dominance 당시 Gsin1626는 net user /domain 등의 명령을 통해 AD 내 도메인 계정 목록, 도메인 관리자 식별 등의 정보 수집 활동을 수행했다.</span></div>
+        <div class="technique-card used"><strong><a href="https://attack.mitre.org/techniques/T1018/" target="_blank" rel="noopener noreferrer"><code>T1018</code></a> Remote System Discovery</strong><span>Operation MyCompany Dominance 당시 Gsin1626는 nltest, nslookup 등의 명령을 통해 주요 서버와 인프라 구조를 특정했다.</span></div>
+        <div class="technique-card used"><strong><a href="https://attack.mitre.org/techniques/T1033/" target="_blank" rel="noopener noreferrer"><code>T1033</code></a> System Owner/User Discovery</strong><span>Operation MyCompany Dominance 당시 Gsin1626는 whoami, quser 등의 명령을 통해 시스템 내 권한 수준과 계정을 확인했다.</span></div>
+        <div class="technique-card used"><strong><a href="https://attack.mitre.org/techniques/T1135/" target="_blank" rel="noopener noreferrer"><code>T1135</code></a> Network Share Discovery</strong><span>Operation MyCompany Dominance 당시 Gsin1626는 net view, net share 등의 명령을 통해 네트워크 공유 자원에 대한 정보를 수집했다.</span></div>
+        <div class="technique-card used"><strong><a href="https://attack.mitre.org/techniques/T1069/" target="_blank" rel="noopener noreferrer"><code>T1069</code></a> Permission Groups Discovery</strong><span>Operation MyCompany Dominance 당시 Gsin1626는 net localgroup Administrators 등의 명령을 통ㅇ해 로컬 관리자 그룹 구성원과 도메인 관리자 계정 목록을 파악했다.</span></div>
         <div class="technique-card used"><strong><a href="https://attack.mitre.org/techniques/T1558/003/" target="_blank" rel="noopener noreferrer"><code>T1558.003</code></a> Steal or Forge Kerberos Tickets: Kerberoasting</strong><span>Operation MyCompany Dominance 당시 Gsin1626는 Rubeus를 이용하여 서비스 계정의 Kerberos 서비스 티켓 해시를 추출하고 Hashcat을 이용한 커스텀 사전 공격으로 평문 암호를 복원했다.</span></div>
         <div class="technique-card used"><strong><a href="https://attack.mitre.org/techniques/T1021/006/" target="_blank" rel="noopener noreferrer"><code>T1021.006</code></a> Remote Services: Windows Remote Management</strong><span>Operation MyCompany Dominance 당시 Gsin1626는 탈취한 서비스 계정의 자격 증명으로 WinRM을 사용하여 파일 서버에 원격으로 접속했다.</span></div>
+        <div class="technique-card used"><strong><a href="https://attack.mitre.org/techniques/T1059/001/" target="_blank" rel="noopener noreferrer"><code>T1059.001</code></a> Command and Scripting Interpreter: PowerShell</strong><span>Operation MyCompany Dominance 당시 Gsin1626는 파일 서버 내부 이동 및 툴 반입 과정 전반에 걸쳐 PowerShell 인터프리터를 오용했다.</span></div>
         <div class="technique-card used"><strong><a href="https://attack.mitre.org/techniques/T1003/001/" target="_blank" rel="noopener noreferrer"><code>T1003.001</code></a> OS Credential Dumping: LSASS Memory</strong><span>Operation MyCompany Dominance 당시 Gsin1626는 Windows 내장 도구인 comsvcs.dll을 이용하여 LSASS 프로세스 메모리를 덤프하고 도메인 관리자의 자격 증명을 탈취했다.</span></div>
+        <div class="technique-card used"><strong><a href="https://attack.mitre.org/techniques/T1218/011/" target="_blank" rel="noopener noreferrer"><code>T1218.011</code></a> System Binary Proxy Execution: Rundll32</strong><span>Operation MyCompany Dominance 당시 Gsin1626는 마이크로소프트 서명이 완료된 신뢰할 수 있는 정상 시스템 파일인 rundll32.exe를 프록시로 악용했다.</span></div>
         <div class="technique-card used"><strong><a href="https://attack.mitre.org/techniques/T1074/001/" target="_blank" rel="noopener noreferrer"><code>T1074.001</code></a> Data Staged: Local Data Staging</strong><span>Operation MyCompany Dominance 당시 Gsin1626는 파일 서버의 내부 공유 폴더를 경유지로 삼아 직원PC로 데이터를 스테이징했다.</span></div>
+        <div class="technique-card used"><strong><a href="https://attack.mitre.org/techniques/T1036/005/" target="_blank" rel="noopener noreferrer"><code>T1036.005</code></a> Masquerading: Match Legitimate Resource Name or Location</strong><span>Operation MyCompany Dominance 당시 Gsin1626는 데이터 유출 및 스테이징 과정에서 파일명을 정상 파일 패턴으로 위장했다.</span></div>
+        <div class="technique-card used"><strong><a href="https://attack.mitre.org/techniques/T1560/001/" target="_blank" rel="noopener noreferrer"><code>T1560.001</code></a> Archive Collected Data: Archive via Utility</strong><span>Operation MyCompany Dominance 당시 Gsin1626는 여러 경로에서 수집한 파일들을 네트워크로 유출하기 용이하도록 단일 아카이브 파일로 압축했다.</span></div>
         <div class="technique-card used"><strong><a href="https://attack.mitre.org/techniques/T1003/006/" target="_blank" rel="noopener noreferrer"><code>T1003.006</code></a> OS Credential Dumping: DCSync</strong><span>Operation MyCompany Dominance 당시 Gsin1626는 Impacket의 DCSync 기능을 이용하여 DC로부터 krbtgt의 AES256 키를 탈취했다.</span></div>
         <div class="technique-card used"><strong><a href="https://attack.mitre.org/techniques/T1558/001/" target="_blank" rel="noopener noreferrer"><code>T1558.001</code></a> Steal or Forge Kerberos Tickets: Golden Ticket</strong><span>Operation MyCompany Dominance 당시 Gsin1626는 탈취한 krbtgt 자격 증명으로 위조 TGT(Golden Ticket)를 생성하여 도메인 내 임의 권한을 행사하고 DC로의 장기 지속 접근을 확보했다.</span></div>
         <div class="technique-card used"><strong><a href="https://attack.mitre.org/techniques/T1078/002/" target="_blank" rel="noopener noreferrer"><code>T1078.002</code></a> Valid Accounts: Domain Accounts</strong><span>Operation MyCompany Dominance 당시 Gsin1626는 탈취한 도메인 관리자의 자격 증명과 골든 티켓을 이용하여 DC에 도메인 관리자 권한으로 접근했다.</span></div>
+        <div class="technique-card used"><strong><a href="https://attack.mitre.org/techniques/T1569/002/" target="_blank" rel="noopener noreferrer"><code>T1569.002</code></a> System Services: Service Execution</strong><span>Operation MyCompany Dominance 당시 Gsin1626는 위조된 골든 티켓과 Impacket의 psexec.py를 이용해 도메인 컨트롤러에 원격 접속했다.</span></div>
+        <div class="technique-card used"><strong><a href="https://attack.mitre.org/techniques/T1003/003/" target="_blank" rel="noopener noreferrer"><code>T1003.003</code></a> OS Credential Dumping: NTDS</strong><span>Operation MyCompany Dominance 당시 Gsin1626는 위조된 골든 티켓과 Impacket의 secretdump.py를 이용해 AD 내부의 모든 계정의 데이터베이스(NTDS)를 탈취했다.</span></div>
       </div>
       <div class="tactic">
         <div class="tactic-header">Command and Control</div>
-        <div class="technique-card"><strong>No SB-03 Technique</strong><span>현재 캠페인에서 이 tactic에 매핑된 Technique 없음</span></div>
+        <div class="technique-card used"><strong><a href="https://attack.mitre.org/techniques/T1105/" target="_blank" rel="noopener noreferrer"><code>T1105</code></a> Ingress Tool Transfer</strong><span>Operation MyCompany Dominance 당시 Gsin1626는 Kerberosting 공격을 위한 도구(Rubeus.exe)를 직원PC 내부로 반입했다.</span></div>
       </div>
       <div class="tactic">
         <div class="tactic-header">Exfiltration</div>
