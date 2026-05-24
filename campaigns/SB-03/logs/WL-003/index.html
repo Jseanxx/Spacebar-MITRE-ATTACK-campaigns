@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SB-03 WL-003 WL-003 Windows Security 4769 Kerberos Service Ticket Request | Spacebar Campaign Logs</title>
+  <link rel="stylesheet" href="/assets/campaign.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="/campaigns/"><img class="brand-logo" src="/assets/spacebarLogo.png" alt="Spacebar"><span>Spacebar Campaigns</span></a>
+    </div>
+  </header>
+
+  <div class="page-shell">
+
+    <aside class="campaign-sidebar" aria-label="Campaign log navigation">
+      <div class="sidebar-block">
+        <div class="sidebar-title">SB-03 Logs</div>
+        <nav class="sidebar-links">
+          <a class="sidebar-link" href="/campaigns/SB-03/">Campaign Page</a>
+          <a class="sidebar-link" href="/campaigns/SB-03/logs/">Campaign Logs</a>
+          <a class="sidebar-link" href="/campaigns/SB-03/logs/WL-001/"><span>WL-001</span>Sysmon 1 Process Creation</a>
+          <a class="sidebar-link" href="/campaigns/SB-03/logs/WL-002/"><span>WL-002</span>Sysmon 3 Network Connection</a>
+          <a class="sidebar-link active" href="/campaigns/SB-03/logs/WL-003/"><span>WL-003</span>WL-003 Windows Security 4769 Kerberos Service Ticket Request</a>
+        </nav>
+      </div>
+      <div class="sidebar-block">
+        <div class="sidebar-title">Global Catalog</div>
+        <nav class="sidebar-links">
+          <a class="sidebar-link" href="/logs/">All Logs</a>
+        </nav>
+      </div>
+    </aside>
+    <main class="page campaign-content">
+      <div class="breadcrumbs"><a href="/campaigns/">Home</a> / <a href="/campaigns/SB-03/">Operation MyCompany Dominance</a> / <a href="/campaigns/SB-03/logs/">Campaign Logs</a> / <span>WL-003</span></div>
+<h1>WL-003 Windows Security 4769 Kerberos Service Ticket Request</h1>
+<div class="meta-grid" aria-label="Campaign metadata">
+<div class="meta-label">Log ID:</div>
+<div class="meta-value">WL-003</div>
+<div class="meta-label">Source:</div>
+<div class="meta-value">Windows Event Log Security</div>
+<div class="meta-label">Representative Path:</div>
+<div class="meta-value"><code>Windows Logs &gt; Security (Event ID 4769)</code></div>
+<div class="meta-label">Collection:</div>
+<div class="meta-value">Winlogbeat</div>
+<div class="meta-label">Primary Use:</div>
+<div class="meta-value">Active Directory 환경에서 서비스 계정의 패스워드 해시를 탈취하려는 Kerberoasting 공격을 탐지하고, 비정상적인 Kerberos 서비스 티켓(TGS) 요청 행위를 추적 및 모니터링</div>
+</div>
+<h2 id="주요-필드">주요 필드</h2>
+<div class="table-wrap wide-table">
+<table>
+<thead><tr><th>필드</th><th>의미</th><th>예시</th></tr></thead>
+<tbody>
+<tr><td>winlog.event_id</td><td>Windows 보안 이벤트 식별자 (Kerberos 서비스 티켓 요청 이벤트의 경우 값은 4769)</td><td>4769</td></tr>
+<tr><td>winlog.computer_name</td><td>이벤트가 발생한 대상 호스트(PC 또는 서버)의 컴퓨터 이름</td><td>DC01.mycompany.local</td></tr>
+<tr><td>winlog.event_data.TargetUserName</td><td>Kerberos 서비스 티켓(TGS)을 요청한 사용자(계정명). 일반적으로 티켓 요청을 시도한 공격자 또는 탈취된 계정</td><td>employee1@MYCOMPANY.LOCAL</td></tr>
+<tr><td>winlog.event_data.ServiceName</td><td>티켓이 요청된 대상 서비스 계정의 이름 (SPN에 매핑된 서비스 계정)</td><td>svc_file</td></tr>
+<tr><td>winlog.event_data.IpAddress</td><td>서비스 티켓 요청이 발생한 출발지(공격자 또는 감염된 클라이언트 PC)의 IP 주소</td><td>::ffff:10.0.4.216</td></tr>
+<tr><td>winlog.event_data.Status</td><td>Kerberos 티켓 요청 처리 결과 코드 (0x0은 오류 없이 성공적으로 티켓이 발급되었음을 의미)</td><td>0x0</td></tr>
+</tbody></table></div>
+<h2 id="커버하는-techniques-used">커버하는 Techniques Used</h2>
+<div class="table-wrap wide-table">
+<table>
+<thead><tr><th>Technique</th><th>Mapping Reason</th></tr></thead>
+<tbody>
+<tr><td><a href="https://attack.mitre.org/techniques/T1558/003/">T1558.003 - Steal or Forge Kerberos Tickets: Kerberoasting</a></td><td>공격자가 도메인 환경 내 서비스 계정(예: svc_file)의 비밀번호를 오프라인에서 크래킹(알아내기) 위해, 도메인 컨트롤러에 정당한 권한이 있는 것처럼 서비스 티켓(TGS)을 요청하여 자격 증명 해시 데이터를 수집하는 행위를 식별한다.</td></tr>
+</tbody></table></div>
+<h2 id="탐지-포인트">탐지 포인트</h2>
+<div class="table-wrap wide-table">
+<table>
+<thead><tr><th>Technique</th><th>관찰할 행위</th><th>주요 필드</th></tr></thead>
+<tbody>
+<tr><td>T1558.003 - Steal or Forge Kerberos Tickets: Kerberoasting</td><td>일반 사용자 계정(예: employee1, employee2 등)이 평소 접근할 이유가 없거나 업무 연관성이 낮은 특정 핵심 서비스 계정(svc_file)을 대상으로, 도메인 컨트롤러에 Kerberos 서비스 티켓을 요청하여 성공적으로 발급(Status: 0x0)받는 행위 감시</td><td>winlog.event_id, winlog.computer_name, winlog.event_data.TargetUserName, winlog.event_data.ServiceName, winlog.event_data.IpAddress, winlog.event_data.Status</td></tr>
+</tbody></table></div>
+<h2 id="elk-query-예시">ELK Query 예시</h2>
+<pre><code>winlog.channel : &quot;Security&quot;
+and winlog.event_id : 4769
+and winlog.event_data.Status : 0x0
+and winlog.event_data.TargetUserName : (employee1* or employee2*)
+and winlog.event_data.ServiceName : (&quot;svc_file&quot;)</code></pre>
+      <footer class="footer">
+        Spacebar Project. This campaign log page is scoped to SB-03.
+      </footer>
+    </main>
+  </div>
+</body>
+</html>
