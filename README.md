@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/spacebarLogo.png" alt="Spacebar Logo" width="120">
+</p>
+
 # Spacebar MITRE ATT&CK Campaigns
 
 Spacebar 팀의 MITRE ATT&CK Campaign 형식 정리 페이지입니다.
