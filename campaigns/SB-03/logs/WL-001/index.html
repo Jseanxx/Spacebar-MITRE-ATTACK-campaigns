@@ -71,6 +71,8 @@
 <tr><td><a href="https://attack.mitre.org/techniques/T1033/">T1033 - System Owner/User Discovery</a></td><td>공격자가 AD 환경 내에서 권한 상승 및 목표 달성 경로를 설계하기 위해 로컬 및 도메인의 주요 보안 그룹(예: Administrators, Domain Admins)의 구성원 목록을 확인하는 행위를 매핑한다.</td></tr>
 <tr><td><a href="https://attack.mitre.org/techniques/T1135/">T1135 - Network Share Discovery</a></td><td>공격자가 다른 시스템으로 접근하거나 중요 데이터를 탐색하기 전, 현재 권한으로 접근 가능한 네트워크 공유 자원(SMB 공유 폴더 등) 목록을 정찰하는 행위를 식별한다.</td></tr>
 <tr><td><a href="https://attack.mitre.org/techniques/T1069/">T1069 - Permission Groups Discovery</a></td><td>공격자가 AD 환경 내에서 권한 상승 및 목표 달성 경로를 설계하기 위해 로컬 및 도메인의 주요 보안 그룹(예: Administrators, Domain Admins)의 구성원 목록을 확인하는 행위를 매핑한다.</td></tr>
+<tr><td><a href="https://attack.mitre.org/techniques/T1021/006/">T1021.006 - Remote Services: Windows Remote Management</a></td><td>공격자가 탈취한 유효한 자격 증명(예: svc_file 계정)을 악용하여 내부의 다른 호스트(예: 파일 서버 FS01)로 원격 접속을 시도할 때, WinRM 서비스가 백엔드에서 원격 명령을 처리하기 위해 호스트 프로세스(wsmprovhost.exe)를 생성하는 행위를 식별한다.</td></tr>
+<tr><td><a href="https://attack.mitre.org/techniques/T1059/001/">T1059.001 - Command and Scripting Interpreter: PowerShell</a></td><td>공격자가 내부 이동 후 툴 반입, 자격 증명 개체 생성(예: ConvertTo-SecureString), 원격 쉘 제어 등 악성 행위를 자동화하고 실행하기 위해 윈도우 기본 스크립트 인터프리터인 powershell.exe를 오용하는 행위를 식별한다.</td></tr>
 </tbody></table></div>
 <h2 id="탐지-포인트">탐지 포인트</h2>
 <div class="table-wrap wide-table">
@@ -83,6 +85,8 @@
 <tr><td>T1033 - System Owner/User Discovery</td><td>관리자가 아닌 계정이 세션 정보를 확인하기 위해 whoami.exe, quser.exe, qwinsta.exe 등의 명령어를 실행하는 행위 감시</td><td>winlog.event_id, winlog.computer_name, winlog.event_data.Image, winlog.event_data.ParentImage, winlog.event_data.CommandLine, winlog.event_data.User</td></tr>
 <tr><td>T1135 - Network Share Discovery</td><td>관리자가 아닌 계정이 네트워크 공유 정보를 수집하기 위해 net.exe, powershell.exe 등을 실행하고 명령행 인자에 view, share, Get-SmbShare 등의 공유 자원 탐색 키워드를 사용하는 행위 감시</td><td>winlog.event_id, winlog.computer_name, winlog.event_data.Image, winlog.event_data.ParentImage, winlog.event_data.CommandLine, winlog.event_data.User</td></tr>
 <tr><td>T1069 - Permission Groups Discovery</td><td>관리자가 아닌 계정이 net.exe, wmic.exe, powershell.exe 등을 통해 group, localgroup, Get-LocalGroupMember 등의 명령어로 특정 보안 그룹의 구성원 권한 정보를 조회하는 행위 감시</td><td>winlog.event_id, winlog.computer_name, winlog.event_data.Image, winlog.event_data.ParentImage, winlog.event_data.CommandLine, winlog.event_data.User</td></tr>
+<tr><td>T1021.006 - Remote Services: Windows Remote Management</td><td>대상 서버(FS01)에서 외부로부터의 WinRM 요청을 받아 PowerShell 원격 세션 호스트 프로세스인 wsmprovhost.exe가 생성되는 행위 감시 (특히 서비스 계정 MYCOMPANY\svc_file과 같이 평소 원격 쉘 접속을 하지 않는 계정이나 특정 출발지 IP에서 발생하는 비정상적인 원격 연결 유의)</td><td>winlog.event_id, winlog.computer_name, winlog.event_data.Image, winlog.event_data.ParentImage, winlog.event_data.User</td></tr>
+<tr><td>T1059.001 - Command and Scripting Interpreter: PowerShell</td><td>원격 관리 세션 호스트 프로세스(wsmprovhost.exe)에 의해 powershell.exe가 자식 프로세스로 연쇄 생성되는 행위 감시 (WinRM을 통해 원격으로 접속한 후 대화형 스크립트 명령을 실행하는 전형적인 내부 이동 및 제어 패턴)</td><td>winlog.event_id, winlog.computer_name, winlog.event_data.Image, winlog.event_data.ParentImage, winlog.event_data.User</td></tr>
 </tbody></table></div>
 <h2 id="elk-query-예시">ELK Query 예시</h2>
 <pre><code>winlog.channel :&quot;Microsoft-Windows-Sysmon/Operational&quot;
@@ -119,6 +123,16 @@ and winlog.event_data.Image : (*net.exe or *net1.exe or *wmic.exe or *powershell
 and winlog.event_data.CommandLine : (*group* or *localgroup* or *Get-LocalGroupMember* or *Get-ADGroupMember*)
 and not winlog.event_data.User : (&quot;NT AUTHORITY\SYSTEM&quot; or &quot;MYCOMPANY\admin_user&quot;)
 and not winlog.event_data.ParentImage : (*devenv.exe or *code.exe)</code></pre>
+<pre><code>winlog.channel: &quot;Microsoft-Windows-Sysmon/Operational&quot;
+and event.code: &quot;1&quot;
+and host.name: &quot;FS01.mycompany.local&quot;
+and winlog.event_data.Image: &quot;C:\\Windows\\System32\\wsmprovhost.exe&quot;
+and winlog.event_data.User: &quot;MYCOMPANY\\svc_file&quot;</code></pre>
+<pre><code>winlog.channel: &quot;Microsoft-Windows-Sysmon/Operational&quot;
+and event.code: &quot;1&quot;
+and host.name: &quot;FS01.mycompany.local&quot;
+and winlog.event_data.Image: &quot;C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe&quot;
+and winlog.event_data.ParentImage: &quot;C:\\Windows\\System32\\wsmprovhost.exe&quot;</code></pre>
       <footer class="footer">
         Spacebar Project. This campaign log page is scoped to SB-03.
       </footer>
