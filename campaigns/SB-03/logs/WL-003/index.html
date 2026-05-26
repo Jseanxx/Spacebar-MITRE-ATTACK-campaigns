@@ -90,6 +90,32 @@ and winlog.event_id : 4769
 and winlog.event_data.Status : 0x0
 and winlog.event_data.TargetUserName : (employee1* or employee2*)
 and winlog.event_data.ServiceName : (&quot;svc_file&quot;)</code></pre>
+<pre><code>from winlogbeat-*
+| where winlog.channel == &quot;Security&quot; 
+  and winlog.event_id in (&quot;4768&quot;, &quot;4769&quot;)
+  and winlog.event_data.TargetUserName in (&quot;Administrator@MYCOMPANY.LOCAL&quot;, &quot;admin_user@MYCOMPANY.LOCAL&quot;, &quot;Administrator&quot;, &quot;admin_user&quot;)
+| eval ticket_hash = case(
+    winlog.event_id == &quot;4769&quot;, winlog.event_data.RequestTicketHash,
+    winlog.event_id == &quot;4768&quot;, winlog.event_data.ResponseTicket,
+    null
+  )
+| eval is_4769 = to_integer(case(winlog.event_id==&quot;4769&quot;,1,0))
+| eval is_4768 = to_integer(case(winlog.event_id==&quot;4768&quot;,1,0))
+| eval targetUserName = case(
+    winlog.event_data.TargetUserName in (&quot;Administrator@MYCOMPANY.LOCAL&quot;, &quot;Administrator&quot;), &quot;Administrator&quot;,
+    winlog.event_data.TargetUserName in (&quot;admin_user@MYCOMPANY.LOCAL&quot;, &quot;admin_user&quot;), &quot;admin_user&quot;,
+    null
+)
+| stats
+    count_4769 = sum(is_4769),
+    count_4768 = sum(is_4768),
+    first_seen = min(to_long(@timestamp)),
+    last_seen = max(to_long(@timestamp))
+by ticket_hash, winlog.event_data.IpAddress, targetUserName
+| where count_4769 &gt; 0 and count_4768 == 0
+| eval first_seen = to_datetime(first_seen)
+| eval last_seen = to_datetime(last_seen)
+| keep ticket_hash, winlog.event_data.IpAddress, targetUserName, first_seen, last_seen, count_4768, count_4769</code></pre>
       <footer class="footer">
         Spacebar Project. This campaign log page is scoped to SB-03.
       </footer>
