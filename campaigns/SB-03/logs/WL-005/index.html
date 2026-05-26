@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SB-03 WL-005 WL-005 Sysmon 10 Process Access | Spacebar Campaign Logs</title>
+  <link rel="stylesheet" href="/assets/campaign.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="/campaigns/"><img class="brand-logo" src="/assets/spacebarLogo.png" alt="Spacebar"><span>Spacebar Campaigns</span></a>
+    </div>
+  </header>
+
+  <div class="page-shell">
+
+    <aside class="campaign-sidebar" aria-label="Campaign log navigation">
+      <div class="sidebar-block">
+        <div class="sidebar-title">SB-03 Logs</div>
+        <nav class="sidebar-links">
+          <a class="sidebar-link" href="/campaigns/SB-03/">Campaign Page</a>
+          <a class="sidebar-link" href="/campaigns/SB-03/logs/">Campaign Logs</a>
+          <a class="sidebar-link" href="/campaigns/SB-03/logs/WL-001/"><span>WL-001</span>Sysmon 1 Process Creation</a>
+          <a class="sidebar-link" href="/campaigns/SB-03/logs/WL-002/"><span>WL-002</span>Sysmon 3 Network Connection</a>
+          <a class="sidebar-link" href="/campaigns/SB-03/logs/WL-003/"><span>WL-003</span>WL-003 Windows Security 4769 Kerberos Service Ticket Request</a>
+          <a class="sidebar-link" href="/campaigns/SB-03/logs/WL-004/"><span>WL-004</span>WL-004 PowerShell 4104 PowerShell Script Block Logging</a>
+          <a class="sidebar-link active" href="/campaigns/SB-03/logs/WL-005/"><span>WL-005</span>WL-005 Sysmon 10 Process Access</a>
+          <a class="sidebar-link" href="/campaigns/SB-03/logs/WL-006/"><span>WL-006</span>WL-006 Windows Security 4662 Direction Service Access</a>
+          <a class="sidebar-link" href="/campaigns/SB-03/logs/WL-009/"><span>WL-009</span>WL-009 Kerberos Golen Ticket Bypass Detection</a>
+          <a class="sidebar-link" href="/campaigns/SB-03/logs/WL-007/"><span>WL-007</span>WL-007 Windows Security 4624 Successful Logon</a>
+          <a class="sidebar-link" href="/campaigns/SB-03/logs/WL-008/"><span>WL-008</span>WL-008 Windows System 7045 Service Installation</a>
+        </nav>
+      </div>
+      <div class="sidebar-block">
+        <div class="sidebar-title">Global Catalog</div>
+        <nav class="sidebar-links">
+          <a class="sidebar-link" href="/logs/">All Logs</a>
+        </nav>
+      </div>
+    </aside>
+    <main class="page campaign-content">
+      <div class="breadcrumbs"><a href="/campaigns/">Home</a> / <a href="/campaigns/SB-03/">Operation MyCompany Dominance</a> / <a href="/campaigns/SB-03/logs/">Campaign Logs</a> / <span>WL-005</span></div>
+<h1>WL-005 Sysmon 10 Process Access</h1>
+<div class="meta-grid" aria-label="Campaign metadata">
+<div class="meta-label">Log ID:</div>
+<div class="meta-value">WL-005</div>
+<div class="meta-label">Source:</div>
+<div class="meta-value">Sysmon</div>
+<div class="meta-label">Representative Path:</div>
+<div class="meta-value"><code>Applications and Services Logs &gt; Microsoft &gt; Windows &gt; Sysmon &gt; Operational (Event ID 5)</code></div>
+<div class="meta-label">Collection:</div>
+<div class="meta-value">Winlogbeat</div>
+<div class="meta-label">Primary Use:</div>
+<div class="meta-value">특정 프로세스가 다른 프로세스의 메모리나 핸들에 접근하는 행위를 모니터링하여, 자격 증명 탈취를 목적으로 하는 LSASS 메모리 덤프 공격을 탐지</div>
+</div>
+<h2 id="주요-필드">주요 필드</h2>
+<div class="table-wrap wide-table">
+<table>
+<thead><tr><th>필드</th><th>의미</th><th>예시</th></tr></thead>
+<tbody>
+<tr><td>winlog.event_id</td><td>Sysmon의 이벤트 식별자 (프로세스 접근 이벤트의 경우 값은 10)</td><td>10</td></tr>
+<tr><td>winlog.computer_name</td><td>이벤트가 발생한 대상 호스트(PC 또는 서버)의 컴퓨터 이름</td><td>FS01.mycompany.local</td></tr>
+<tr><td>winlog.event_data.SourceImage</td><td>다른 프로세스의 메모리나 핸들에 접근을 시도한 주체(공격 실행) 프로세스의 전체 경로</td><td>C:\\Windows\\system32\\rundll32.exe</td></tr>
+<tr><td>winlog.event_data.TargetImage</td><td>접근 대상이 된 타깃 프로세스의 전체 경로 (예: lsass.exe)</td><td>C:\\Windows\\system32\\lsass.exe</td></tr>
+<tr><td>winlog.event_data.GrantedAccess</td><td>타깃 프로세스에 대해 허가된 구체적인 접근 권한 플래그 (메모리 읽기, 복제 등)</td><td>0x1410</td></tr>
+<tr><td>winlog.event_data.CallTrace</td><td>함수가 호출된 메모리 상의 스택 추적 정보 (어떤 DLL과 함수가 관여했는지 확인 가능)</td><td>…C:\\Windows\\System32\\comsvcs.dll…</td></tr>
+<tr><td>winlog.event_data.SourceUser</td><td>접근을 시도한 주체 프로세스를 실행한 사용자 계정명</td><td>MYCOMPANY\\svc_file</td></tr>
+</tbody></table></div>
+<h2 id="커버하는-techniques-used">커버하는 Techniques Used</h2>
+<div class="table-wrap wide-table">
+<table>
+<thead><tr><th>Technique</th><th>Mapping Reason</th></tr></thead>
+<tbody>
+<tr><td><a href="https://attack.mitre.org/techniques/T1003/001/">T1003.001 - OS Credential Dumping: LSASS Memory</a></td><td>공격자가 시스템 내에 로그인된 관리자 계정들의 자격 증명(해시 또는 평문 암호)을 확보하기 위해, 로컬 관리자 권한을 악용하여 윈도우 인증 서브시스템 프로세스(lsass.exe)의 메모리 데이터를 강제로 읽어 덤프 파일로 저장하려는 행위를 식별한다.</td></tr>
+</tbody></table></div>
+<h2 id="탐지-포인트">탐지 포인트</h2>
+<div class="table-wrap wide-table">
+<table>
+<thead><tr><th>Technique</th><th>관찰할 행위</th><th>주요 필드</th></tr></thead>
+<tbody>
+<tr><td>T1003.001 - OS Credential Dumping: LSASS Memory</td><td>윈도우 표준 유틸리티인 rundll32.exe가 자격 증명 프로세스인 lsass.exe에 접근하여 메모리 읽기 권한 플래그(0x1410, 0x1F0FFF)를 확보하는 행위를 감시</td><td>winlog.event_id, winlog.computer_name, winlog.event_data.SourceImage, winlog.event_data.TargetImage, winlog.event_data.GrantedAccess, winlog.event_data.CallTrace, winlog.event_data.SourceUser</td></tr>
+</tbody></table></div>
+<h2 id="elk-query-예시">ELK Query 예시</h2>
+<pre><code>winlog.channel : &quot;Microsoft-Windows-Sysmon/Operational&quot;
+and winlog.event_id : 10
+and winlog.event_data.TargetImage : *\\lsass.exe
+and winlog.event_data.SourceImage : *\\rundll32.exe
+and winlog.event_data.GrantedAccess : (&quot;0x1410&quot; or &quot;0x1F0FFF&quot;)
+and winlog.event_data.CallTrace : *comsvcs.dll*</code></pre>
+      <footer class="footer">
+        Spacebar Project. This campaign log page is scoped to SB-03.
+      </footer>
+    </main>
+  </div>
+</body>
+</html>
