@@ -23,21 +23,21 @@
           <a class="sidebar-link active" href="/campaigns/SB-07/logs/">Campaign Logs</a>
           <a class="sidebar-link" href="/campaigns/SB-07/logs/HAB-001/"><span>HAB-001</span>Bastion SSH Auth Log</a>
           <a class="sidebar-link" href="/campaigns/SB-07/logs/HAP-001/"><span>HAP-001</span>PMS JBoss and Update Relay HTTP Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-07/logs/HAC-001/"><span>HAC-001</span>Hanguel AD Sequential Correlator Alert</a>
           <a class="sidebar-link" href="/campaigns/SB-07/logs/HAP-002/"><span>HAP-002</span>PMS Patch Manifest and Hash Evidence</a>
           <a class="sidebar-link" href="/campaigns/SB-07/logs/HAW-001/"><span>HAW-001</span>Win01 Hanguel AD Agent Enriched Event</a>
           <a class="sidebar-link" href="/campaigns/SB-07/logs/HAW-003/"><span>HAW-003</span>Windows Task Scheduler Operational Log</a>
-          <a class="sidebar-link" href="/campaigns/SB-07/logs/HAW-002/"><span>HAW-002</span>Win01 PowerShell Operational Log</a>
           <a class="sidebar-link" href="/campaigns/SB-07/logs/HTE-002/"><span>HTE-002</span>SB-07 Attack Traffic Emulation Event</a>
+          <a class="sidebar-link" href="/campaigns/SB-07/logs/HAW-002/"><span>HAW-002</span>Win01 PowerShell Operational Log</a>
           <a class="sidebar-link" href="/campaigns/SB-07/logs/HAW-004/"><span>HAW-004</span>Windows Security Process Creation Log</a>
           <a class="sidebar-link" href="/campaigns/SB-07/logs/HAD-002/"><span>HAD-002</span>DC Loader and Dump Artifact Evidence</a>
-          <a class="sidebar-link" href="/campaigns/SB-07/logs/HAD-003/"><span>HAD-003</span>DC Sysmon Operational Log</a>
           <a class="sidebar-link" href="/campaigns/SB-07/logs/HAD-004/"><span>HAD-004</span>DC Loader Run Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-07/logs/HAD-009/"><span>HAD-009</span>DC NTFS USN Journal Artifact</a>
+          <a class="sidebar-link" href="/campaigns/SB-07/logs/HAD-003/"><span>HAD-003</span>DC Sysmon Operational Log</a>
           <a class="sidebar-link" href="/campaigns/SB-07/logs/HAD-005/"><span>HAD-005</span>DC Application Error and WER Event</a>
           <a class="sidebar-link" href="/campaigns/SB-07/logs/HAD-006/"><span>HAD-006</span>DC Amcache Artifact</a>
           <a class="sidebar-link" href="/campaigns/SB-07/logs/HAD-007/"><span>HAD-007</span>DC ShimCache AppCompatCache Artifact</a>
           <a class="sidebar-link" href="/campaigns/SB-07/logs/HAD-008/"><span>HAD-008</span>DC TaskCache Registry and Task XML Artifact</a>
-          <a class="sidebar-link" href="/campaigns/SB-07/logs/HAD-009/"><span>HAD-009</span>DC NTFS USN Journal Artifact</a>
-          <a class="sidebar-link" href="/campaigns/SB-07/logs/HAC-001/"><span>HAC-001</span>Hanguel AD Sequential Correlator Alert</a>
           <a class="sidebar-link" href="/campaigns/SB-07/logs/HTE-001/"><span>HTE-001</span>SB-07 Normal Traffic Emulation Event</a>
         </nav>
       </div>
@@ -76,6 +76,18 @@
           </div>
         </article>
         <article class="card">
+          <h3><a href="/campaigns/SB-07/logs/HAC-001/">HAC-001 Hanguel AD Sequential Correlator Alert</a></h3>
+          <p>hanguel-alerts-* 인덱스에 생성되는 SB-07 sequential correlation alert와 rule.id를 확인하는 상관분석 로그.</p>
+          <div class="tag-row">
+            <span class="tag">T1195.002</span>
+            <span class="tag">T1552</span>
+            <span class="tag">T1021.006</span>
+            <span class="tag">T1021.002</span>
+            <span class="tag">T1620</span>
+            <span class="tag">T1003.001</span>
+          </div>
+        </article>
+        <article class="card">
           <h3><a href="/campaigns/SB-07/logs/HAP-002/">HAP-002 PMS Patch Manifest and Hash Evidence</a></h3>
           <p>PMS 업데이트 manifest와 patch.ps1의 버전, 해시, 파일 경로 변화를 기록하는 공급망 변조 증거.</p>
           <div class="tag-row">
@@ -108,17 +120,6 @@
           </div>
         </article>
         <article class="card">
-          <h3><a href="/campaigns/SB-07/logs/HAW-002/">HAW-002 Win01 PowerShell Operational Log</a></h3>
-          <p>win01에서 Import-Clixml, Invoke-Command, New-PSDrive 등 PowerShell 기반 credential 사용과 DC 접근을 확인하는 로그.</p>
-          <div class="tag-row">
-            <span class="tag">T1552</span>
-            <span class="tag">T1021.006</span>
-            <span class="tag">T1021.002</span>
-            <span class="tag">T1003.001</span>
-            <span class="tag">T1620</span>
-          </div>
-        </article>
-        <article class="card">
           <h3><a href="/campaigns/SB-07/logs/HTE-002/">HTE-002 SB-07 Attack Traffic Emulation Event</a></h3>
           <p>PMS patch 실행, AD/DC discovery, credential artifact, WinRM/C$ 접근 흐름을 안전하게 재현해 correlation rule을 검증하는 emulation 이벤트.</p>
           <div class="tag-row">
@@ -129,6 +130,17 @@
             <span class="tag">T1552</span>
             <span class="tag">T1021.006</span>
             <span class="tag">T1021.002</span>
+          </div>
+        </article>
+        <article class="card">
+          <h3><a href="/campaigns/SB-07/logs/HAW-002/">HAW-002 Win01 PowerShell Operational Log</a></h3>
+          <p>win01에서 Import-Clixml, Invoke-Command, New-PSDrive 등 PowerShell 기반 credential 사용과 DC 접근을 확인하는 로그.</p>
+          <div class="tag-row">
+            <span class="tag">T1552</span>
+            <span class="tag">T1021.006</span>
+            <span class="tag">T1021.002</span>
+            <span class="tag">T1003.001</span>
+            <span class="tag">T1620</span>
           </div>
         </article>
         <article class="card">
@@ -150,21 +162,31 @@
           </div>
         </article>
         <article class="card">
-          <h3><a href="/campaigns/SB-07/logs/HAD-003/">HAD-003 DC Sysmon Operational Log</a></h3>
-          <p>DC에서 hgl_loader.exe의 lsass.exe 접근, dump 파일 생성, suspicious image load를 직접 증명하기 위한 Sysmon 로그.</p>
-          <div class="tag-row">
-            <span class="tag">T1003.001</span>
-            <span class="tag">T1620</span>
-            <span class="tag">T1055</span>
-          </div>
-        </article>
-        <article class="card">
           <h3><a href="/campaigns/SB-07/logs/HAD-004/">HAD-004 DC Loader Run Log</a></h3>
           <p>hgl_run.cmd가 생성한 hgl_loader_run.log를 요약하여 encrypted payload 복호화와 entry point 실행 정황을 확인하는 커스텀 실행 로그.</p>
           <div class="tag-row">
             <span class="tag">T1620</span>
             <span class="tag">T1027</span>
             <span class="tag">T1003.001</span>
+          </div>
+        </article>
+        <article class="card">
+          <h3><a href="/campaigns/SB-07/logs/HAD-009/">HAD-009 DC NTFS USN Journal Artifact</a></h3>
+          <p>USN Journal에서 hgl_loader.exe, hgl_payload.enc, hgl_run.cmd 파일 생성/갱신 lifecycle을 요약하는 포렌식 아티팩트.</p>
+          <div class="tag-row">
+            <span class="tag">T1105</span>
+            <span class="tag">T1620</span>
+            <span class="tag">T1027</span>
+            <span class="tag">T1003.001</span>
+          </div>
+        </article>
+        <article class="card">
+          <h3><a href="/campaigns/SB-07/logs/HAD-003/">HAD-003 DC Sysmon Operational Log</a></h3>
+          <p>DC에서 hgl_loader.exe의 lsass.exe 접근, dump 파일 생성, suspicious image load를 직접 증명하기 위한 Sysmon 로그.</p>
+          <div class="tag-row">
+            <span class="tag">T1003.001</span>
+            <span class="tag">T1620</span>
+            <span class="tag">T1055</span>
           </div>
         </article>
         <article class="card">
@@ -196,28 +218,6 @@
           <p>HanguelLoaderDiag scheduled task의 TaskCache registry와 Task XML action을 확인하는 DC 포렌식 아티팩트.</p>
           <div class="tag-row">
             <span class="tag">T1053.005</span>
-            <span class="tag">T1620</span>
-            <span class="tag">T1003.001</span>
-          </div>
-        </article>
-        <article class="card">
-          <h3><a href="/campaigns/SB-07/logs/HAD-009/">HAD-009 DC NTFS USN Journal Artifact</a></h3>
-          <p>USN Journal에서 hgl_loader.exe, hgl_payload.enc, hgl_run.cmd 파일 생성/갱신 lifecycle을 요약하는 포렌식 아티팩트.</p>
-          <div class="tag-row">
-            <span class="tag">T1105</span>
-            <span class="tag">T1620</span>
-            <span class="tag">T1027</span>
-            <span class="tag">T1003.001</span>
-          </div>
-        </article>
-        <article class="card">
-          <h3><a href="/campaigns/SB-07/logs/HAC-001/">HAC-001 Hanguel AD Sequential Correlator Alert</a></h3>
-          <p>hanguel-alerts-* 인덱스에 생성되는 SB-07 sequential correlation alert와 rule.id를 확인하는 상관분석 로그.</p>
-          <div class="tag-row">
-            <span class="tag">T1195.002</span>
-            <span class="tag">T1552</span>
-            <span class="tag">T1021.006</span>
-            <span class="tag">T1021.002</span>
             <span class="tag">T1620</span>
             <span class="tag">T1003.001</span>
           </div>

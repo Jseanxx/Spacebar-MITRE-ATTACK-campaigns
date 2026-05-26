@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SB-07 Detection Map | Spacebar Detection Map</title>
+  <link rel="stylesheet" href="/assets/campaign.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="/campaigns/"><img class="brand-logo" src="/assets/spacebarLogo.png" alt="Spacebar"><span>Spacebar Campaigns</span></a>
+    </div>
+  </header>
+
+  <div class="page-shell">
+
+    <aside class="campaign-sidebar" aria-label="Campaign navigation">
+      <div class="sidebar-block">
+        <div class="sidebar-title">Campaigns</div>
+        <nav class="sidebar-links">
+          <a class="sidebar-link" href="/campaigns/SB-00/"><span>SB-00</span>SB-01 Demo</a>
+          <a class="sidebar-link" href="/campaigns/SB-01/"><span>SB-01</span>2024 PipelineKey</a>
+          <a class="sidebar-link" href="/campaigns/SB-02/"><span>SB-02</span>Operation Poisoned Relay</a>
+          <a class="sidebar-link" href="/campaigns/SB-03/"><span>SB-03</span>Operation MyCompany Dominance</a>
+          <a class="sidebar-link" href="/campaigns/SB-04/"><span>SB-04</span>NodeFall</a>
+          <a class="sidebar-link" href="/campaigns/SB-05/"><span>SB-05</span>ClusterDrain</a>
+          <a class="sidebar-link" href="/campaigns/SB-06/"><span>SB-06</span>Operation Hanguel Flow</a>
+          <a class="sidebar-link active" href="/campaigns/SB-07/"><span>SB-07</span>OZZY PMS Chain</a>
+        </nav>
+      </div>
+      <div class="sidebar-block sidebar-sections">
+        <div class="sidebar-title">Logs</div>
+        <nav class="sidebar-links">
+          <a class="sidebar-link" href="/campaigns/SB-07/logs/">Campaign Logs</a>
+          <a class="sidebar-link" href="/logs/">Global Log Catalog</a>
+        </nav>
+      </div>
+    </aside>
+    <main class="page campaign-content">
+      <div class="breadcrumbs"><a href="/campaigns/">Home</a> / <a href="/campaigns/">Campaigns</a> / <a href="/campaigns/SB-07/">OZZY PMS Chain</a> / <span>Detection Map</span></div>
+<h1>SB-07 Detection Map</h1>
+
+<p class="summary">
+  이 페이지는 OZZY PMS Chain 환경에서 발생하는 공격 Technique과 이를 증명할 수 있는 Log Source를 분리해 정리한 Campaign Page 2 초안이다.
+  Technique 문서는 공격 행위와 분석 관점을 설명하고, Log Catalog는 원본 로그 위치, 수집 방식, 주요 필드, 커버 가능한 Technique을 역매핑한다.
+  특히 loader 기반 실행은 직접 증거와 추론 증거를 분리하여 <code>manual_mapping_inferred</code>처럼 표현한다.
+</p>
+
+<div class="concept-banner">
+  <b>문서화 원칙</b>
+  <span>Technique 하나를 바로 탐지한다고 쓰지 않고, 실제 행위 단위인 "PMS patch 실행", "credential artifact 발견", "DC WinRM/C$ 접근", "loader forensic artifact"를 Log ID와 연결한다.</span>
+</div>
+
+<h2 id="environment">Environment Scope</h2>
+<div class="table-wrap wide-table">
+  <table>
+    <tbody>
+      <tr><th>AWS Region</th><td>ap-northeast-2</td></tr>
+      <tr><th>Bastion</th><td>hanguel-bastion, 10.60.0.10</td></tr>
+      <tr><th>PMS / JBoss</th><td>hanguel-ops-pms, 10.60.0.20</td></tr>
+      <tr><th>Domain Controller</th><td>hanguel-dc01, 10.60.20.10</td></tr>
+      <tr><th>Windows Client</th><td>hanguel-win01, 10.60.30.10</td></tr>
+      <tr><th>ELK / SOC</th><td>hanguel-soc01, 10.60.40.10</td></tr>
+      <tr><th>Campaign ID</th><td>HGC-2026-AD-001</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<h2 id="technique-log-map">Technique to Log Map</h2>
+<div class="table-wrap wide-table">
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>MITRE ID</th>
+        <th>Technique</th>
+        <th>현재 환경 적용 여부</th>
+        <th>Related Logs</th>
+        <th>Representative event.action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>1</td><td class="id-cell">T1133</td><td>External Remote Services</td><td>관측 가능</td><td><a href="/campaigns/SB-07/logs/HAB-001/">HAB-001</a></td><td><code>ssh_session_accepted</code></td></tr>
+      <tr><td>2</td><td class="id-cell">T1046</td><td>Network Service Discovery</td><td>관측 가능</td><td><a href="/campaigns/SB-07/logs/HAB-001/">HAB-001</a>, <a href="/campaigns/SB-07/logs/HAP-001/">HAP-001</a></td><td><code>internal_service_probe</code>, <code>jboss_invoker_probe</code></td></tr>
+      <tr><td>3</td><td class="id-cell">T1190</td><td>Exploit Public-Facing Application</td><td>핵심 Technique</td><td><a href="/campaigns/SB-07/logs/HAP-001/">HAP-001</a>, <a href="/campaigns/SB-07/logs/HAC-001/">HAC-001</a></td><td><code>jboss_command_execution</code></td></tr>
+      <tr><td>4</td><td class="id-cell">T1195.002</td><td>Supply Chain Compromise</td><td>핵심 Technique</td><td><a href="/campaigns/SB-07/logs/HAP-002/">HAP-002</a>, <a href="/campaigns/SB-07/logs/HAW-001/">HAW-001</a>, <a href="/campaigns/SB-07/logs/HAC-001/">HAC-001</a></td><td><code>pms_patch_changed_emulated</code>, <code>pms_patch_executed</code></td></tr>
+      <tr><td>5</td><td class="id-cell">T1053.005</td><td>Scheduled Task / Job</td><td>핵심 Technique</td><td><a href="/campaigns/SB-07/logs/HAW-003/">HAW-003</a>, <a href="/campaigns/SB-07/logs/HAD-008/">HAD-008</a></td><td><code>dc_scheduled_task_registered</code>, <code>task_xml_loader_action_found</code></td></tr>
+      <tr><td>6</td><td class="id-cell">T1082</td><td>System Information Discovery</td><td>관측 가능</td><td><a href="/campaigns/SB-07/logs/HAW-001/">HAW-001</a>, <a href="/campaigns/SB-07/logs/HTE-002/">HTE-002</a></td><td><code>system_user_context</code>, <code>system_ipconfig</code></td></tr>
+      <tr><td>7</td><td class="id-cell">T1482</td><td>Domain Trust Discovery</td><td>관측 가능</td><td><a href="/campaigns/SB-07/logs/HAW-001/">HAW-001</a>, <a href="/campaigns/SB-07/logs/HTE-002/">HTE-002</a></td><td><code>domain_controller_discovery</code>, <code>dc_srv_dns_lookup</code></td></tr>
+      <tr><td>8</td><td class="id-cell">T1018</td><td>Remote System Discovery</td><td>관측 가능</td><td><a href="/campaigns/SB-07/logs/HAW-001/">HAW-001</a>, <a href="/campaigns/SB-07/logs/HTE-002/">HTE-002</a></td><td><code>dc_port_probe_445</code>, <code>dc_port_probe_5985</code></td></tr>
+      <tr><td>9</td><td class="id-cell">T1552</td><td>Unsecured Credentials</td><td>핵심 Technique</td><td><a href="/campaigns/SB-07/logs/HAW-001/">HAW-001</a>, <a href="/campaigns/SB-07/logs/HAW-002/">HAW-002</a>, <a href="/campaigns/SB-07/logs/HTE-002/">HTE-002</a></td><td><code>dc_cred_xml_discovered</code>, <code>dc_cred_xml_imported</code></td></tr>
+      <tr><td>10</td><td class="id-cell">T1021.002</td><td>SMB / Windows Admin Shares</td><td>관측 가능</td><td><a href="/campaigns/SB-07/logs/HAW-002/">HAW-002</a>, <a href="/campaigns/SB-07/logs/HTE-002/">HTE-002</a></td><td><code>dc_c_admin_share_access</code></td></tr>
+      <tr><td>11</td><td class="id-cell">T1021.006</td><td>Windows Remote Management</td><td>관측 가능</td><td><a href="/campaigns/SB-07/logs/HAW-002/">HAW-002</a>, <a href="/campaigns/SB-07/logs/HAW-003/">HAW-003</a>, <a href="/campaigns/SB-07/logs/HTE-002/">HTE-002</a></td><td><code>dc_winrm_whoami</code>, <code>dc_winrm_command_observed</code></td></tr>
+      <tr><td>12</td><td class="id-cell">T1027</td><td>Obfuscated Files or Information</td><td>관측 가능</td><td><a href="/campaigns/SB-07/logs/HAD-002/">HAD-002</a>, <a href="/campaigns/SB-07/logs/HAD-004/">HAD-004</a>, <a href="/campaigns/SB-07/logs/HAD-009/">HAD-009</a></td><td><code>encrypted_payload_artifact_found</code>, <code>loader_execution_log_found</code></td></tr>
+      <tr><td>13</td><td class="id-cell">T1620</td><td>Reflective Code Loading</td><td>추론 포함</td><td><a href="/campaigns/SB-07/logs/HAD-003/">HAD-003</a>, <a href="/campaigns/SB-07/logs/HAD-004/">HAD-004</a>, <a href="/campaigns/SB-07/logs/HAD-005/">HAD-005</a>, <a href="/campaigns/SB-07/logs/HAD-006/">HAD-006</a>, <a href="/campaigns/SB-07/logs/HAD-007/">HAD-007</a>, <a href="/campaigns/SB-07/logs/HAD-008/">HAD-008</a>, <a href="/campaigns/SB-07/logs/HAC-001/">HAC-001</a></td><td><code>loader_execution_log_found</code>, <code>manual_mapping_inferred_from_artifacts</code></td></tr>
+      <tr><td>14</td><td class="id-cell">T1003.001</td><td>OS Credential Dumping: LSASS Memory</td><td>조건부 관측</td><td><a href="/campaigns/SB-07/logs/HAD-002/">HAD-002</a>, <a href="/campaigns/SB-07/logs/HAD-003/">HAD-003</a>, <a href="/campaigns/SB-07/logs/HAD-004/">HAD-004</a>, <a href="/campaigns/SB-07/logs/HAD-005/">HAD-005</a>, <a href="/campaigns/SB-07/logs/HAC-001/">HAC-001</a></td><td><code>sysmon_lsass_process_access</code>, <code>loader_execution_log_found</code></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<h2 id="detection-details">Detection Details</h2>
+
+<p>
+  아래 상세 항목은 Technique별로 어떤 행위가 발생하고, 어떤 Log ID를 1차 근거로 삼아야 하며, 어떤 필드와 KQL로 확인할 수 있는지 정리한다.
+  단일 로그만으로 단정하지 않고, <code>host.name</code>, <code>source.ip</code>, <code>event.action</code>, <code>hanguel.classification</code>, <code>related.events</code>를 pivot으로 연결한다.
+</p>
+
+<details class="technique-panel" open>
+  <summary><span class="id-cell">T1195.002</span> PMS Patch Supply Chain</summary>
+  <div class="technique-body">
+    <p>PMS update path의 manifest와 <code>patch.ps1</code>이 변경되고, win01 PMS Agent가 이를 정상 업데이트처럼 다운로드/실행하는 단계다.</p>
+    <div class="mapping-grid">
+      <div><h3>Log IDs</h3><p><a href="/campaigns/SB-07/logs/HAP-002/">HAP-002</a>, <a href="/campaigns/SB-07/logs/HAW-001/">HAW-001</a>, <a href="/campaigns/SB-07/logs/HAW-003/">HAW-003</a>, <a href="/campaigns/SB-07/logs/HAC-001/">HAC-001</a></p></div>
+      <div><h3>Detection Point</h3><p><code>patch.ps1</code> hash 변경, <code>pms_patch_executed</code>, SYSTEM 실행 context</p></div>
+      <div><h3>KQL Draft</h3><p><code>event.action : ("pms_patch_changed_emulated" or "pms_patch_executed")</code></p></div>
+    </div>
+    <p>Investigation Pivot: PMS host의 manifest/hash 변경 시간과 win01의 patch 실행 시간, 이후 AD/DC discovery 이벤트를 연결한다.</p>
+  </div>
+</details>
+
+<details class="technique-panel">
+  <summary><span class="id-cell">T1082 / T1482 / T1018</span> win01 Discovery</summary>
+  <div class="technique-body">
+    <p>win01 SYSTEM 컨텍스트에서 사용자, IP/DNS, 도메인 컨트롤러, DC SMB/WinRM 포트 접근성을 확인하는 단계다.</p>
+    <div class="mapping-grid">
+      <div><h3>Log IDs</h3><p><a href="/campaigns/SB-07/logs/HAW-001/">HAW-001</a>, <a href="/campaigns/SB-07/logs/HTE-002/">HTE-002</a></p></div>
+      <div><h3>Detection Point</h3><p><code>system_user_context</code>, <code>domain_controller_discovery</code>, <code>dc_port_probe_445</code></p></div>
+      <div><h3>KQL Draft</h3><p><code>event.action : ("domain_controller_discovery" or "dc_srv_dns_lookup" or "dc_port_probe_445" or "dc_port_probe_5985")</code></p></div>
+    </div>
+  </div>
+</details>
+
+<details class="technique-panel">
+  <summary><span class="id-cell">T1552</span> Credential Artifact</summary>
+  <div class="technique-body">
+    <p><code>C:\ProgramData\HanguelPMS\dc_cred.xml</code>을 발견하고, 복호화 가능한 사용자 컨텍스트에서 credential object를 사용할 수 있는지 확인하는 단계다.</p>
+    <div class="mapping-grid">
+      <div><h3>Log IDs</h3><p><a href="/campaigns/SB-07/logs/HAW-001/">HAW-001</a>, <a href="/campaigns/SB-07/logs/HAW-002/">HAW-002</a>, <a href="/campaigns/SB-07/logs/HTE-002/">HTE-002</a></p></div>
+      <div><h3>Detection Point</h3><p><code>dc_cred_xml_discovered</code>, <code>dc_cred_xml_imported</code>, password redaction 여부</p></div>
+      <div><h3>KQL Draft</h3><p><code>event.action : ("dc_cred_xml_discovered" or "dc_cred_xml_imported")</code></p></div>
+    </div>
+  </div>
+</details>
+
+<details class="technique-panel">
+  <summary><span class="id-cell">T1021.002 / T1021.006</span> DC WinRM and C$ Access</summary>
+  <div class="technique-body">
+    <p>확보한 도메인 관리자 credential로 win01에서 DC WinRM command와 C$ admin share 접근을 수행하는 단계다.</p>
+    <div class="mapping-grid">
+      <div><h3>Log IDs</h3><p><a href="/campaigns/SB-07/logs/HAW-002/">HAW-002</a>, <a href="/campaigns/SB-07/logs/HAW-003/">HAW-003</a>, <a href="/campaigns/SB-07/logs/HTE-002/">HTE-002</a>, <a href="/campaigns/SB-07/logs/HAC-001/">HAC-001</a></p></div>
+      <div><h3>Detection Point</h3><p><code>dc_winrm_whoami</code>, <code>dc_c_admin_share_access</code>, <code>dc_scheduled_task_registered</code></p></div>
+      <div><h3>KQL Draft</h3><p><code>event.action : ("dc_winrm_whoami" or "dc_c_admin_share_access" or "dc_scheduled_task_registered")</code></p></div>
+    </div>
+  </div>
+</details>
+
+<details class="technique-panel">
+  <summary><span class="id-cell">T1620 / T1003.001</span> Loader and LSASS Artifact</summary>
+  <div class="technique-body">
+    <p>DC에 loader chain 파일이 배치되고, Task XML, Application Error, Amcache, ShimCache, USN Journal, loader run log로 실행 흐름을 재구성하는 단계다. Sysmon Event ID 10이 없으면 LSASS process access는 직접 증거가 아니라 한계로 표시한다.</p>
+    <div class="mapping-grid">
+      <div><h3>Log IDs</h3><p><a href="/campaigns/SB-07/logs/HAD-002/">HAD-002</a>, <a href="/campaigns/SB-07/logs/HAD-003/">HAD-003</a>, <a href="/campaigns/SB-07/logs/HAD-004/">HAD-004</a>, <a href="/campaigns/SB-07/logs/HAD-005/">HAD-005</a>, <a href="/campaigns/SB-07/logs/HAD-006/">HAD-006</a>, <a href="/campaigns/SB-07/logs/HAD-007/">HAD-007</a>, <a href="/campaigns/SB-07/logs/HAD-008/">HAD-008</a>, <a href="/campaigns/SB-07/logs/HAD-009/">HAD-009</a>, <a href="/campaigns/SB-07/logs/HAC-001/">HAC-001</a></p></div>
+      <div><h3>Detection Point</h3><p><code>application_loader_crash_observed</code>, <code>amcache_loader_artifact_found</code>, <code>usn_loader_file_lifecycle_observed</code></p></div>
+      <div><h3>KQL Draft</h3><p><code>log.id : ("HAD-005" or "HAD-006" or "HAD-007" or "HAD-008" or "HAD-009")</code></p></div>
+    </div>
+  </div>
+</details>
+
+<h2 id="mapping-matrix">Technique to Log Matrix</h2>
+<div class="table-wrap wide-table">
+  <table>
+    <thead>
+      <tr>
+        <th>Technique</th><th>HAB-001</th><th>HAP-001</th><th>HAP-002</th><th>HAW-001</th><th>HAW-002</th><th>HAW-003</th><th>HAW-004</th><th>HAD-003</th><th>HAD-004</th><th>HAD-005~009</th><th>HTE-002</th><th>HAC-001</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>T1133 External Remote Services</td><td>O</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+      <tr><td>T1046 Network Service Discovery</td><td>O</td><td>O</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+      <tr><td>T1190 Exploit Public-Facing Application</td><td>-</td><td>O</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>O</td></tr>
+      <tr><td>T1195.002 Supply Chain Compromise</td><td>-</td><td>O</td><td>O</td><td>O</td><td>-</td><td>O</td><td>-</td><td>-</td><td>-</td><td>-</td><td>O</td><td>O</td></tr>
+      <tr><td>T1082/T1482/T1018 Discovery</td><td>-</td><td>-</td><td>-</td><td>O</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>O</td><td>O</td></tr>
+      <tr><td>T1552 Unsecured Credentials</td><td>-</td><td>-</td><td>-</td><td>O</td><td>O</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>O</td><td>O</td></tr>
+      <tr><td>T1021.002/T1021.006 Remote Services</td><td>-</td><td>-</td><td>-</td><td>-</td><td>O</td><td>O</td><td>O</td><td>-</td><td>-</td><td>-</td><td>O</td><td>O</td></tr>
+      <tr><td>T1620 Reflective Code Loading</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>O</td><td>O</td><td>O</td><td>O</td><td>O</td><td>-</td><td>O</td></tr>
+      <tr><td>T1003.001 LSASS Memory</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>O</td><td>확장 필요</td><td>O</td><td>O</td><td>-</td><td>O</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<h2 id="referenced-log-catalog">Referenced Log Catalog</h2>
+<div class="cards">
+  <article class="card"><h3><a href="/campaigns/SB-07/logs/HAW-001/">HAW-001 Win01 Hanguel AD Agent Enriched Event</a></h3><p>PMS patch 실행 이후 win01의 AD/DC discovery, credential artifact 발견, DC 접근 신호를 정규화한다.</p></article>
+  <article class="card"><h3><a href="/campaigns/SB-07/logs/HAW-002/">HAW-002 Win01 PowerShell Operational Log</a></h3><p>Import-Clixml, Invoke-Command, New-PSDrive 기반 credential 사용과 DC 접근을 확인한다.</p></article>
+  <article class="card"><h3><a href="/campaigns/SB-07/logs/HAD-003/">HAD-003 DC Sysmon Operational Log</a></h3><p>Sysmon Event ID 10으로 loader가 LSASS를 열었는지 직접 증명하기 위한 로그다.</p></article>
+  <article class="card"><h3><a href="/campaigns/SB-07/logs/HAD-005/">HAD-005 DC Application Error and WER Event</a></h3><p>hgl_loader.exe crash와 unknown module 정황을 Windows 원본 로그로 확인한다.</p></article>
+  <article class="card"><h3><a href="/campaigns/SB-07/logs/HAD-006/">HAD-006 DC Amcache Artifact</a></h3><p>Amcache에서 hgl_loader.exe 경로와 PE metadata를 확인한다.</p></article>
+  <article class="card"><h3><a href="/campaigns/SB-07/logs/HAC-001/">HAC-001 Hanguel AD Sequential Correlator Alert</a></h3><p>patch, credential, DC access, loader artifact를 시간창 내 incident 후보로 묶는다.</p></article>
+</div>
+
+<h2 id="next-improvements">Current Gaps</h2>
+<ol>
+  <li>Sysmon Event ID 10 기반 <code>hgl_loader.exe -> lsass.exe</code> ProcessAccess 직접 증거는 아직 재현 캡처가 필요하다.</li>
+  <li><code>manual_mapping_inferred</code>는 직접 증거가 아니라 loader run log, Application Error, Amcache, ShimCache, Task XML, USN Journal 조합에 따른 추론으로 유지한다.</li>
+  <li>Bastion SSH, JBoss HTTP access, PMS relay access log를 ELK로 직접 ingest하면 초기 접근부터 supply chain까지의 증거가 더 강해진다.</li>
+  <li>정상 traffic emulation인 <code>HTE-001</code>과 공격 traffic emulation인 <code>HTE-002</code>를 Page 3 Detection Evidence 캡처로 분리하면 오탐/탐지 비교가 쉬워진다.</li>
+  <li>CloudTrail, VPC Flow Log를 연결하면 AWS-level 접근과 내부 east-west traffic을 보조 증거로 확장할 수 있다.</li>
+</ol>
+      <footer class="footer">
+        Spacebar Project. This detection map is an educational analysis artifact.
+      </footer>
+    </main>
+  </div>
+</body>
+</html>

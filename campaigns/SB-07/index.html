@@ -43,398 +43,403 @@
   <div class="campaign-description">
 <h1>OZZY PMS Chain</h1>
 <p class="summary">
-  OZZY PMS Chain은 AD 환경과 JBoss/PMS 업데이트 경로 간의 신뢰 관계를 악용하는 침해 캠페인이다.
-공격자는 bastion을 통해 내부망에 진입한 뒤 hanguel-ops-pms의 JBoss AS 6 취약 표면을 이용해 PMS 업데이트 파일과 manifest를 변조한다.
-hanguel-win01의 Hanguel PMS Agent는 변조된 패치를 <code>nt authority\system</code> 권한으로 실행하고, 이 과정에서 DC 접근에 필요한 credential artifact가 노출된다.
-이후 공격자는 <code>HANGUEL\Administrator</code> 권한으로 hanguel-dc01의 관리자 공유(C$)와 WinRM 원격 관리 채널에 접근 가능한 상태가 되며,
-PMS 업데이트 체인의 신뢰 훼손은 도메인 컨트롤러 credential access 위험으로 확대된다.
-</p>
+      OZZY PMS Chain은 AWS 기반 AD 실습 환경에서 JBoss/PMS 업데이트 경로를 신뢰 체인으로 악용하는 침해 캠페인이다.
+      HanguelPMSChain은 bastion을 통해 내부망으로 진입한 뒤 hanguel-ops-pms의 JBoss AS 6 취약 표면을 확인하고, PMS update manifest와 patch.ps1을 변조한다.
+      이후 hanguel-win01의 Hanguel PMS Agent가 변조된 패치를 <code>nt authority\system</code> 권한으로 실행하면서 AD/DC discovery, credential artifact 접근, DC C$/WinRM 접근, loader 기반 LSASS dump artifact 흐름으로 이어지는 활동을 수행했다.
+      피해 환경은 AWS VPC, bastion, JBoss/PMS 서버, Windows 클라이언트, Active Directory Domain Controller, Hanguel AD Agent, ELK Stack으로 구성된 기업형 AD 운영 환경으로 모델링된다.
+    </p>
   </div>
 <div class="meta-grid" aria-label="Campaign metadata">
-  <div class="meta-label">ID:</div>
-  <div class="meta-value">SB-07</div>
-  <div class="meta-label">Name:</div>
-  <div class="meta-value">OZZY PMS Chain</div>
-  <div class="meta-label">Source Profile ID:</div>
-  <div class="meta-value">HGC-2026-AD-001</div>
-  <div class="meta-label">First Seen:</div>
-  <div class="meta-value">May 2026</div>
-  <div class="meta-label">Last Seen:</div>
-  <div class="meta-value">May 2026</div>
-  <div class="meta-label">Version:</div>
-  <div class="meta-value">0.2</div>
-  <div class="meta-label">Created:</div>
-  <div class="meta-value">22 May 2026</div>
-  <div class="meta-label">Last Modified:</div>
-  <div class="meta-value">26 May 2026</div>
-  <div class="meta-label">Target:</div>
-  <div class="meta-value">AD server / JBoss PMS update chain</div>
-  <div class="meta-label">Objective:</div>
-  <div class="meta-value">Supply-chain execution, lateral movement, DC credential access</div>
-</div>
-</div>
-
-<div class="tag-row" aria-label="Campaign tags">
-  <span class="tag">JBoss AS 6</span>
-  <span class="tag">PMS Update Chain</span>
-  <span class="tag">Manual PE Loader</span>
-  <span class="tag">Hanguel AD Agent</span>
-  <span class="tag">Forensic Artifacts</span>
-  <span class="tag">Sequential Correlation</span>
-  <span class="tag">ATT&amp;CK Enterprise</span>
+      <div class="meta-label">ID:</div>
+      <div class="meta-value">SB-07</div>
+      <div class="meta-label">Name:</div>
+      <div class="meta-value">OZZY PMS Chain</div>
+      <div class="meta-label">Source Profile ID:</div>
+      <div class="meta-value">HGC-2026-AD-001</div>
+      <div class="meta-label">First Seen:</div>
+      <div class="meta-value">May 2026</div>
+      <div class="meta-label">Last Seen:</div>
+      <div class="meta-value">May 2026</div>
+      <div class="meta-label">Version:</div>
+      <div class="meta-value">0.3</div>
+      <div class="meta-label">Created:</div>
+      <div class="meta-value">22 May 2026</div>
+      <div class="meta-label">Last Modified:</div>
+      <div class="meta-value">26 May 2026</div>
+      <div class="meta-label">Target:</div>
+      <div class="meta-value">AWS-hosted AD / JBoss PMS update chain</div>
+      <div class="meta-label">Objective:</div>
+      <div class="meta-value">Supply-chain execution, lateral movement, DC credential access</div>
+    </div>
 </div>
 
-<h2 id="overview">Overview</h2>
-<p>
-  이 캠페인은 외부 접근 경로, Linux 기반 JBoss/PMS 서버, Windows PMS Agent, Active Directory 도메인 컨트롤러를 기업형 운영망 환경으로 구성하여 침해 흐름을 보여주는 캠페인이다. 
-  핵심 전개는 <code>hanguel-ops-pms</code>의 업데이트 경로의 패치파일을 변조해 <code>hanguel-win01</code>에서 SYSTEM 실행 흐름을 만들고,
-  <code>hanguel-win01</code>에서 발견한 credential artifact를 복호화 가능한 컨텍스트로 처리하여 <code>HANGUEL\Administrator</code> 접근 정보를 확보하는 것이다.
-  이후 공격자는 DC의 관리자 공유(C$) 및 WinRM 원격 실행 채널을 이용해 로더와 암호화된 payload를 배치하고,
-  로더가 payload를 메모리에서 복호화 및 manual mapping하여 LSASS dump를 생성하는 흐름을 구성한다.
-</p>
+    <div class="tag-row" aria-label="Campaign tags">
+      <span class="tag">AWS AD Lab</span>
+      <span class="tag">JBoss AS 6</span>
+      <span class="tag">PMS Update Chain</span>
+      <span class="tag">Hanguel AD Agent</span>
+      <span class="tag">Manual PE Loader</span>
+      <span class="tag">ATT&amp;CK Enterprise</span>
+    </div>
 
-<div class="info-grid" aria-label="OZZY PMS Chain overview">
-  <div class="info-cell">
-    <b>Initial Foothold</b>
-    <span>bastion 접근 경로를 이용한 내부망 진입</span>
-  </div>
-  <div class="info-cell">
-    <b>Supply Chain</b>
-    <span>PMS update manifest와 patch.ps1 변조</span>
-  </div>
-  <div class="info-cell">
-    <b>Lateral Movement</b>
-    <span>win01에서 DC C$ 및 WinRM 접근</span>
-  </div>
-  <div class="info-cell">
-    <b>Credential Access</b>
-    <span>DC LSASS dump와 offline credential parsing</span>
-  </div>
-</div>
+    <div class="concept-banner">
+      <b>Campaign Page 2</b>
+      <span>Technique별 탐지 근거와 Log Source Catalog는 <a href="/campaigns/SB-07/detection-map/">SB-07 Detection Map</a>에서 분리 관리한다.</span>
+    </div>
 
-<div class="phase-grid" aria-label="Campaign phase matrix">
-  <div class="phase-item"><b>Foothold</b><span>T1133</span><br><span>T1046</span></div>
-  <div class="phase-item"><b>PMS Access</b><span>T1190</span><br><span>T1059.004</span></div>
-  <div class="phase-item"><b>Supply Chain</b><span>T1195.002</span><br><span>T1036.005</span></div>
-  <div class="phase-item"><b>win01 SYSTEM</b><span>T1053.005</span><br><span>T1552</span></div>
-  <div class="phase-item"><b>DC Access</b><span>T1021.002</span><br><span>T1021.006</span></div>
-  <div class="phase-item"><b>LSASS</b><span>T1027</span><br><span>T1620</span><br><span>T1003.001</span></div>
-</div>
+    <h2 id="overview">Overview</h2>
+    <p>
+      이 캠페인은 외부 접근 경로, Linux 기반 JBoss/PMS 서버, Windows PMS Agent, Active Directory 도메인 컨트롤러가 연결된 기업형 운영망 침해 흐름으로 모델링된다.
+      핵심 전개는 <code>hanguel-ops-pms</code>의 업데이트 경로를 변조해 <code>hanguel-win01</code>에서 SYSTEM 실행을 만들고,
+      win01에서 발견한 credential artifact를 복호화 가능한 컨텍스트로 처리하여 <code>HANGUEL\Administrator</code> 접근 재료를 확보하는 것이다.
+      이후 공격자는 DC의 관리 공유 및 WinRM 실행 경로를 이용해 로더와 암호화된 payload를 배치하고,
+      로더 실행 산출물, Windows Event Log, Amcache, ShimCache, TaskCache, USN Journal을 조합해 loader chain을 재구성할 수 있는 흔적을 남긴다.
+    </p>
 
-<h2 id="detection-readiness">Detection Readiness</h2>
-<p>
-  SB-07의 탐지 문서화는 단일 Technique 탐지보다 행위 흐름을 재구성하는 데 초점을 둔다.
-  <code>hanguel_ad_agent</code>는 Windows/AD 이벤트와 포렌식 아티팩트를 ECS 유사 JSON으로 정규화하고,
-  <code>campaign.id</code>, <code>log.id</code>, <code>event.action</code>, <code>hanguel.classification</code> 필드로 정상, 의심, 공격 행위를 구분한다.
-  로더 기반 실행의 경우 <code>manual_mapping_inferred</code>처럼 직접 증거와 추론 증거를 분리해 기록한다.
-</p>
+    <div class="info-grid" aria-label="OZZY PMS Chain overview">
+      <div class="info-cell">
+        <b>Initial Access</b>
+        <span>bastion 경유 내부망 진입과 JBoss 취약 표면 확인</span>
+      </div>
+      <div class="info-cell">
+        <b>Supply Chain</b>
+        <span>PMS update manifest와 patch.ps1 변조</span>
+      </div>
+      <div class="info-cell">
+        <b>Lateral Movement</b>
+        <span>win01에서 DC C$ 및 WinRM 접근</span>
+      </div>
+      <div class="info-cell">
+        <b>Detection Goal</b>
+        <span>patch 실행, credential artifact, DC 접근, loader artifact를 묶어 탐지</span>
+      </div>
+    </div>
 
-<div class="concept-banner">
-  <b>증거 기준</b>
-  <span><code>확인됨</code>은 ELK 이벤트, Windows 원본 로그, 레지스트리, 파일, 명령 출력으로 관측된 사실에만 사용한다. <code>manual mapping</code> 내부 단계는 Windows 기본 로그에 직접 남지 않으므로 code behavior와 실행 산출물 기반 추론으로 분리한다.</span>
-</div>
+    <div class="phase-grid" aria-label="Campaign phase matrix">
+      <div class="phase-item"><b>Foothold</b><span>T1133</span><br><span>T1046</span></div>
+      <div class="phase-item"><b>PMS Access</b><span>T1190</span><br><span>T1059.004</span></div>
+      <div class="phase-item"><b>Supply Chain</b><span>T1195.002</span><br><span>T1036.005</span></div>
+      <div class="phase-item"><b>win01 SYSTEM</b><span>T1053.005</span><br><span>T1552</span></div>
+      <div class="phase-item"><b>DC Access</b><span>T1021.002</span><br><span>T1021.006</span></div>
+      <div class="phase-item"><b>LSASS</b><span>T1027</span><br><span>T1620</span><br><span>T1003.001</span></div>
+    </div>
 
-<h3 id="primary-log-map">Primary Log Map</h3>
-<div class="table-wrap wide-table">
-  <table>
-    <thead>
-      <tr>
-        <th>Phase</th>
-        <th>Primary Logs</th>
-        <th>Representative event.action</th>
-        <th>Use in SB-07</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>External Access / Recon</td>
-        <td><a href="/campaigns/SB-07/logs/HAB-001/">HAB-001</a>, <a href="/campaigns/SB-07/logs/HAP-001/">HAP-001</a></td>
-        <td><code>ssh_session_accepted</code>, <code>jboss_invoker_probe</code></td>
-        <td>bastion 접속, 내부 PMS/JBoss 서비스 탐색, JBoss 취약 표면 확인을 로그로 재구성한다.</td>
-      </tr>
-      <tr>
-        <td>PMS Update Chain</td>
-        <td><a href="/campaigns/SB-07/logs/HAP-001/">HAP-001</a>, <a href="/campaigns/SB-07/logs/HAP-002/">HAP-002</a>, <a href="/campaigns/SB-07/logs/HAW-001/">HAW-001</a>, <a href="/campaigns/SB-07/logs/HAW-003/">HAW-003</a></td>
-        <td><code>pms_patch_downloaded</code>, <code>pms_patch_executed</code></td>
-        <td>manifest/patch 변경, win01의 PMS Agent 다운로드와 SYSTEM 실행 흐름을 확인한다.</td>
-      </tr>
-      <tr>
-        <td>win01 Discovery / Credential Artifact</td>
-        <td><a href="/campaigns/SB-07/logs/HAW-001/">HAW-001</a>, <a href="/campaigns/SB-07/logs/HAW-002/">HAW-002</a>, <a href="/campaigns/SB-07/logs/HTE-002/">HTE-002</a></td>
-        <td><code>domain_controller_discovery</code>, <code>dc_cred_xml_discovered</code></td>
-        <td>win01에서 AD/DC 정보를 탐색하고 <code>dc_cred.xml</code> artifact를 발견한 행위를 정규화한다.</td>
-      </tr>
-      <tr>
-        <td>DC Lateral Movement</td>
-        <td><a href="/campaigns/SB-07/logs/HAW-001/">HAW-001</a>, <a href="/campaigns/SB-07/logs/HAW-002/">HAW-002</a>, <a href="/campaigns/SB-07/logs/HAW-004/">HAW-004</a>, <a href="/campaigns/SB-07/logs/HTE-002/">HTE-002</a></td>
-        <td><code>dc_winrm_whoami</code>, <code>dc_c_admin_share_access</code></td>
-        <td>WinRM과 C$ 접근이 가능한 상태였는지, 실제 검증 또는 안전한 emulation 이벤트로 확인한다.</td>
-      </tr>
-      <tr>
-        <td>Loader / LSASS Artifact</td>
-        <td><a href="/campaigns/SB-07/logs/HAD-002/">HAD-002</a>, <a href="/campaigns/SB-07/logs/HAD-003/">HAD-003</a>, <a href="/campaigns/SB-07/logs/HAD-004/">HAD-004</a>, <a href="/campaigns/SB-07/logs/HAD-005/">HAD-005</a>, <a href="/campaigns/SB-07/logs/HAD-006/">HAD-006</a>, <a href="/campaigns/SB-07/logs/HAD-007/">HAD-007</a>, <a href="/campaigns/SB-07/logs/HAD-008/">HAD-008</a>, <a href="/campaigns/SB-07/logs/HAD-009/">HAD-009</a></td>
-        <td><code>loader_execution_log_found</code>, <code>application_loader_crash_observed</code>, <code>usn_loader_file_lifecycle_observed</code></td>
-        <td>로더 실행, scheduled task, Application Error, Amcache, ShimCache, USN Journal로 DC의 loader chain을 재구성한다.</td>
-      </tr>
-      <tr>
-        <td>Correlation</td>
-        <td><a href="/campaigns/SB-07/logs/HAC-001/">HAC-001</a>, <a href="/campaigns/SB-07/logs/HTE-001/">HTE-001</a>, <a href="/campaigns/SB-07/logs/HTE-002/">HTE-002</a></td>
-        <td><code>sb07-pms-patch-discovery-001</code>, <code>sb07-manual-mapping-inferred-014</code></td>
-        <td>정상 baseline과 공격 sequence를 분리하고, 여러 로그를 시간창 내 하나의 incident 후보로 묶는다.</td>
-      </tr>
-    </tbody>
-  </table>
-</div>
+    <h2>Groups</h2>
+    <div class="table-wrap medium-table">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="id-cell">G-SB-007</td>
+            <td>HanguelPMSChain</td>
+            <td>OZZY PMS Chain 활동과 연결된 가상 공격 그룹이다. PMS 업데이트 신뢰 구조와 Windows 관리 채널을 결합해 AD 환경 credential access를 수행하는 형태로 모델링된다.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
-<h2>Groups</h2>
-<div class="table-wrap medium-table">
-  <table>
-    <thead>
-      <tr>
-        <th>ID</th>
-        <th>Name</th>
-        <th>Description</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td class="id-cell">G-SB-007</td>
-        <td>OZZY</td>
-        <td>OZZY PMS Chain 활동과 연결된 공격 그룹으로, PMS 업데이트 신뢰 구조와 Windows 관리 채널을 결합해 AD 환경 credential access를 수행한다.</td>
-      </tr>
-    </tbody>
-  </table>
-</div>
+    <h2 id="techniques-used">Techniques Used</h2>
+    <div class="table-tools">
+      <label class="searchbox" for="techFilter">
+        <span>Filter</span>
+        <input id="techFilter" type="search" placeholder="예: PMS, LSASS, WinRM, T1003.001">
+      </label>
+    </div>
+    <div class="table-wrap wide-table">
+      <table id="techTable">
+        <thead>
+          <tr>
+            <th>Domain</th>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Use</th>
+            <th>Primary Logs</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Enterprise</td>
+            <td class="id-cell">T1133</td>
+            <td>External Remote Services</td>
+            <td>OZZY PMS Chain 당시 HanguelPMSChain은 제공된 SSH 접근 경로로 <code>hanguel-bastion</code>에 접속하고, 이를 내부망 <code>10.60.0.0/16</code> 진입 거점으로 사용했다.</td>
+            <td><a href="/campaigns/SB-07/logs/HAB-001/">HAB-001</a></td>
+          </tr>
+          <tr>
+            <td>Enterprise</td>
+            <td class="id-cell">T1046</td>
+            <td>Network Service Discovery</td>
+            <td>HanguelPMSChain은 bastion에서 내부망을 스캔하여 <code>hanguel-ops-pms:8080</code>, <code>hanguel-dc01:{445,3389,5985}</code>, <code>hanguel-win01:{3389,5985}</code> 등 주요 서비스를 식별했다.</td>
+            <td><a href="/campaigns/SB-07/logs/HAB-001/">HAB-001</a>, <a href="/campaigns/SB-07/logs/HAP-001/">HAP-001</a></td>
+          </tr>
+          <tr>
+            <td>Enterprise</td>
+            <td class="id-cell">T1190</td>
+            <td>Exploit Public-Facing Application</td>
+            <td>HanguelPMSChain은 <code>hanguel-ops-pms</code>의 JBoss AS 6 취약 표면을 이용해 PMS 서버 컨테이너 내부 명령 실행 권한을 확보했다.</td>
+            <td><a href="/campaigns/SB-07/logs/HAP-001/">HAP-001</a>, <a href="/campaigns/SB-07/logs/HAC-001/">HAC-001</a></td>
+          </tr>
+          <tr>
+            <td>Enterprise</td>
+            <td class="id-cell">T1059.004</td>
+            <td>Command and Scripting Interpreter: Unix Shell</td>
+            <td>HanguelPMSChain은 JBoss 컨테이너 shell에서 <code>id</code>, <code>hostname</code>, <code>pwd</code>, 배포 디렉터리 확인으로 실행 위치와 권한을 파악했다.</td>
+            <td><a href="/campaigns/SB-07/logs/HAP-001/">HAP-001</a></td>
+          </tr>
+          <tr>
+            <td>Enterprise</td>
+            <td class="id-cell">T1505.003</td>
+            <td>Server Software Component: Web Shell</td>
+            <td>HanguelPMSChain은 JBoss 배포 경로에 JSP webshell 또는 marker를 배치하여 PMS 서버에서 지속적인 명령 실행 채널을 유지할 수 있는 구조를 만들었다.</td>
+            <td><a href="/campaigns/SB-07/logs/HAP-001/">HAP-001</a></td>
+          </tr>
+          <tr>
+            <td>Enterprise</td>
+            <td class="id-cell">T1083</td>
+            <td>File and Directory Discovery</td>
+            <td>HanguelPMSChain은 PMS 서버 내부에서 JBoss 배포 경로와 Windows PMS Agent가 신뢰하는 <code>/updates/manifest.json</code>, <code>/updates/patch.ps1</code> 업데이트 구조를 확인했다.</td>
+            <td><a href="/campaigns/SB-07/logs/HAP-001/">HAP-001</a>, <a href="/campaigns/SB-07/logs/HAP-002/">HAP-002</a></td>
+          </tr>
+          <tr>
+            <td>Enterprise</td>
+            <td class="id-cell">T1195.002</td>
+            <td>Supply Chain Compromise: Compromise Software Supply Chain</td>
+            <td>HanguelPMSChain은 PMS 업데이트 경로의 <code>patch.ps1</code>과 manifest를 변조하여 내부 Windows 클라이언트가 신뢰하는 정상 패치 배포 흐름에 공격 코드를 삽입했다.</td>
+            <td><a href="/campaigns/SB-07/logs/HAP-002/">HAP-002</a>, <a href="/campaigns/SB-07/logs/HAW-001/">HAW-001</a>, <a href="/campaigns/SB-07/logs/HAC-001/">HAC-001</a></td>
+          </tr>
+          <tr>
+            <td>Enterprise</td>
+            <td class="id-cell">T1036.005</td>
+            <td>Masquerading: Match Legitimate Name or Location</td>
+            <td>HanguelPMSChain은 변조 패치를 기존 파일명과 경로인 <code>/updates/patch.ps1</code>로 유지하고 manifest 버전/해시만 갱신하여 정상 업데이트처럼 보이게 만들었다.</td>
+            <td><a href="/campaigns/SB-07/logs/HAP-002/">HAP-002</a></td>
+          </tr>
+          <tr>
+            <td>Enterprise</td>
+            <td class="id-cell">T1053.005</td>
+            <td>Scheduled Task / Job: Scheduled Task</td>
+            <td><code>hanguel-win01</code>의 Hanguel PMS Agent Scheduled Task가 PMS 서버에서 변조 패치를 다운로드하고 <code>nt authority\system</code> 권한으로 실행했다.</td>
+            <td><a href="/campaigns/SB-07/logs/HAW-001/">HAW-001</a>, <a href="/campaigns/SB-07/logs/HAW-003/">HAW-003</a></td>
+          </tr>
+          <tr>
+            <td>Enterprise</td>
+            <td class="id-cell">T1082</td>
+            <td>System Information Discovery</td>
+            <td>HanguelPMSChain은 win01 SYSTEM 컨텍스트에서 사용자, 호스트명, IP 구성, DNS 서버, 실행 권한을 확인하여 감염된 클라이언트의 내부 위치와 권한 수준을 파악했다.</td>
+            <td><a href="/campaigns/SB-07/logs/HAW-001/">HAW-001</a>, <a href="/campaigns/SB-07/logs/HTE-002/">HTE-002</a></td>
+          </tr>
+          <tr>
+            <td>Enterprise</td>
+            <td class="id-cell">T1482</td>
+            <td>Domain Trust Discovery</td>
+            <td>HanguelPMSChain은 win01에서 <code>hanguel.local</code> 도메인과 도메인 컨트롤러 <code>hanguel-dc01.hanguel.local / 10.60.20.10</code> 존재를 확인했다.</td>
+            <td><a href="/campaigns/SB-07/logs/HAW-001/">HAW-001</a>, <a href="/campaigns/SB-07/logs/HTE-002/">HTE-002</a></td>
+          </tr>
+          <tr>
+            <td>Enterprise</td>
+            <td class="id-cell">T1018</td>
+            <td>Remote System Discovery</td>
+            <td>HanguelPMSChain은 <code>hanguel-dc01</code>의 SMB, WinRM, LDAP, Kerberos, DNS 서비스 접근 가능성을 확인하고 후속 장악 대상으로 지정했다.</td>
+            <td><a href="/campaigns/SB-07/logs/HAW-001/">HAW-001</a>, <a href="/campaigns/SB-07/logs/HTE-002/">HTE-002</a></td>
+          </tr>
+          <tr>
+            <td>Enterprise</td>
+            <td class="id-cell">T1552</td>
+            <td>Unsecured Credentials</td>
+            <td>HanguelPMSChain은 win01의 <code>C:\ProgramData\HanguelPMS\dc_cred.xml</code> credential artifact를 발견하고, 복호화 가능한 사용자 컨텍스트에서 <code>HANGUEL\Administrator</code> 자격 증명을 확보했다.</td>
+            <td><a href="/campaigns/SB-07/logs/HAW-001/">HAW-001</a>, <a href="/campaigns/SB-07/logs/HAW-002/">HAW-002</a>, <a href="/campaigns/SB-07/logs/HTE-002/">HTE-002</a></td>
+          </tr>
+          <tr>
+            <td>Enterprise</td>
+            <td class="id-cell">T1021.002</td>
+            <td>Remote Services: SMB / Windows Admin Shares</td>
+            <td>HanguelPMSChain은 <code>HANGUEL\Administrator</code> 자격 증명으로 win01에서 DC의 <code>\\10.60.20.10\C$</code> 관리 공유에 접근하고 loader chain 파일을 <code>C:\Windows\Temp</code>에 배치했다.</td>
+            <td><a href="/campaigns/SB-07/logs/HAW-002/">HAW-002</a>, <a href="/campaigns/SB-07/logs/HAW-004/">HAW-004</a>, <a href="/campaigns/SB-07/logs/HTE-002/">HTE-002</a></td>
+          </tr>
+          <tr>
+            <td>Enterprise</td>
+            <td class="id-cell">T1021.006</td>
+            <td>Remote Services: Windows Remote Management</td>
+            <td>HanguelPMSChain은 <code>HANGUEL\Administrator</code> 자격 증명으로 win01에서 DC에 WinRM 명령을 실행하고, DC 내부에서 SYSTEM 권한 Scheduled Task를 등록했다.</td>
+            <td><a href="/campaigns/SB-07/logs/HAW-002/">HAW-002</a>, <a href="/campaigns/SB-07/logs/HAW-003/">HAW-003</a>, <a href="/campaigns/SB-07/logs/HTE-002/">HTE-002</a></td>
+          </tr>
+          <tr>
+            <td>Enterprise</td>
+            <td class="id-cell">T1027</td>
+            <td>Obfuscated Files or Information</td>
+            <td>HanguelPMSChain은 LSASS dump payload DLL을 XOR 암호화된 <code>hgl_payload.enc</code> 형태로 전달하여 정적 파일 탐지 가능성을 줄였다.</td>
+            <td><a href="/campaigns/SB-07/logs/HAD-002/">HAD-002</a>, <a href="/campaigns/SB-07/logs/HAD-004/">HAD-004</a>, <a href="/campaigns/SB-07/logs/HAD-009/">HAD-009</a></td>
+          </tr>
+          <tr>
+            <td>Enterprise</td>
+            <td class="id-cell">T1620</td>
+            <td>Reflective Code Loading</td>
+            <td>HanguelPMSChain은 <code>hgl_loader.exe</code>를 이용해 암호화된 PE/DLL payload를 메모리에서 복호화하고, PE header/section mapping, relocation, import resolving을 직접 수행하는 loader 기반 실행 흐름을 사용했다.</td>
+            <td><a href="/campaigns/SB-07/logs/HAD-003/">HAD-003</a>, <a href="/campaigns/SB-07/logs/HAD-004/">HAD-004</a>, <a href="/campaigns/SB-07/logs/HAD-005/">HAD-005</a>, <a href="/campaigns/SB-07/logs/HAD-006/">HAD-006</a>, <a href="/campaigns/SB-07/logs/HAD-007/">HAD-007</a>, <a href="/campaigns/SB-07/logs/HAD-008/">HAD-008</a>, <a href="/campaigns/SB-07/logs/HAC-001/">HAC-001</a></td>
+          </tr>
+          <tr>
+            <td>Enterprise</td>
+            <td class="id-cell">T1003.001</td>
+            <td>OS Credential Dumping: LSASS Memory</td>
+            <td>HanguelPMSChain은 DC의 SYSTEM Scheduled Task에서 loader 기반 dump 흐름을 실행해 LSASS dump artifact를 생성하고, 이를 win01에서 offline 분석하는 흐름을 구성했다.</td>
+            <td><a href="/campaigns/SB-07/logs/HAD-002/">HAD-002</a>, <a href="/campaigns/SB-07/logs/HAD-003/">HAD-003</a>, <a href="/campaigns/SB-07/logs/HAD-004/">HAD-004</a>, <a href="/campaigns/SB-07/logs/HAD-005/">HAD-005</a>, <a href="/campaigns/SB-07/logs/HAC-001/">HAC-001</a></td>
+          </tr>
+          <tr>
+            <td>Enterprise</td>
+            <td class="id-cell">T1550.002</td>
+            <td>Use Alternate Authentication Material: Pass the Hash</td>
+            <td>HanguelPMSChain은 LSASS dump에서 확보한 <code>HANGUEL\Administrator</code> NTLM hash를 이용해 평문 비밀번호 없이 DC 및 다른 Windows 시스템 접근을 시도할 수 있는 후속 경로를 확보했다.</td>
+            <td><a href="/campaigns/SB-07/logs/HTE-002/">HTE-002</a>, <a href="/campaigns/SB-07/logs/HAC-001/">HAC-001</a></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
-<h2 id="techniques-used">Techniques Used</h2>
-<div class="table-tools">
-  <label class="searchbox" for="techFilter">
-    <span>Filter</span>
-    <input id="techFilter" type="search" placeholder="예: PMS, LSASS, WinRM, T1003.001">
-  </label>
-</div>
-<div class="table-wrap wide-table">
-  <table id="techTable">
-    <thead>
-      <tr>
-        <th>Phase</th>
-        <th>ID</th>
-        <th>Name</th>
-        <th>Use</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>Initial Foothold</td>
-        <td class="id-cell">T1133</td>
-        <td>External Remote Services</td>
-        <td>공격자는 제공된 SSH 접근 경로를 이용해 <code>hanguel-bastion</code>에 접속하고, 이를 내부망 <code>10.60.0.0/16</code>으로 진입하기 위한 거점으로 사용한다.</td>
-      </tr>
-      <tr>
-        <td>Discovery</td>
-        <td class="id-cell">T1046</td>
-        <td>Network Service Discovery</td>
-        <td>공격자는 <code>hanguel-bastion</code>에서 내부망을 스캔하여 <code>hanguel-ops-pms:8080</code>, <code>hanguel-dc01:{445,3389,5985}</code>, <code>hanguel-win01:{3389,5985}</code> 등 주요 서비스를 식별한다.</td>
-      </tr>
-      <tr>
-        <td>Initial Access</td>
-        <td class="id-cell">T1190</td>
-        <td>Exploit Public-Facing Application</td>
-        <td>공격자는 <code>hanguel-ops-pms</code>의 JBoss AS 6 취약 표면을 이용해 PMS 서버 컨테이너 내부에서 명령 실행 권한을 확보한다.</td>
-      </tr>
-      <tr>
-        <td>Execution</td>
-        <td class="id-cell">T1059.004</td>
-        <td>Unix Shell</td>
-        <td>공격자는 JBoss 컨테이너 shell에서 <code>id</code>, <code>hostname</code>, <code>pwd</code>, 네트워크 경로, 배포 디렉터리를 확인하여 실행 위치와 권한을 파악한다.</td>
-      </tr>
-      <tr>
-        <td>Persistence</td>
-        <td class="id-cell">T1505.003</td>
-        <td>Web Shell</td>
-        <td>공격자는 JBoss 배포 경로에 JSP webshell 또는 marker를 배치하여 PMS 서버에서 지속적인 명령 실행 채널을 유지한다.</td>
-      </tr>
-      <tr>
-        <td>Discovery</td>
-        <td class="id-cell">T1083</td>
-        <td>File and Directory Discovery</td>
-        <td>공격자는 PMS 서버 내부에서 JBoss 배포 경로와 Windows PMS Agent가 신뢰하는 <code>/updates/manifest.json</code>, <code>/updates/patch.ps1</code> 업데이트 구조를 확인한다.</td>
-      </tr>
-      <tr>
-        <td>Supply Chain</td>
-        <td class="id-cell">T1195.002</td>
-        <td>Supply Chain Compromise</td>
-        <td>공격자는 PMS 업데이트 경로의 <code>patch.ps1</code>과 manifest를 변조하여 내부 Windows 클라이언트가 신뢰하는 정상 패치 배포 흐름에 공격 코드를 삽입한다.</td>
-      </tr>
-      <tr>
-        <td>Defense Evasion</td>
-        <td class="id-cell">T1036.005</td>
-        <td>Masquerading</td>
-        <td>공격자는 변조 패치를 기존 파일명과 경로인 <code>/updates/patch.ps1</code>로 유지하고 manifest 버전/해시만 갱신하여 정상 업데이트처럼 보이게 만든다.</td>
-      </tr>
-      <tr>
-        <td>Execution</td>
-        <td class="id-cell">T1053.005</td>
-        <td>Scheduled Task / Job</td>
-        <td><code>hanguel-win01</code>의 <code>Hanguel PMS Agent</code> Scheduled Task가 PMS 서버에서 변조 패치를 다운로드하고 <code>nt authority\system</code> 권한으로 실행한다.</td>
-      </tr>
-      <tr>
-        <td>Discovery</td>
-        <td class="id-cell">T1082</td>
-        <td>System Information Discovery</td>
-        <td>공격자는 win01 SYSTEM 컨텍스트에서 사용자, 호스트명, IP 구성, DNS 서버, 실행 권한을 확인하여 감염된 클라이언트의 내부 위치와 권한 수준을 파악한다.</td>
-      </tr>
-      <tr>
-        <td>Discovery</td>
-        <td class="id-cell">T1482</td>
-        <td>Domain Trust Discovery</td>
-        <td>공격자는 win01에서 <code>hanguel.local</code> 도메인과 도메인 컨트롤러 <code>hanguel-dc01.hanguel.local / 10.60.20.10</code> 존재를 확인한다.</td>
-      </tr>
-      <tr>
-        <td>Discovery</td>
-        <td class="id-cell">T1018</td>
-        <td>Remote System Discovery</td>
-        <td>공격자는 <code>hanguel-dc01</code>의 SMB, WinRM, LDAP, Kerberos, DNS 서비스 접근 가능성을 확인하고 후속 장악 대상으로 지정한다.</td>
-      </tr>
-      <tr>
-        <td>Credential Access</td>
-        <td class="id-cell">T1552</td>
-        <td>Unsecured Credentials</td>
-        <td>공격자는 win01의 <code>C:\ProgramData\HanguelPMS\dc_cred.xml</code> credential artifact를 발견하고, 복호화 가능한 사용자 컨텍스트에서 <code>HANGUEL\Administrator</code> 자격 증명을 확보한다.</td>
-      </tr>
-      <tr>
-        <td>Lateral Movement</td>
-        <td class="id-cell">T1021.002</td>
-        <td>SMB / Windows Admin Shares</td>
-        <td>공격자는 <code>HANGUEL\Administrator</code> 자격 증명을 이용해 win01에서 DC의 <code>\\10.60.20.10\C$</code> 관리 공유에 접근하고, <code>hgl_loader.exe</code>, <code>hgl_payload.enc</code>, <code>hgl_run.cmd</code>를 <code>C:\Windows\Temp</code>에 배치한다.</td>
-      </tr>
-      <tr>
-        <td>Lateral Movement</td>
-        <td class="id-cell">T1021.006</td>
-        <td>Windows Remote Management</td>
-        <td>공격자는 <code>HANGUEL\Administrator</code> 자격 증명을 이용해 win01에서 DC에 WinRM 명령을 실행하고, DC 내부에서 SYSTEM 권한 Scheduled Task를 등록한다.</td>
-      </tr>
-      <tr>
-        <td>Defense Evasion</td>
-        <td class="id-cell">T1027</td>
-        <td>Obfuscated Files or Information</td>
-        <td>공격자는 LSASS dump payload DLL을 XOR 암호화된 <code>hgl_payload.enc</code> 형태로 전달하여 정적 파일 탐지 가능성을 줄인다.</td>
-      </tr>
-      <tr>
-        <td>Defense Evasion</td>
-        <td class="id-cell">T1620</td>
-        <td>Reflective Code Loading</td>
-        <td>공격자는 <code>hgl_loader.exe</code>를 이용해 암호화된 PE/DLL payload를 메모리에서 복호화하고, PE header/section mapping, relocation, import resolving을 직접 수행하여 디스크에 복호화된 DLL을 남기지 않고 실행한다.</td>
-      </tr>
-      <tr>
-        <td>Credential Access</td>
-        <td class="id-cell">T1003.001</td>
-        <td>OS Credential Dumping: LSASS</td>
-        <td>공격자는 DC의 SYSTEM Scheduled Task에서 manual-mapping loader를 실행해 <code>lsass.exe</code> 메모리를 <code>C:\Windows\Temp\hgl_diag.bin</code>으로 dump하고, 이를 win01로 회수한다.</td>
-      </tr>
-      <tr>
-        <td>Credential Access</td>
-        <td class="id-cell">T1003.001</td>
-        <td>LSASS Credential Material</td>
-        <td>공격자는 win01에서 Mimikatz로 DC LSASS dump를 offline 분석하여 <code>HANGUEL\Administrator</code> NTLM hash와 Kerberos key material을 확보한다.</td>
-      </tr>
-      <tr>
-        <td>Lateral Movement</td>
-        <td class="id-cell">T1550.002</td>
-        <td>Pass the Hash</td>
-        <td>공격자는 LSASS dump에서 확보한 <code>HANGUEL\Administrator</code> NTLM hash를 이용해 평문 비밀번호 없이 DC 및 다른 Windows 시스템에 SMB/WinRM 기반 관리자 접근을 시도할 수 있다.</td>
-      </tr>
-    </tbody>
-  </table>
-</div>
+    <h2 id="software">Software</h2>
+    <div class="table-wrap medium-table">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Observed Role</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="id-cell">S-SB-007-01</td>
+            <td>JBoss AS 6</td>
+            <td>PMS 서버의 애플리케이션 런타임으로, 업데이트 파일 배포 경로와 명령 실행 취약 표면이 결합된 대상으로 모델링된다.</td>
+            <td>PMS application server</td>
+          </tr>
+          <tr>
+            <td class="id-cell">S-SB-007-02</td>
+            <td>Hanguel PMS Agent</td>
+            <td>Windows 클라이언트에서 PMS 업데이트 manifest와 patch를 주기적으로 확인하고 실행하는 에이전트다.</td>
+            <td>Trusted update executor</td>
+          </tr>
+          <tr>
+            <td class="id-cell">S-SB-007-03</td>
+            <td>Windows Scheduled Task</td>
+            <td>win01 PMS Agent 실행과 DC SYSTEM 컨텍스트 작업 등록에 사용된 Windows 작업 스케줄러 기능이다.</td>
+            <td>Execution mechanism</td>
+          </tr>
+          <tr>
+            <td class="id-cell">S-SB-007-04</td>
+            <td>WinRM</td>
+            <td>Windows Remote Management 경로로, win01에서 DC에 원격 명령을 실행하는 관리 채널이다.</td>
+            <td>Remote execution channel</td>
+          </tr>
+          <tr>
+            <td class="id-cell">S-SB-007-05</td>
+            <td>SMB Admin Shares</td>
+            <td><code>C$</code>, <code>ADMIN$</code> 등 Windows 관리 공유로, DC 파일 배치와 회수 경로로 사용된다.</td>
+            <td>Remote file access</td>
+          </tr>
+          <tr>
+            <td class="id-cell">S-SB-007-06</td>
+            <td>Hanguel AD Agent</td>
+            <td>Windows/AD 로그와 포렌식 아티팩트를 ECS 유사 JSON으로 정규화하고 <code>normal</code>, <code>suspicious</code>, <code>attack</code> 태그를 부여하는 실습용 수집 에이전트다.</td>
+            <td>Endpoint telemetry and enrichment</td>
+          </tr>
+          <tr>
+            <td class="id-cell">S-SB-007-07</td>
+            <td>Manual PE Loader</td>
+            <td>암호화된 PE/DLL payload를 메모리에서 복호화하고 직접 mapping하여 실행하는 C++ loader다.</td>
+            <td>Defense evasion and payload execution</td>
+          </tr>
+          <tr>
+            <td class="id-cell">S-SB-007-08</td>
+            <td>ELK Stack</td>
+            <td>Elasticsearch, Logstash, Kibana 기반의 수집, 검색, 시각화, 상관분석 환경이다.</td>
+            <td>SIEM and investigation platform</td>
+          </tr>
+          <tr>
+            <td class="id-cell">S-SB-007-09</td>
+            <td>Microsoft Defender</td>
+            <td>raw LSASS dump 시도와 알려진 credential dumping 도구를 탐지하거나 차단하는 Windows 보안 구성 요소다.</td>
+            <td>Endpoint protection and detection</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
-<h2 id="software">Software</h2>
-<div class="table-wrap medium-table">
-  <table>
-    <thead>
-      <tr>
-        <th>ID</th>
-        <th>Name</th>
-        <th>Description</th>
-        <th>Observed Role</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td class="id-cell">S-SB-007-01</td>
-        <td>JBoss AS 6</td>
-        <td>PMS 서버의 애플리케이션 런타임으로, 업데이트 파일 배포 경로와 명령 실행 취약 표면이 결합된 대상이다.</td>
-        <td>PMS application server</td>
-      </tr>
-      <tr>
-        <td class="id-cell">S-SB-007-02</td>
-        <td>Hanguel PMS Agent</td>
-        <td>Windows 클라이언트에서 PMS 업데이트 manifest와 patch를 주기적으로 확인하고 실행하는 에이전트이다.</td>
-        <td>Trusted update executor</td>
-      </tr>
-      <tr>
-        <td class="id-cell">S-SB-007-03</td>
-        <td>Windows Scheduled Task</td>
-        <td>win01의 PMS Agent 실행과 DC SYSTEM 컨텍스트 작업 등록에 사용된 Windows 작업 스케줄러 기능이다.</td>
-        <td>Execution mechanism</td>
-      </tr>
-      <tr>
-        <td class="id-cell">S-SB-007-04</td>
-        <td>WinRM</td>
-        <td>Windows Remote Management 경로로, win01에서 DC에 원격 명령을 실행하는 관리 채널이다.</td>
-        <td>Remote execution channel</td>
-      </tr>
-      <tr>
-        <td class="id-cell">S-SB-007-05</td>
-        <td>SMB Admin Shares</td>
-        <td><code>C$</code>, <code>ADMIN$</code> 등 Windows 관리 공유로, DC 파일 배치와 회수 경로로 사용된다.</td>
-        <td>Remote file access</td>
-      </tr>
-      <tr>
-        <td class="id-cell">S-SB-007-06</td>
-        <td>Manual PE Loader</td>
-        <td>암호화된 PE/DLL payload를 메모리에서 복호화하고 직접 mapping하여 실행하는 C++ loader다.</td>
-        <td>Defense evasion and payload execution</td>
-      </tr>
-      <tr>
-        <td class="id-cell">S-SB-007-07</td>
-        <td>Mimikatz</td>
-        <td>회수한 LSASS dump를 win01에서 offline 분석하여 credential material을 확인하는 데 사용된다.</td>
-        <td>Offline credential parsing</td>
-      </tr>
-      <tr>
-        <td class="id-cell">S-SB-007-08</td>
-        <td>Microsoft Defender</td>
-        <td>raw LSASS dump 시도와 알려진 credential dumping 도구를 탐지하거나 차단하는 Windows 보안 구성 요소다.</td>
-        <td>Endpoint protection and detection</td>
-      </tr>
-    </tbody>
-  </table>
-</div>
+    <h2 id="detection">Detection Plan</h2>
+    <div class="cards">
+      <article class="card">
+        <h3>1. PMS Patch Chain</h3>
+        <p><code>patch.ps1</code> 변경, win01 patch 다운로드, PMS Agent SYSTEM 실행, AD/DC discovery가 짧은 시간 안에 이어지는지 확인한다. 정상 baseline은 <a href="/campaigns/SB-07/logs/HTE-001/">HTE-001</a>로 분리한다.</p>
+      </article>
+      <article class="card">
+        <h3>2. Credential to DC Access</h3>
+        <p><code>dc_cred.xml</code> 발견 이후 WinRM whoami 또는 <code>\\10.60.20.10\C$</code> 접근 이벤트가 발생하는지 확인한다.</p>
+      </article>
+      <article class="card">
+        <h3>3. Loader Artifact Correlation</h3>
+        <p>DC의 Task XML, Application Error, Amcache, ShimCache, USN Journal, loader run log를 묶어 loader 기반 실행 정황을 재구성한다.</p>
+      </article>
+    </div>
 
-<h2 id="references">References</h2>
-<ol class="references">
-  <li>MITRE ATT&amp;CK, T1133 External Remote Services. <a href="https://attack.mitre.org/techniques/T1133/">https://attack.mitre.org/techniques/T1133/</a></li>
-  <li>MITRE ATT&amp;CK, T1046 Network Service Discovery. <a href="https://attack.mitre.org/techniques/T1046/">https://attack.mitre.org/techniques/T1046/</a></li>
-  <li>MITRE ATT&amp;CK, T1190 Exploit Public-Facing Application. <a href="https://attack.mitre.org/techniques/T1190/">https://attack.mitre.org/techniques/T1190/</a></li>
-  <li>MITRE ATT&amp;CK, T1059.004 Unix Shell. <a href="https://attack.mitre.org/techniques/T1059/004/">https://attack.mitre.org/techniques/T1059/004/</a></li>
-  <li>MITRE ATT&amp;CK, T1505.003 Web Shell. <a href="https://attack.mitre.org/techniques/T1505/003/">https://attack.mitre.org/techniques/T1505/003/</a></li>
-  <li>MITRE ATT&amp;CK, T1083 File and Directory Discovery. <a href="https://attack.mitre.org/techniques/T1083/">https://attack.mitre.org/techniques/T1083/</a></li>
-  <li>MITRE ATT&amp;CK, T1195.002 Compromise Software Supply Chain. <a href="https://attack.mitre.org/techniques/T1195/002/">https://attack.mitre.org/techniques/T1195/002/</a></li>
-  <li>MITRE ATT&amp;CK, T1036.005 Match Legitimate Name or Location. <a href="https://attack.mitre.org/techniques/T1036/005/">https://attack.mitre.org/techniques/T1036/005/</a></li>
-  <li>MITRE ATT&amp;CK, T1053.005 Scheduled Task. <a href="https://attack.mitre.org/techniques/T1053/005/">https://attack.mitre.org/techniques/T1053/005/</a></li>
-  <li>MITRE ATT&amp;CK, T1082 System Information Discovery. <a href="https://attack.mitre.org/techniques/T1082/">https://attack.mitre.org/techniques/T1082/</a></li>
-  <li>MITRE ATT&amp;CK, T1482 Domain Trust Discovery. <a href="https://attack.mitre.org/techniques/T1482/">https://attack.mitre.org/techniques/T1482/</a></li>
-  <li>MITRE ATT&amp;CK, T1018 Remote System Discovery. <a href="https://attack.mitre.org/techniques/T1018/">https://attack.mitre.org/techniques/T1018/</a></li>
-  <li>MITRE ATT&amp;CK, T1552 Unsecured Credentials. <a href="https://attack.mitre.org/techniques/T1552/">https://attack.mitre.org/techniques/T1552/</a></li>
-  <li>MITRE ATT&amp;CK, T1021.002 SMB/Windows Admin Shares. <a href="https://attack.mitre.org/techniques/T1021/002/">https://attack.mitre.org/techniques/T1021/002/</a></li>
-  <li>MITRE ATT&amp;CK, T1021.006 Windows Remote Management. <a href="https://attack.mitre.org/techniques/T1021/006/">https://attack.mitre.org/techniques/T1021/006/</a></li>
-  <li>MITRE ATT&amp;CK, T1027 Obfuscated Files or Information. <a href="https://attack.mitre.org/techniques/T1027/">https://attack.mitre.org/techniques/T1027/</a></li>
-  <li>MITRE ATT&amp;CK, T1620 Reflective Code Loading. <a href="https://attack.mitre.org/techniques/T1620/">https://attack.mitre.org/techniques/T1620/</a></li>
-  <li>MITRE ATT&amp;CK, T1003.001 LSASS Memory. <a href="https://attack.mitre.org/techniques/T1003/001/">https://attack.mitre.org/techniques/T1003/001/</a></li>
-  <li>MITRE ATT&amp;CK, T1550.002 Pass the Hash. <a href="https://attack.mitre.org/techniques/T1550/002/">https://attack.mitre.org/techniques/T1550/002/</a></li>
-  <li>Spacebar Project local lab notes, OZZY PMS Chain, 22 May 2026.</li>
-</ol>
+    <div class="flow" aria-label="Detection flow">
+      <div class="flow-step"><b>PMS Patch</b><span>manifest and patch update</span></div>
+      <div class="flow-step"><b>win01 SYSTEM</b><span>PMS Agent executes patch</span></div>
+      <div class="flow-step"><b>Credential</b><span>dc_cred.xml discovered</span></div>
+      <div class="flow-step"><b>DC Access</b><span>WinRM and C$ reachable</span></div>
+      <div class="flow-step"><b>Loader Artifact</b><span>Task, WER, Amcache, USN</span></div>
+      <div class="flow-step"><b>Alert</b><span>ELK correlation document</span></div>
+    </div>
+
+    <h3>Detection Query Draft</h3>
+    <div class="code-grid">
+      <pre><code>campaign.id: "SB-07"
+and event.action: ("pms_patch_executed" or "domain_controller_discovery" or "dc_cred_xml_discovered")</code></pre>
+      <pre><code>sequence by host.name with maxspan=30m
+  [any where event.action == "pms_patch_executed"]
+  [any where event.action == "domain_controller_discovery"]
+  [any where event.action == "dc_cred_xml_discovered"]
+  [any where event.action in ("dc_winrm_whoami", "dc_c_admin_share_access")]</code></pre>
+    </div>
+
+    <h2 id="infrastructure">Observed Infrastructure</h2>
+    <p>
+      관찰된 환경은 AWS bastion, JBoss/PMS update relay, Windows client, Active Directory Domain Controller, SOC/ELK 서버로 구성된다.
+      공격자는 bastion을 통해 내부망을 관찰하고, PMS 업데이트 경로를 변조한 뒤 Windows 신뢰 실행 흐름을 이용해 win01 SYSTEM 컨텍스트와 DC 관리 채널로 확장할 수 있다.
+    </p>
+
+    <div class="code-grid">
+      <pre><code>Internet / Analyst
+  -> hanguel-bastion
+  -> hanguel-ops-pms
+  -> hanguel-win01 PMS Agent
+  -> hanguel-dc01
+  -> hanguel-soc01 ELK</code></pre>
+      <pre><code># Analyst KQL
+campaign.id: "SB-07"
+log.id: ("HAW-001" or "HAD-005" or "HAC-001")
+hanguel.classification: ("suspicious" or "attack")</code></pre>
+    </div>
+
+    <h2 id="references">References</h2>
+    <ol class="references">
+      <li>MITRE ATT&amp;CK Campaigns. https://attack.mitre.org/campaigns/</li>
+      <li>MITRE ATT&amp;CK T1133, External Remote Services. https://attack.mitre.org/techniques/T1133/</li>
+      <li>MITRE ATT&amp;CK T1046, Network Service Discovery. https://attack.mitre.org/techniques/T1046/</li>
+      <li>MITRE ATT&amp;CK T1190, Exploit Public-Facing Application. https://attack.mitre.org/techniques/T1190/</li>
+      <li>MITRE ATT&amp;CK T1195.002, Compromise Software Supply Chain. https://attack.mitre.org/techniques/T1195/002/</li>
+      <li>MITRE ATT&amp;CK T1053.005, Scheduled Task. https://attack.mitre.org/techniques/T1053/005/</li>
+      <li>MITRE ATT&amp;CK T1552, Unsecured Credentials. https://attack.mitre.org/techniques/T1552/</li>
+      <li>MITRE ATT&amp;CK T1021.002, SMB/Windows Admin Shares. https://attack.mitre.org/techniques/T1021/002/</li>
+      <li>MITRE ATT&amp;CK T1021.006, Windows Remote Management. https://attack.mitre.org/techniques/T1021/006/</li>
+      <li>MITRE ATT&amp;CK T1620, Reflective Code Loading. https://attack.mitre.org/techniques/T1620/</li>
+      <li>MITRE ATT&amp;CK T1003.001, LSASS Memory. https://attack.mitre.org/techniques/T1003/001/</li>
+      <li>Spacebar Project local file, OZZY PMS Chain campaign profile, 2026-05-22.</li>
+    </ol>
       <footer class="footer">
         Spacebar Project. This page is not affiliated with MITRE ATT&amp;CK.
       </footer>
