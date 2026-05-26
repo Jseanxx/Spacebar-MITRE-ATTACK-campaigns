@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SB-07 HAC-001 Hanguel AD Sequential Correlator Alert | Spacebar Campaign Logs</title>
+  <link rel="stylesheet" href="/assets/campaign.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="/campaigns/"><img class="brand-logo" src="/assets/spacebarLogo.png" alt="Spacebar"><span>Spacebar Campaigns</span></a>
+    </div>
+  </header>
+
+  <div class="page-shell">
+
+    <aside class="campaign-sidebar" aria-label="Campaign log navigation">
+      <div class="sidebar-block">
+        <div class="sidebar-title">SB-07 Logs</div>
+        <nav class="sidebar-links">
+          <a class="sidebar-link" href="/campaigns/SB-07/">Campaign Page</a>
+          <a class="sidebar-link" href="/campaigns/SB-07/logs/">Campaign Logs</a>
+          <a class="sidebar-link" href="/campaigns/SB-07/logs/HAB-001/"><span>HAB-001</span>Bastion SSH Auth Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-07/logs/HAP-001/"><span>HAP-001</span>PMS JBoss and Update Relay HTTP Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-07/logs/HAP-002/"><span>HAP-002</span>PMS Patch Manifest and Hash Evidence</a>
+          <a class="sidebar-link" href="/campaigns/SB-07/logs/HAW-001/"><span>HAW-001</span>Win01 Hanguel AD Agent Enriched Event</a>
+          <a class="sidebar-link" href="/campaigns/SB-07/logs/HAW-003/"><span>HAW-003</span>Windows Task Scheduler Operational Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-07/logs/HAW-002/"><span>HAW-002</span>Win01 PowerShell Operational Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-07/logs/HTE-002/"><span>HTE-002</span>SB-07 Attack Traffic Emulation Event</a>
+          <a class="sidebar-link" href="/campaigns/SB-07/logs/HAW-004/"><span>HAW-004</span>Windows Security Process Creation Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-07/logs/HAD-002/"><span>HAD-002</span>DC Loader and Dump Artifact Evidence</a>
+          <a class="sidebar-link" href="/campaigns/SB-07/logs/HAD-003/"><span>HAD-003</span>DC Sysmon Operational Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-07/logs/HAD-004/"><span>HAD-004</span>DC Loader Run Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-07/logs/HAD-005/"><span>HAD-005</span>DC Application Error and WER Event</a>
+          <a class="sidebar-link" href="/campaigns/SB-07/logs/HAD-006/"><span>HAD-006</span>DC Amcache Artifact</a>
+          <a class="sidebar-link" href="/campaigns/SB-07/logs/HAD-007/"><span>HAD-007</span>DC ShimCache AppCompatCache Artifact</a>
+          <a class="sidebar-link" href="/campaigns/SB-07/logs/HAD-008/"><span>HAD-008</span>DC TaskCache Registry and Task XML Artifact</a>
+          <a class="sidebar-link" href="/campaigns/SB-07/logs/HAD-009/"><span>HAD-009</span>DC NTFS USN Journal Artifact</a>
+          <a class="sidebar-link active" href="/campaigns/SB-07/logs/HAC-001/"><span>HAC-001</span>Hanguel AD Sequential Correlator Alert</a>
+          <a class="sidebar-link" href="/campaigns/SB-07/logs/HTE-001/"><span>HTE-001</span>SB-07 Normal Traffic Emulation Event</a>
+        </nav>
+      </div>
+      <div class="sidebar-block">
+        <div class="sidebar-title">Global Catalog</div>
+        <nav class="sidebar-links">
+          <a class="sidebar-link" href="/logs/">All Logs</a>
+        </nav>
+      </div>
+    </aside>
+    <main class="page campaign-content">
+      <div class="breadcrumbs"><a href="/campaigns/">Home</a> / <a href="/campaigns/SB-07/">OZZY PMS Chain</a> / <a href="/campaigns/SB-07/logs/">Campaign Logs</a> / <span>HAC-001</span></div>
+<h1>HAC-001 Hanguel AD Sequential Correlator Alert</h1>
+<div class="meta-grid" aria-label="Campaign metadata">
+<div class="meta-label">Log ID:</div>
+<div class="meta-value">HAC-001</div>
+<div class="meta-label">Source:</div>
+<div class="meta-value"><code>hanguel-ad-correlator.service</code></div>
+<div class="meta-label">Representative Path:</div>
+<div class="meta-value">SOC service <code>/opt/hanguel-elk/correlator/hanguel_ad_correlator.py</code>, index <code>hanguel-alerts-*</code></div>
+<div class="meta-label">Collection:</div>
+<div class="meta-value">Correlator reads <code>hanguel-ad-agent-*</code> and writes <code>hanguel-alerts-*</code></div>
+<div class="meta-label">Current Status:</div>
+<div class="meta-value">correlator active. 신규 loader 룰 2건 생성 확인, 일부 룰은 재평가/캡처 필요</div>
+<div class="meta-label">Primary Use:</div>
+<div class="meta-value">단일 이벤트가 아니라 시간창 내 복수 행위를 incident 후보로 묶음</div>
+</div>
+<h2 id="상관분석-요약">상관분석 요약</h2>
+<p>SB-07은 단일 이벤트보다 순서가 중요하다. PMS patch 실행 뒤 AD/DC discovery, credential artifact 발견, DC WinRM/C$ 접근, loader forensic artifact가 이어지면 각각의 행위를 하나의 attack chain으로 묶어야 한다.</p>
+<h2 id="대표-rule-id">대표 rule.id</h2>
+<pre><code>sb07-pms-patch-discovery-001
+sb07-credential-dc-access-002
+sb07-pms-credential-chain-003
+sb07-loader-forensic-triad-012
+sb07-loader-file-lifecycle-013
+sb07-manual-mapping-inferred-014</code></pre>
+<h2 id="주요-필드">주요 필드</h2>
+<div class="table-wrap wide-table">
+<table>
+<thead><tr><th>필드</th><th>의미</th><th>예시</th></tr></thead>
+<tbody>
+<tr><td><code>rule.id</code></td><td>correlation rule ID</td><td><code>sb07-loader-forensic-triad-012</code></td></tr>
+<tr><td><code>related.events</code></td><td>연결된 원본 이벤트</td><td>event IDs</td></tr>
+<tr><td><code>hanguel.risk_score</code></td><td>위험도</td><td><code>85</code></td></tr>
+<tr><td><code>event.action</code></td><td>alert action</td><td><code>manual_mapping_inferred_from_artifacts</code></td></tr>
+</tbody></table></div>
+<h2 id="탐지-포인트">탐지 포인트</h2>
+<ol>
+<li><code>HTE-001</code> normal 이벤트는 alert로 묶이지 않아야 한다.</li>
+<li><code>HTE-002</code> attack 이벤트는 patch -&gt; discovery -&gt; credential -&gt; DC access sequence로 묶여야 한다.</li>
+<li><code>manual_mapping_inferred</code>는 직접 증거가 아니라 추론 alert로 유지한다.</li>
+</ol>
+<h2 id="elk-query-예시">ELK Query 예시</h2>
+<pre><code>rule.id:(&quot;sb07-pms-patch-discovery-001&quot; or &quot;sb07-credential-dc-access-002&quot; or &quot;sb07-pms-credential-chain-003&quot; or &quot;sb07-loader-forensic-triad-012&quot; or &quot;sb07-manual-mapping-inferred-014&quot;)</code></pre>
+      <footer class="footer">
+        Spacebar Project. This campaign log page is scoped to SB-07.
+      </footer>
+    </main>
+  </div>
+</body>
+</html>

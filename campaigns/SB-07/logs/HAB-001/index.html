@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SB-07 HAB-001 Bastion SSH Auth Log | Spacebar Campaign Logs</title>
+  <link rel="stylesheet" href="/assets/campaign.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="/campaigns/"><img class="brand-logo" src="/assets/spacebarLogo.png" alt="Spacebar"><span>Spacebar Campaigns</span></a>
+    </div>
+  </header>
+
+  <div class="page-shell">
+
+    <aside class="campaign-sidebar" aria-label="Campaign log navigation">
+      <div class="sidebar-block">
+        <div class="sidebar-title">SB-07 Logs</div>
+        <nav class="sidebar-links">
+          <a class="sidebar-link" href="/campaigns/SB-07/">Campaign Page</a>
+          <a class="sidebar-link" href="/campaigns/SB-07/logs/">Campaign Logs</a>
+          <a class="sidebar-link active" href="/campaigns/SB-07/logs/HAB-001/"><span>HAB-001</span>Bastion SSH Auth Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-07/logs/HAP-001/"><span>HAP-001</span>PMS JBoss and Update Relay HTTP Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-07/logs/HAP-002/"><span>HAP-002</span>PMS Patch Manifest and Hash Evidence</a>
+          <a class="sidebar-link" href="/campaigns/SB-07/logs/HAW-001/"><span>HAW-001</span>Win01 Hanguel AD Agent Enriched Event</a>
+          <a class="sidebar-link" href="/campaigns/SB-07/logs/HAW-003/"><span>HAW-003</span>Windows Task Scheduler Operational Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-07/logs/HAW-002/"><span>HAW-002</span>Win01 PowerShell Operational Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-07/logs/HTE-002/"><span>HTE-002</span>SB-07 Attack Traffic Emulation Event</a>
+          <a class="sidebar-link" href="/campaigns/SB-07/logs/HAW-004/"><span>HAW-004</span>Windows Security Process Creation Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-07/logs/HAD-002/"><span>HAD-002</span>DC Loader and Dump Artifact Evidence</a>
+          <a class="sidebar-link" href="/campaigns/SB-07/logs/HAD-003/"><span>HAD-003</span>DC Sysmon Operational Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-07/logs/HAD-004/"><span>HAD-004</span>DC Loader Run Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-07/logs/HAD-005/"><span>HAD-005</span>DC Application Error and WER Event</a>
+          <a class="sidebar-link" href="/campaigns/SB-07/logs/HAD-006/"><span>HAD-006</span>DC Amcache Artifact</a>
+          <a class="sidebar-link" href="/campaigns/SB-07/logs/HAD-007/"><span>HAD-007</span>DC ShimCache AppCompatCache Artifact</a>
+          <a class="sidebar-link" href="/campaigns/SB-07/logs/HAD-008/"><span>HAD-008</span>DC TaskCache Registry and Task XML Artifact</a>
+          <a class="sidebar-link" href="/campaigns/SB-07/logs/HAD-009/"><span>HAD-009</span>DC NTFS USN Journal Artifact</a>
+          <a class="sidebar-link" href="/campaigns/SB-07/logs/HAC-001/"><span>HAC-001</span>Hanguel AD Sequential Correlator Alert</a>
+          <a class="sidebar-link" href="/campaigns/SB-07/logs/HTE-001/"><span>HTE-001</span>SB-07 Normal Traffic Emulation Event</a>
+        </nav>
+      </div>
+      <div class="sidebar-block">
+        <div class="sidebar-title">Global Catalog</div>
+        <nav class="sidebar-links">
+          <a class="sidebar-link" href="/logs/">All Logs</a>
+        </nav>
+      </div>
+    </aside>
+    <main class="page campaign-content">
+      <div class="breadcrumbs"><a href="/campaigns/">Home</a> / <a href="/campaigns/SB-07/">OZZY PMS Chain</a> / <a href="/campaigns/SB-07/logs/">Campaign Logs</a> / <span>HAB-001</span></div>
+<h1>HAB-001 Bastion SSH Auth Log</h1>
+<div class="meta-grid" aria-label="Campaign metadata">
+<div class="meta-label">Log ID:</div>
+<div class="meta-value">HAB-001</div>
+<div class="meta-label">Source:</div>
+<div class="meta-value"><code>hanguel-bastion</code></div>
+<div class="meta-label">Representative Path:</div>
+<div class="meta-value"><code>/var/log/secure</code> 또는 <code>/var/log/auth.log</code></div>
+<div class="meta-label">Collection:</div>
+<div class="meta-value">Elastic Agent/Filebeat system module 또는 Hanguel collector custom input</div>
+<div class="meta-label">Current Status:</div>
+<div class="meta-value">수집 설계 대상. bastion SSH 접근 자체는 확인됐고, ELK 직접 수집은 환경별 확인 필요</div>
+<div class="meta-label">Primary Use:</div>
+<div class="meta-value">외부 접근 경로가 bastion을 통해 시작됐는지 확인</div>
+</div>
+<h2 id="공격-행위-요약">공격 행위 요약</h2>
+<p>공격자는 제공된 SSH 접근 경로를 이용해 <code>hanguel-bastion</code>에 접속한 뒤 내부망 <code>10.60.0.0/16</code>으로 pivot한다. 이 로그는 누가, 언제, 어떤 출발지에서 bastion에 접근했는지 확인하는 1차 로그다.</p>
+<h2 id="로그-발생-위치">로그 발생 위치</h2>
+<div class="table-wrap wide-table">
+<table>
+<thead><tr><th>구분</th><th>위치</th><th>설명</th></tr></thead>
+<tbody>
+<tr><td>Amazon Linux 계열</td><td><code>/var/log/secure</code></td><td><code>sshd</code> 인증 성공/실패, session opened/closed</td></tr>
+<tr><td>Ubuntu 계열</td><td><code>/var/log/auth.log</code></td><td><code>Accepted publickey</code>, <code>Failed password</code>, PAM session 이벤트</td></tr>
+</tbody></table></div>
+<h2 id="수집-방식">수집 방식</h2>
+<div class="table-wrap wide-table">
+<table>
+<thead><tr><th>구분</th><th>방식</th></tr></thead>
+<tbody>
+<tr><td>권장</td><td>Elastic Agent system integration 또는 Filebeat system module</td></tr>
+<tr><td>대체</td><td>Hanguel collector가 auth log tail 후 ECS 유사 JSON으로 변환</td></tr>
+</tbody></table></div>
+<h2 id="주요-필드">주요 필드</h2>
+<div class="table-wrap wide-table">
+<table>
+<thead><tr><th>필드</th><th>의미</th><th>예시</th></tr></thead>
+<tbody>
+<tr><td><code>@timestamp</code></td><td>SSH 인증 이벤트 발생 시간</td><td><code>2026-05-26T04:00:00Z</code></td></tr>
+<tr><td><code>host.name</code></td><td>bastion 호스트명</td><td><code>hanguel-bastion</code></td></tr>
+<tr><td><code>user.name</code></td><td>접속 계정</td><td><code>ec2-user</code></td></tr>
+<tr><td><code>source.ip</code></td><td>SSH 출발지</td><td>analyst public IP</td></tr>
+<tr><td><code>event.action</code></td><td>정규화된 행위</td><td><code>ssh_session_accepted</code></td></tr>
+</tbody></table></div>
+<h2 id="커버하는-techniques-used">커버하는 Techniques Used</h2>
+<div class="table-wrap wide-table">
+<table>
+<thead><tr><th>Technique</th><th>Mapping Reason</th></tr></thead>
+<tbody>
+<tr><td><a href="https://attack.mitre.org/techniques/T1133/">T1133 External Remote Services</a></td><td>bastion SSH가 내부망 접근의 시작점이다.</td></tr>
+<tr><td><a href="https://attack.mitre.org/techniques/T1078/">T1078 Valid Accounts</a></td><td>정상 키 기반 계정 사용과 비정상 사용을 비교할 수 있다.</td></tr>
+</tbody></table></div>
+<h2 id="탐지-포인트">탐지 포인트</h2>
+<ol>
+<li>허용된 실습자 IP가 아닌 출발지에서 <code>Accepted publickey</code>가 발생했는지 확인한다.</li>
+<li>bastion SSH 세션 직후 내부 <code>10.60.0.0/16</code> 스캔 또는 PMS 접근 로그가 이어지는지 본다.</li>
+</ol>
+<h2 id="elk-query-예시">ELK Query 예시</h2>
+<pre><code>host.name:&quot;hanguel-bastion&quot; and event.action:&quot;ssh_session_accepted&quot;</code></pre>
+      <footer class="footer">
+        Spacebar Project. This campaign log page is scoped to SB-07.
+      </footer>
+    </main>
+  </div>
+</body>
+</html>

@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SB-07 HAD-005 DC Application Error and WER Event | Spacebar Campaign Logs</title>
+  <link rel="stylesheet" href="/assets/campaign.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="/campaigns/"><img class="brand-logo" src="/assets/spacebarLogo.png" alt="Spacebar"><span>Spacebar Campaigns</span></a>
+    </div>
+  </header>
+
+  <div class="page-shell">
+
+    <aside class="campaign-sidebar" aria-label="Campaign log navigation">
+      <div class="sidebar-block">
+        <div class="sidebar-title">SB-07 Logs</div>
+        <nav class="sidebar-links">
+          <a class="sidebar-link" href="/campaigns/SB-07/">Campaign Page</a>
+          <a class="sidebar-link" href="/campaigns/SB-07/logs/">Campaign Logs</a>
+          <a class="sidebar-link" href="/campaigns/SB-07/logs/HAB-001/"><span>HAB-001</span>Bastion SSH Auth Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-07/logs/HAP-001/"><span>HAP-001</span>PMS JBoss and Update Relay HTTP Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-07/logs/HAP-002/"><span>HAP-002</span>PMS Patch Manifest and Hash Evidence</a>
+          <a class="sidebar-link" href="/campaigns/SB-07/logs/HAW-001/"><span>HAW-001</span>Win01 Hanguel AD Agent Enriched Event</a>
+          <a class="sidebar-link" href="/campaigns/SB-07/logs/HAW-003/"><span>HAW-003</span>Windows Task Scheduler Operational Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-07/logs/HAW-002/"><span>HAW-002</span>Win01 PowerShell Operational Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-07/logs/HTE-002/"><span>HTE-002</span>SB-07 Attack Traffic Emulation Event</a>
+          <a class="sidebar-link" href="/campaigns/SB-07/logs/HAW-004/"><span>HAW-004</span>Windows Security Process Creation Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-07/logs/HAD-002/"><span>HAD-002</span>DC Loader and Dump Artifact Evidence</a>
+          <a class="sidebar-link" href="/campaigns/SB-07/logs/HAD-003/"><span>HAD-003</span>DC Sysmon Operational Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-07/logs/HAD-004/"><span>HAD-004</span>DC Loader Run Log</a>
+          <a class="sidebar-link active" href="/campaigns/SB-07/logs/HAD-005/"><span>HAD-005</span>DC Application Error and WER Event</a>
+          <a class="sidebar-link" href="/campaigns/SB-07/logs/HAD-006/"><span>HAD-006</span>DC Amcache Artifact</a>
+          <a class="sidebar-link" href="/campaigns/SB-07/logs/HAD-007/"><span>HAD-007</span>DC ShimCache AppCompatCache Artifact</a>
+          <a class="sidebar-link" href="/campaigns/SB-07/logs/HAD-008/"><span>HAD-008</span>DC TaskCache Registry and Task XML Artifact</a>
+          <a class="sidebar-link" href="/campaigns/SB-07/logs/HAD-009/"><span>HAD-009</span>DC NTFS USN Journal Artifact</a>
+          <a class="sidebar-link" href="/campaigns/SB-07/logs/HAC-001/"><span>HAC-001</span>Hanguel AD Sequential Correlator Alert</a>
+          <a class="sidebar-link" href="/campaigns/SB-07/logs/HTE-001/"><span>HTE-001</span>SB-07 Normal Traffic Emulation Event</a>
+        </nav>
+      </div>
+      <div class="sidebar-block">
+        <div class="sidebar-title">Global Catalog</div>
+        <nav class="sidebar-links">
+          <a class="sidebar-link" href="/logs/">All Logs</a>
+        </nav>
+      </div>
+    </aside>
+    <main class="page campaign-content">
+      <div class="breadcrumbs"><a href="/campaigns/">Home</a> / <a href="/campaigns/SB-07/">OZZY PMS Chain</a> / <a href="/campaigns/SB-07/logs/">Campaign Logs</a> / <span>HAD-005</span></div>
+<h1>HAD-005 DC Application Error and WER Event</h1>
+<div class="meta-grid" aria-label="Campaign metadata">
+<div class="meta-label">Log ID:</div>
+<div class="meta-value">HAD-005</div>
+<div class="meta-label">Source:</div>
+<div class="meta-value"><code>hanguel-dc01</code></div>
+<div class="meta-label">Representative Path:</div>
+<div class="meta-value">Windows Logs &gt; Application, Event ID <code>1000</code>/<code>1001</code></div>
+<div class="meta-label">Collection:</div>
+<div class="meta-value">Hanguel AD Agent collector -&gt; <code>hanguel-ad-agent-*</code></div>
+<div class="meta-label">Current Status:</div>
+<div class="meta-value">ELK에서 이벤트 확인됨</div>
+<div class="meta-label">Primary Use:</div>
+<div class="meta-value"><code>hgl_loader.exe</code>가 실제 프로세스로 실행됐고 crash가 발생했음을 Windows 원본 로그로 확인</div>
+</div>
+<h2 id="공격-행위-요약">공격 행위 요약</h2>
+<p>Application Error/WER 이벤트는 loader가 실행됐다는 강한 정황이다. 특히 <code>Faulting module name: unknown</code>, <code>Exception code: 0xc0000005</code>는 메모리 상 코드나 비정상 매핑 영역에서 예외가 발생했을 가능성을 시사한다. 단독으로 manual mapping을 확정하지는 않는다.</p>
+<h2 id="관측된-내용">관측된 내용</h2>
+<pre><code>Faulting application name: hgl_loader.exe
+Faulting module name: unknown
+Exception code: 0xc0000005
+Faulting application path: C:\Windows\Temp\hgl_loader.exe</code></pre>
+<h2 id="주요-필드">주요 필드</h2>
+<div class="table-wrap wide-table">
+<table>
+<thead><tr><th>필드</th><th>의미</th><th>예시</th></tr></thead>
+<tbody>
+<tr><td><code>event.code</code></td><td>Application Error/WER 이벤트 ID</td><td><code>1000</code>, <code>1001</code></td></tr>
+<tr><td><code>process.name</code></td><td>faulting application</td><td><code>hgl_loader.exe</code></td></tr>
+<tr><td><code>error.code</code></td><td>exception code</td><td><code>0xc0000005</code></td></tr>
+<tr><td><code>event.action</code></td><td>정규화된 행위</td><td><code>application_loader_crash_observed</code></td></tr>
+</tbody></table></div>
+<h2 id="elk-query-예시">ELK Query 예시</h2>
+<pre><code>log.id:&quot;HAD-005&quot; and event.action:&quot;application_loader_crash_observed&quot;</code></pre>
+      <footer class="footer">
+        Spacebar Project. This campaign log page is scoped to SB-07.
+      </footer>
+    </main>
+  </div>
+</body>
+</html>

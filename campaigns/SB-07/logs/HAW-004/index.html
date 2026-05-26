@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SB-07 HAW-004 Windows Security Process Creation Log | Spacebar Campaign Logs</title>
+  <link rel="stylesheet" href="/assets/campaign.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="/campaigns/"><img class="brand-logo" src="/assets/spacebarLogo.png" alt="Spacebar"><span>Spacebar Campaigns</span></a>
+    </div>
+  </header>
+
+  <div class="page-shell">
+
+    <aside class="campaign-sidebar" aria-label="Campaign log navigation">
+      <div class="sidebar-block">
+        <div class="sidebar-title">SB-07 Logs</div>
+        <nav class="sidebar-links">
+          <a class="sidebar-link" href="/campaigns/SB-07/">Campaign Page</a>
+          <a class="sidebar-link" href="/campaigns/SB-07/logs/">Campaign Logs</a>
+          <a class="sidebar-link" href="/campaigns/SB-07/logs/HAB-001/"><span>HAB-001</span>Bastion SSH Auth Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-07/logs/HAP-001/"><span>HAP-001</span>PMS JBoss and Update Relay HTTP Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-07/logs/HAP-002/"><span>HAP-002</span>PMS Patch Manifest and Hash Evidence</a>
+          <a class="sidebar-link" href="/campaigns/SB-07/logs/HAW-001/"><span>HAW-001</span>Win01 Hanguel AD Agent Enriched Event</a>
+          <a class="sidebar-link" href="/campaigns/SB-07/logs/HAW-003/"><span>HAW-003</span>Windows Task Scheduler Operational Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-07/logs/HAW-002/"><span>HAW-002</span>Win01 PowerShell Operational Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-07/logs/HTE-002/"><span>HTE-002</span>SB-07 Attack Traffic Emulation Event</a>
+          <a class="sidebar-link active" href="/campaigns/SB-07/logs/HAW-004/"><span>HAW-004</span>Windows Security Process Creation Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-07/logs/HAD-002/"><span>HAD-002</span>DC Loader and Dump Artifact Evidence</a>
+          <a class="sidebar-link" href="/campaigns/SB-07/logs/HAD-003/"><span>HAD-003</span>DC Sysmon Operational Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-07/logs/HAD-004/"><span>HAD-004</span>DC Loader Run Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-07/logs/HAD-005/"><span>HAD-005</span>DC Application Error and WER Event</a>
+          <a class="sidebar-link" href="/campaigns/SB-07/logs/HAD-006/"><span>HAD-006</span>DC Amcache Artifact</a>
+          <a class="sidebar-link" href="/campaigns/SB-07/logs/HAD-007/"><span>HAD-007</span>DC ShimCache AppCompatCache Artifact</a>
+          <a class="sidebar-link" href="/campaigns/SB-07/logs/HAD-008/"><span>HAD-008</span>DC TaskCache Registry and Task XML Artifact</a>
+          <a class="sidebar-link" href="/campaigns/SB-07/logs/HAD-009/"><span>HAD-009</span>DC NTFS USN Journal Artifact</a>
+          <a class="sidebar-link" href="/campaigns/SB-07/logs/HAC-001/"><span>HAC-001</span>Hanguel AD Sequential Correlator Alert</a>
+          <a class="sidebar-link" href="/campaigns/SB-07/logs/HTE-001/"><span>HTE-001</span>SB-07 Normal Traffic Emulation Event</a>
+        </nav>
+      </div>
+      <div class="sidebar-block">
+        <div class="sidebar-title">Global Catalog</div>
+        <nav class="sidebar-links">
+          <a class="sidebar-link" href="/logs/">All Logs</a>
+        </nav>
+      </div>
+    </aside>
+    <main class="page campaign-content">
+      <div class="breadcrumbs"><a href="/campaigns/">Home</a> / <a href="/campaigns/SB-07/">OZZY PMS Chain</a> / <a href="/campaigns/SB-07/logs/">Campaign Logs</a> / <span>HAW-004</span></div>
+<h1>HAW-004 Windows Security Process Creation Log</h1>
+<div class="meta-grid" aria-label="Campaign metadata">
+<div class="meta-label">Log ID:</div>
+<div class="meta-value">HAW-004</div>
+<div class="meta-label">Source:</div>
+<div class="meta-value"><code>hanguel-win01</code>, <code>hanguel-dc01</code></div>
+<div class="meta-label">Representative Path:</div>
+<div class="meta-value">Windows Security log Event ID <code>4688</code></div>
+<div class="meta-label">Collection:</div>
+<div class="meta-value">Windows Event Log collector; process creation audit policy 필요</div>
+<div class="meta-label">Current Status:</div>
+<div class="meta-value">collector logic 존재. 실제 coverage는 4688 command-line auditing 설정 여부에 의존</div>
+<div class="meta-label">Primary Use:</div>
+<div class="meta-value">comsvcs/rdrleakdiag/raw dump 시도, loader 실행, suspicious command-line 확인</div>
+</div>
+<h2 id="공격-행위-요약">공격 행위 요약</h2>
+<p>Defender가 차단한 LotL dump 시도와 loader 실행을 process creation 로그에서 확인할 수 있다. 단, Security 4688은 audit policy와 command line logging 설정이 없으면 상세한 command line이 부족할 수 있다.</p>
+<h2 id="주요-event-action">주요 event.action</h2>
+<pre><code>comsvcs_lsass_dump_attempt
+rdrleakdiag_lsass_dump_attempt
+loader_execution_observed</code></pre>
+<h2 id="주요-필드">주요 필드</h2>
+<div class="table-wrap wide-table">
+<table>
+<thead><tr><th>필드</th><th>의미</th><th>예시</th></tr></thead>
+<tbody>
+<tr><td><code>event.code</code></td><td>Windows Security event ID</td><td><code>4688</code></td></tr>
+<tr><td><code>process.executable</code></td><td>실행 파일</td><td><code>rundll32.exe</code>, <code>rdrleakdiag.exe</code>, <code>hgl_loader.exe</code></td></tr>
+<tr><td><code>process.command_line</code></td><td>명령줄</td><td><code>comsvcs.dll MiniDump</code></td></tr>
+<tr><td><code>user.name</code></td><td>실행 계정</td><td><code>SYSTEM</code></td></tr>
+</tbody></table></div>
+<h2 id="커버하는-techniques-used">커버하는 Techniques Used</h2>
+<div class="table-wrap wide-table">
+<table>
+<thead><tr><th>Technique</th><th>Mapping Reason</th></tr></thead>
+<tbody>
+<tr><td><a href="https://attack.mitre.org/techniques/T1003/001/">T1003.001 LSASS Memory</a></td><td>LSASS dump 시도 도구와 command line을 확인한다.</td></tr>
+<tr><td><a href="https://attack.mitre.org/techniques/T1620/">T1620 Reflective Code Loading</a></td><td>loader 프로세스 실행 자체를 확인한다.</td></tr>
+<tr><td><a href="https://attack.mitre.org/techniques/T1027/">T1027 Obfuscated Files or Information</a></td><td>encrypted payload와 loader 조합의 실행 흐름을 보조한다.</td></tr>
+</tbody></table></div>
+<h2 id="elk-query-예시">ELK Query 예시</h2>
+<pre><code>log.id:&quot;HAW-004&quot; and event.action:(&quot;comsvcs_lsass_dump_attempt&quot; or &quot;rdrleakdiag_lsass_dump_attempt&quot; or &quot;loader_execution_observed&quot;)</code></pre>
+      <footer class="footer">
+        Spacebar Project. This campaign log page is scoped to SB-07.
+      </footer>
+    </main>
+  </div>
+</body>
+</html>

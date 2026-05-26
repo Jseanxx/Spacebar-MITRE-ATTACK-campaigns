@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SB-07 HAP-002 PMS Patch Manifest and Hash Evidence | Spacebar Campaign Logs</title>
+  <link rel="stylesheet" href="/assets/campaign.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="/campaigns/"><img class="brand-logo" src="/assets/spacebarLogo.png" alt="Spacebar"><span>Spacebar Campaigns</span></a>
+    </div>
+  </header>
+
+  <div class="page-shell">
+
+    <aside class="campaign-sidebar" aria-label="Campaign log navigation">
+      <div class="sidebar-block">
+        <div class="sidebar-title">SB-07 Logs</div>
+        <nav class="sidebar-links">
+          <a class="sidebar-link" href="/campaigns/SB-07/">Campaign Page</a>
+          <a class="sidebar-link" href="/campaigns/SB-07/logs/">Campaign Logs</a>
+          <a class="sidebar-link" href="/campaigns/SB-07/logs/HAB-001/"><span>HAB-001</span>Bastion SSH Auth Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-07/logs/HAP-001/"><span>HAP-001</span>PMS JBoss and Update Relay HTTP Log</a>
+          <a class="sidebar-link active" href="/campaigns/SB-07/logs/HAP-002/"><span>HAP-002</span>PMS Patch Manifest and Hash Evidence</a>
+          <a class="sidebar-link" href="/campaigns/SB-07/logs/HAW-001/"><span>HAW-001</span>Win01 Hanguel AD Agent Enriched Event</a>
+          <a class="sidebar-link" href="/campaigns/SB-07/logs/HAW-003/"><span>HAW-003</span>Windows Task Scheduler Operational Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-07/logs/HAW-002/"><span>HAW-002</span>Win01 PowerShell Operational Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-07/logs/HTE-002/"><span>HTE-002</span>SB-07 Attack Traffic Emulation Event</a>
+          <a class="sidebar-link" href="/campaigns/SB-07/logs/HAW-004/"><span>HAW-004</span>Windows Security Process Creation Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-07/logs/HAD-002/"><span>HAD-002</span>DC Loader and Dump Artifact Evidence</a>
+          <a class="sidebar-link" href="/campaigns/SB-07/logs/HAD-003/"><span>HAD-003</span>DC Sysmon Operational Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-07/logs/HAD-004/"><span>HAD-004</span>DC Loader Run Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-07/logs/HAD-005/"><span>HAD-005</span>DC Application Error and WER Event</a>
+          <a class="sidebar-link" href="/campaigns/SB-07/logs/HAD-006/"><span>HAD-006</span>DC Amcache Artifact</a>
+          <a class="sidebar-link" href="/campaigns/SB-07/logs/HAD-007/"><span>HAD-007</span>DC ShimCache AppCompatCache Artifact</a>
+          <a class="sidebar-link" href="/campaigns/SB-07/logs/HAD-008/"><span>HAD-008</span>DC TaskCache Registry and Task XML Artifact</a>
+          <a class="sidebar-link" href="/campaigns/SB-07/logs/HAD-009/"><span>HAD-009</span>DC NTFS USN Journal Artifact</a>
+          <a class="sidebar-link" href="/campaigns/SB-07/logs/HAC-001/"><span>HAC-001</span>Hanguel AD Sequential Correlator Alert</a>
+          <a class="sidebar-link" href="/campaigns/SB-07/logs/HTE-001/"><span>HTE-001</span>SB-07 Normal Traffic Emulation Event</a>
+        </nav>
+      </div>
+      <div class="sidebar-block">
+        <div class="sidebar-title">Global Catalog</div>
+        <nav class="sidebar-links">
+          <a class="sidebar-link" href="/logs/">All Logs</a>
+        </nav>
+      </div>
+    </aside>
+    <main class="page campaign-content">
+      <div class="breadcrumbs"><a href="/campaigns/">Home</a> / <a href="/campaigns/SB-07/">OZZY PMS Chain</a> / <a href="/campaigns/SB-07/logs/">Campaign Logs</a> / <span>HAP-002</span></div>
+<h1>HAP-002 PMS Patch Manifest and Hash Evidence</h1>
+<div class="meta-grid" aria-label="Campaign metadata">
+<div class="meta-label">Log ID:</div>
+<div class="meta-value">HAP-002</div>
+<div class="meta-label">Source:</div>
+<div class="meta-value"><code>hanguel-ops-pms</code></div>
+<div class="meta-label">Representative Path:</div>
+<div class="meta-value"><code>/opt/hanguel-pms/updates/manifest.json</code>, <code>/opt/hanguel-pms/evidence/patch_hashes_*.json</code></div>
+<div class="meta-label">Collection:</div>
+<div class="meta-value">PMS host file inventory, hash snapshot, Hanguel emulation event</div>
+<div class="meta-label">Current Status:</div>
+<div class="meta-value">patch hash evidence 파일 생성 확인. ELK 정규화는 Hanguel event로 보강</div>
+<div class="meta-label">Primary Use:</div>
+<div class="meta-value">정상 파일명으로 유지된 patch 변조와 manifest 갱신 추적</div>
+</div>
+<h2 id="공격-행위-요약">공격 행위 요약</h2>
+<p>공격자는 PMS 업데이트 경로의 <code>patch.ps1</code>과 manifest를 수정한다. 파일명과 경로가 유지되기 때문에 사용자는 정상 업데이트로 인식할 수 있으며, 실제 탐지에서는 hash, manifest version, 배포 시간, win01 실행 이벤트를 함께 봐야 한다.</p>
+<h2 id="로그-발생-위치">로그 발생 위치</h2>
+<div class="table-wrap wide-table">
+<table>
+<thead><tr><th>구분</th><th>위치</th><th>설명</th></tr></thead>
+<tbody>
+<tr><td>PMS update dir</td><td><code>/opt/hanguel-pms/updates/</code></td><td>배포되는 manifest와 patch 원본</td></tr>
+<tr><td>PMS evidence dir</td><td><code>/opt/hanguel-pms/evidence/patch_hashes_*.json</code></td><td>정상/변조 patch hash 비교</td></tr>
+<tr><td>ELK</td><td><code>hanguel-ad-agent-*</code></td><td><code>pms_patch_changed_emulated</code>, <code>pms_patch_downloaded</code></td></tr>
+</tbody></table></div>
+<h2 id="주요-필드">주요 필드</h2>
+<div class="table-wrap wide-table">
+<table>
+<thead><tr><th>필드</th><th>의미</th><th>예시</th></tr></thead>
+<tbody>
+<tr><td><code>file.path</code></td><td>변경 파일 경로</td><td><code>/opt/hanguel-pms/updates/patch.ps1</code></td></tr>
+<tr><td><code>file.hash.sha256</code></td><td>파일 해시</td><td>redacted hash</td></tr>
+<tr><td><code>event.action</code></td><td>정규화된 행위</td><td><code>pms_patch_changed_emulated</code></td></tr>
+<tr><td><code>hanguel.classification</code></td><td>분류</td><td><code>suspicious</code></td></tr>
+</tbody></table></div>
+<h2 id="커버하는-techniques-used">커버하는 Techniques Used</h2>
+<div class="table-wrap wide-table">
+<table>
+<thead><tr><th>Technique</th><th>Mapping Reason</th></tr></thead>
+<tbody>
+<tr><td><a href="https://attack.mitre.org/techniques/T1195/002/">T1195.002 Compromise Software Supply Chain</a></td><td>신뢰된 업데이트 경로에 공격 코드를 삽입한다.</td></tr>
+<tr><td><a href="https://attack.mitre.org/techniques/T1036/005/">T1036.005 Match Legitimate Name or Location</a></td><td>기존 파일명과 경로를 유지해 정상 패치처럼 보이게 한다.</td></tr>
+<tr><td><a href="https://attack.mitre.org/techniques/T1053/005/">T1053.005 Scheduled Task</a></td><td>win01 PMS Agent scheduled task가 해당 patch를 실행한다.</td></tr>
+</tbody></table></div>
+<h2 id="탐지-포인트">탐지 포인트</h2>
+<ol>
+<li>manifest version/hash 변경 직후 win01의 patch download/execution 이벤트가 발생하는지 본다.</li>
+<li>변경 주체와 시간대가 정상 배포 절차와 일치하는지 확인한다.</li>
+</ol>
+<h2 id="elk-query-예시">ELK Query 예시</h2>
+<pre><code>log.id:&quot;HAP-002&quot; or event.action:&quot;pms_patch_changed_emulated&quot;</code></pre>
+      <footer class="footer">
+        Spacebar Project. This campaign log page is scoped to SB-07.
+      </footer>
+    </main>
+  </div>
+</body>
+</html>

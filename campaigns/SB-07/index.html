@@ -32,7 +32,7 @@
       <div class="sidebar-block sidebar-sections">
         <div class="sidebar-title">Logs</div>
         <nav class="sidebar-links">
-          
+          <a class="sidebar-link" href="/campaigns/SB-07/logs/">Campaign Logs</a>
           <a class="sidebar-link" href="/logs/">Global Log Catalog</a>
         </nav>
       </div>
@@ -62,11 +62,11 @@ PMS 업데이트 체인의 신뢰 훼손은 도메인 컨트롤러 credential ac
   <div class="meta-label">Last Seen:</div>
   <div class="meta-value">May 2026</div>
   <div class="meta-label">Version:</div>
-  <div class="meta-value">0.1</div>
+  <div class="meta-value">0.2</div>
   <div class="meta-label">Created:</div>
   <div class="meta-value">22 May 2026</div>
   <div class="meta-label">Last Modified:</div>
-  <div class="meta-value">22 May 2026</div>
+  <div class="meta-value">26 May 2026</div>
   <div class="meta-label">Target:</div>
   <div class="meta-value">AD server / JBoss PMS update chain</div>
   <div class="meta-label">Objective:</div>
@@ -78,6 +78,10 @@ PMS 업데이트 체인의 신뢰 훼손은 도메인 컨트롤러 credential ac
   <span class="tag">JBoss AS 6</span>
   <span class="tag">PMS Update Chain</span>
   <span class="tag">Manual PE Loader</span>
+  <span class="tag">Hanguel AD Agent</span>
+  <span class="tag">Forensic Artifacts</span>
+  <span class="tag">Sequential Correlation</span>
+  <span class="tag">ATT&amp;CK Enterprise</span>
 </div>
 
 <h2 id="overview">Overview</h2>
@@ -115,6 +119,71 @@ PMS 업데이트 체인의 신뢰 훼손은 도메인 컨트롤러 credential ac
   <div class="phase-item"><b>win01 SYSTEM</b><span>T1053.005</span><br><span>T1552</span></div>
   <div class="phase-item"><b>DC Access</b><span>T1021.002</span><br><span>T1021.006</span></div>
   <div class="phase-item"><b>LSASS</b><span>T1027</span><br><span>T1620</span><br><span>T1003.001</span></div>
+</div>
+
+<h2 id="detection-readiness">Detection Readiness</h2>
+<p>
+  SB-07의 탐지 문서화는 단일 Technique 탐지보다 행위 흐름을 재구성하는 데 초점을 둔다.
+  <code>hanguel_ad_agent</code>는 Windows/AD 이벤트와 포렌식 아티팩트를 ECS 유사 JSON으로 정규화하고,
+  <code>campaign.id</code>, <code>log.id</code>, <code>event.action</code>, <code>hanguel.classification</code> 필드로 정상, 의심, 공격 행위를 구분한다.
+  로더 기반 실행의 경우 <code>manual_mapping_inferred</code>처럼 직접 증거와 추론 증거를 분리해 기록한다.
+</p>
+
+<div class="concept-banner">
+  <b>증거 기준</b>
+  <span><code>확인됨</code>은 ELK 이벤트, Windows 원본 로그, 레지스트리, 파일, 명령 출력으로 관측된 사실에만 사용한다. <code>manual mapping</code> 내부 단계는 Windows 기본 로그에 직접 남지 않으므로 code behavior와 실행 산출물 기반 추론으로 분리한다.</span>
+</div>
+
+<h3 id="primary-log-map">Primary Log Map</h3>
+<div class="table-wrap wide-table">
+  <table>
+    <thead>
+      <tr>
+        <th>Phase</th>
+        <th>Primary Logs</th>
+        <th>Representative event.action</th>
+        <th>Use in SB-07</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>External Access / Recon</td>
+        <td><a href="/campaigns/SB-07/logs/HAB-001/">HAB-001</a>, <a href="/campaigns/SB-07/logs/HAP-001/">HAP-001</a></td>
+        <td><code>ssh_session_accepted</code>, <code>jboss_invoker_probe</code></td>
+        <td>bastion 접속, 내부 PMS/JBoss 서비스 탐색, JBoss 취약 표면 확인을 로그로 재구성한다.</td>
+      </tr>
+      <tr>
+        <td>PMS Update Chain</td>
+        <td><a href="/campaigns/SB-07/logs/HAP-001/">HAP-001</a>, <a href="/campaigns/SB-07/logs/HAP-002/">HAP-002</a>, <a href="/campaigns/SB-07/logs/HAW-001/">HAW-001</a>, <a href="/campaigns/SB-07/logs/HAW-003/">HAW-003</a></td>
+        <td><code>pms_patch_downloaded</code>, <code>pms_patch_executed</code></td>
+        <td>manifest/patch 변경, win01의 PMS Agent 다운로드와 SYSTEM 실행 흐름을 확인한다.</td>
+      </tr>
+      <tr>
+        <td>win01 Discovery / Credential Artifact</td>
+        <td><a href="/campaigns/SB-07/logs/HAW-001/">HAW-001</a>, <a href="/campaigns/SB-07/logs/HAW-002/">HAW-002</a>, <a href="/campaigns/SB-07/logs/HTE-002/">HTE-002</a></td>
+        <td><code>domain_controller_discovery</code>, <code>dc_cred_xml_discovered</code></td>
+        <td>win01에서 AD/DC 정보를 탐색하고 <code>dc_cred.xml</code> artifact를 발견한 행위를 정규화한다.</td>
+      </tr>
+      <tr>
+        <td>DC Lateral Movement</td>
+        <td><a href="/campaigns/SB-07/logs/HAW-001/">HAW-001</a>, <a href="/campaigns/SB-07/logs/HAW-002/">HAW-002</a>, <a href="/campaigns/SB-07/logs/HAW-004/">HAW-004</a>, <a href="/campaigns/SB-07/logs/HTE-002/">HTE-002</a></td>
+        <td><code>dc_winrm_whoami</code>, <code>dc_c_admin_share_access</code></td>
+        <td>WinRM과 C$ 접근이 가능한 상태였는지, 실제 검증 또는 안전한 emulation 이벤트로 확인한다.</td>
+      </tr>
+      <tr>
+        <td>Loader / LSASS Artifact</td>
+        <td><a href="/campaigns/SB-07/logs/HAD-002/">HAD-002</a>, <a href="/campaigns/SB-07/logs/HAD-003/">HAD-003</a>, <a href="/campaigns/SB-07/logs/HAD-004/">HAD-004</a>, <a href="/campaigns/SB-07/logs/HAD-005/">HAD-005</a>, <a href="/campaigns/SB-07/logs/HAD-006/">HAD-006</a>, <a href="/campaigns/SB-07/logs/HAD-007/">HAD-007</a>, <a href="/campaigns/SB-07/logs/HAD-008/">HAD-008</a>, <a href="/campaigns/SB-07/logs/HAD-009/">HAD-009</a></td>
+        <td><code>loader_execution_log_found</code>, <code>application_loader_crash_observed</code>, <code>usn_loader_file_lifecycle_observed</code></td>
+        <td>로더 실행, scheduled task, Application Error, Amcache, ShimCache, USN Journal로 DC의 loader chain을 재구성한다.</td>
+      </tr>
+      <tr>
+        <td>Correlation</td>
+        <td><a href="/campaigns/SB-07/logs/HAC-001/">HAC-001</a>, <a href="/campaigns/SB-07/logs/HTE-001/">HTE-001</a>, <a href="/campaigns/SB-07/logs/HTE-002/">HTE-002</a></td>
+        <td><code>sb07-pms-patch-discovery-001</code>, <code>sb07-manual-mapping-inferred-014</code></td>
+        <td>정상 baseline과 공격 sequence를 분리하고, 여러 로그를 시간창 내 하나의 incident 후보로 묶는다.</td>
+      </tr>
+    </tbody>
+  </table>
 </div>
 
 <h2>Groups</h2>
