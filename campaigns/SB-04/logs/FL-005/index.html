@@ -52,90 +52,112 @@
 <div class="meta-label">Representative Path:</div>
 <div class="meta-value"><code>journalctl -u falco-modern-bpf.service</code></div>
 <div class="meta-label">Collection:</div>
-<div class="meta-value">Wazuh agent journald input (<code>/var/ossec/etc/ossec.conf</code>)</div>
+<div class="meta-value">Wazuh agent journald input</div>
 <div class="meta-label">Primary Use:</div>
-<div class="meta-value">IMDS 접근을 통한 EC2 Instance Profile 임시 자격증명 획득 행위 확인</div>
+<div class="meta-value">IMDS 접근을 통한 EC2 Instance Profile 임시 자격증명 획득 시도 확인</div>
 </div>
 <h2 id="공격-행위-요약">공격 행위 요약</h2>
-<p>FL-005는 NodeFall 캠페인에서 공격자가 탈취한 노드 또는 컨테이너 실행 환경에서 AWS EC2 Instance Metadata Service(IMDS)에 접근하여 Instance Profile 임시 자격증명을 획득하려는 런타임 행위를 설명하는 Falco 기반 로그이다.</p>
-<p>공격자는 <code>169.254.169.254</code> 메타데이터 엔드포인트에 접근하여 IMDSv2 토큰을 발급받고, <code>/latest/meta-data/iam/security-credentials/</code> 경로를 조회하여 EC2 인스턴스에 연결된 IAM Role 이름과 임시 자격증명을 확인했다. 이 자격증명은 이후 STS, Secrets Manager, RDS 등 AWS API 호출에 사용될 수 있다.</p>
-<p>Falco는 eBPF/driver를 통해 Linux syscall 및 프로세스 실행 정보를 관찰한다. 프로세스 커맨드라인에 IMDS 주소 또는 메타데이터 자격증명 경로가 포함되거나, <code>169.254.169.254</code>로 네트워크 연결이 발생하면 Falco rule <code>FL-005 IMDS Credential Access</code>가 매칭되고 <code>[FL-005] IMDS Credential Access</code> 로그가 생성된다.</p>
-<p>FL-005는 CloudTrail의 <code>GetCallerIdentity</code>, <code>ListSecrets</code>, <code>GetSecretValue</code>, <code>DescribeDBInstances</code> 이벤트 이전 단계에서, AWS API 호출에 사용될 수 있는 임시 자격증명을 런타임에서 획득하려 한 증거로 사용된다.</p>
+<p>FL-005는 공격자가 컨테이너 내부에서 AWS EC2 Instance Metadata Service(IMDS)에 접근하여 Instance Profile 임시 자격증명 획득을 시도한 행위를 설명하는 Falco 런타임 로그이다.</p>
+<p>공격자는 <code>169.254.169.254</code> 메타데이터 엔드포인트에 접근해 IMDSv2 토큰을 발급받고, <code>/latest/meta-data/iam/security-credentials/</code> 경로를 조회하여 EC2 인스턴스에 연결된 IAM Role 이름과 임시 자격증명을 확인했다.</p>
+<p>Falco에서 <code>cmd</code>, <code>parent_cmd</code>, <code>pod</code>, <code>ns</code>, <code>container_id</code>가 함께 확인되므로, 해당 IMDS 접근 행위가 <code>kube-system</code> 네임스페이스의 <code>pwned-pod-final</code> 컨테이너 실행 환경에서 발생했음을 판단할 수 있다.</p>
 <h2 id="로그-발생-위치">로그 발생 위치</h2>
 <div class="table-wrap wide-table">
 <table>
 <thead><tr><th>구분</th><th>위치</th><th>설명</th></tr></thead>
 <tbody>
-<tr><td>K8s Node</td><td>Linux syscall / process execution</td><td>IMDS 접근 명령 실행 또는 메타데이터 IP로 네트워크 연결 발생</td></tr>
-<tr><td>AWS IMDS</td><td><code>169.254.169.254</code></td><td>EC2 Instance Metadata Service 엔드포인트</td></tr>
-<tr><td>Falco</td><td>rule <code>FL-005 IMDS Credential Access</code></td><td>IMDS 접근 행위가 조건과 매칭되면 탐지 이벤트 생성</td></tr>
-<tr><td>K8s Node</td><td><code>falco-modern-bpf.service</code></td><td>Falco가 생성한 탐지 이벤트가 systemd service 로그로 기록</td></tr>
-<tr><td>K8s Node</td><td><code>journalctl -u falco-modern-bpf.service</code></td><td>분석자가 Falco 원본 탐지 로그를 확인하는 대표 위치</td></tr>
+<tr><td>K8s Node</td><td>Falco</td><td>IMDS 접근 명령 실행 이벤트 탐지</td></tr>
+<tr><td>journald</td><td><code>falco-modern-bpf.service</code></td><td>Falco 탐지 로그 저장</td></tr>
+<tr><td>Wazuh</td><td>Wazuh Dashboard</td><td>수집된 Falco alert 확인</td></tr>
 </tbody></table></div>
 <h2 id="수집-방식">수집 방식</h2>
 <div class="table-wrap wide-table">
 <table>
 <thead><tr><th>구분</th><th>방식</th></tr></thead>
 <tbody>
-<tr><td>Falco 탐지 기준</td><td>프로세스 커맨드라인에 <code>169.254.169.254</code>, <code>/latest/api/token</code>, <code>/latest/meta-data/iam/security-credentials</code>가 포함되는지 확인</td></tr>
-<tr><td>Falco 탐지 기준</td><td>프로세스가 IMDS IP(<code>169.254.169.254</code>)로 네트워크 연결을 시도하는지 확인</td></tr>
-<tr><td>Falco 탐지 메시지</td><td>조건 매칭 시 Falco <code>output</code> 값인 <code>[FL-005] IMDS Credential Access</code>가 journald 로그에 기록됨</td></tr>
-<tr><td>Linux syscall</td><td><code>execve</code>, <code>execveat</code>, <code>connect</code>, <code>sendto</code>, <code>sendmsg</code> 이벤트가 eBPF/driver를 통해 Falco에 전달됨</td></tr>
-<tr><td>journald</td><td>Falco 탐지 이벤트가 <code>falco-modern-bpf.service</code>의 systemd journal에 저장됨</td></tr>
-<tr><td>Wazuh agent</td><td>K8s node의 <code>/var/ossec/etc/ossec.conf</code>에서 journald 로그를 수집</td></tr>
-<tr><td>Wazuh manager</td><td>수집된 Falco 로그를 <code>nodefall_falco_rules.xml</code>의 <code>FL-005</code> 룰과 매칭</td></tr>
-<tr><td>Wazuh Dashboard</td><td>매칭된 alert를 <code>[FL-005] IMDS Credential Access</code> 이벤트로 표시</td></tr>
+<tr><td>Falco 탐지 기준</td><td><code>169.254.169.254</code> 또는 IMDS 자격증명 경로 접근 여부 확인</td></tr>
+<tr><td>Falco 탐지 메시지</td><td>조건 매칭 시 <code>[FL-005] IMDS Credential Access</code> 로그 생성</td></tr>
+<tr><td>Linux syscall</td><td><code>execve</code>, <code>execveat</code>, <code>connect</code> 이벤트가 Falco에 전달</td></tr>
+<tr><td>journald</td><td>Falco 이벤트가 <code>falco-modern-bpf.service</code> 로그에 저장</td></tr>
+<tr><td>Wazuh agent</td><td>K8s node에서 journald 로그 수집</td></tr>
+<tr><td>Wazuh manager</td><td>수집된 Falco 로그를 <code>FL-005</code> 룰과 매칭</td></tr>
+<tr><td>Wazuh Dashboard</td><td><code>[FL-005] IMDS Credential Access</code> 이벤트로 표시</td></tr>
 </tbody></table></div>
 <h2 id="로그-출력-명령어">로그 출력 명령어</h2>
 <pre><code>sudo journalctl -u falco-modern-bpf.service --no-pager | grep -E &quot;\[FL-005\] IMDS Credential Access&quot;</code></pre>
 <h2 id="실제-관측-로그">실제 관측 로그</h2>
-<pre><code>May 27 02:15:48 ip-10-0-133-48 falco[28369]: 02:15:48.482415537: Warning [FL-005] IMDS Credential Access (technique=T1552.005 cmd=&quot;curl -s -X PUT http://169.254.169.254/latest/api/token -H X-aws-ec2-metadata-token-ttl-seconds: 21600&quot; parent_cmd=&quot;bash -i&quot; user=root pod=pwned-pod-final ns=kube-system container_id=f8b62c77cf58 dst=&lt;NA&gt;:&lt;NA&gt;) container_id=f8b62c77cf58 container_name=pwned container_image_repository=docker.io/library/node container_image_tag=20 k8s_pod_name=pwned-pod-final k8s_ns_name=kube-system</code></pre>
-<pre><code>May 27 02:15:56 ip-10-0-133-48 falco[28369]: 02:15:56.366299003: Warning [FL-005] IMDS Credential Access (technique=T1552.005 cmd=&quot;curl -s -H X-aws-ec2-metadata-token: AQAEAP7LAethDQ9zByQBHqydzdrK9byyq2VF8Pqij5yK9iV0BygILA== http://169.254.169.254/latest/meta-data/iam/security-credentials/&quot; parent_cmd=&quot;bash -i&quot; user=root pod=pwned-pod-final ns=kube-system container_id=f8b62c77cf58 dst=&lt;NA&gt;:&lt;NA&gt;) container_id=f8b62c77cf58 container_name=pwned container_image_repository=docker.io/library/node container_image_tag=20 k8s_pod_name=pwned-pod-final k8s_ns_name=kube-system</code></pre>
-<pre><code>May 27 02:16:03 ip-10-0-133-48 falco[28369]: 02:16:03.822634472: Warning [FL-005] IMDS Credential Access (technique=T1552.005 cmd=&quot;curl -s -H X-aws-ec2-metadata-token: AQAEAP7LAethDQ9zByQBHqydzdrK9byyq2VF8Pqij5yK9iV0BygILA== http://169.254.169.254/latest/meta-data/iam/security-credentials/vuln-eks-node-role&quot; parent_cmd=&quot;bash -i&quot; user=root pod=pwned-pod-final ns=kube-system container_id=f8b62c77cf58 dst=&lt;NA&gt;:&lt;NA&gt;) container_id=f8b62c77cf58 container_name=pwned container_image_repository=docker.io/library/node container_image_tag=20 k8s_pod_name=pwned-pod-final k8s_ns_name=kube-system</code></pre>
+<pre><code>May 27 02:15:48 ip-10-0-133-48 falco[28369]:
+  02:15:48.482415537: Warning [FL-005] IMDS Credential Access
+  technique=T1552.005
+  cmd=&quot;curl -s -X PUT http://169.254.169.254/latest/api/token -H X-aws-ec2-metadata-token-ttl-seconds: 21600&quot;
+  parent_cmd=&quot;bash -i&quot;
+  user=root
+  pod=pwned-pod-final
+  ns=kube-system
+  container_id=f8b62c77cf58
+  dst=&lt;NA&gt;:&lt;NA&gt;
+  container_name=pwned
+  container_image_repository=docker.io/library/node
+  container_image_tag=20
+  k8s_pod_name=pwned-pod-final
+  k8s_ns_name=kube-system</code></pre>
+<pre><code>May 27 02:15:56 ip-10-0-133-48 falco[28369]:
+  02:15:56.366299003: Warning [FL-005] IMDS Credential Access
+  technique=T1552.005
+  cmd=&quot;curl -s -H X-aws-ec2-metadata-token: AQAEAP7LAethDQ9zByQBHqydzdrK9byyq2VF8Pqij5yK9iV0BygILA== http://169.254.169.254/latest/meta-data/iam/security-credentials/&quot;
+  parent_cmd=&quot;bash -i&quot;
+  user=root
+  pod=pwned-pod-final
+  ns=kube-system
+  container_id=f8b62c77cf58
+  dst=&lt;NA&gt;:&lt;NA&gt;
+  container_name=pwned
+  container_image_repository=docker.io/library/node
+  container_image_tag=20
+  k8s_pod_name=pwned-pod-final
+  k8s_ns_name=kube-system</code></pre>
+<pre><code>May 27 02:16:03 ip-10-0-133-48 falco[28369]:
+  02:16:03.822634472: Warning [FL-005] IMDS Credential Access
+  technique=T1552.005
+  cmd=&quot;curl -s -H X-aws-ec2-metadata-token: AQAEAP7LAethDQ9zByQBHqydzdrK9byyq2VF8Pqij5yK9iV0BygILA== http://169.254.169.254/latest/meta-data/iam/security-credentials/vuln-eks-node-role&quot;
+  parent_cmd=&quot;bash -i&quot;
+  user=root
+  pod=pwned-pod-final
+  ns=kube-system
+  container_id=f8b62c77cf58
+  dst=&lt;NA&gt;:&lt;NA&gt;
+  container_name=pwned
+  container_image_repository=docker.io/library/node
+  container_image_tag=20
+  k8s_pod_name=pwned-pod-final
+  k8s_ns_name=kube-system</code></pre>
 <h2 id="주요-필드">주요 필드</h2>
 <div class="table-wrap wide-table">
 <table>
 <thead><tr><th>필드</th><th>의미</th><th>예시</th></tr></thead>
 <tbody>
-<tr><td><code>timestamp</code></td><td>systemd journal에 기록된 Falco 로그 발생 시각</td><td><code>May 27 02:15:48</code></td></tr>
-<tr><td><code>node</code></td><td>Falco 이벤트가 발생한 Kubernetes Node</td><td><code>ip-10-0-133-48</code></td></tr>
-<tr><td><code>process</code></td><td>Falco 로그를 기록한 프로세스와 PID</td><td><code>falco[28369]</code></td></tr>
-<tr><td><code>evt.time</code></td><td>Falco가 관찰한 syscall 이벤트 발생 시각</td><td><code>02:15:48.482415537</code></td></tr>
-<tr><td><code>priority</code></td><td>Falco 탐지 심각도</td><td><code>Warning</code></td></tr>
-<tr><td><code>rule/message</code></td><td>Falco가 매칭한 탐지 룰 이름</td><td><code>[FL-005] IMDS Credential Access</code></td></tr>
-<tr><td><code>technique</code></td><td>매핑된 MITRE ATT&amp;CK 기법</td><td><code>T1552.005</code></td></tr>
-<tr><td><code>cmd</code></td><td>IMDS 접근을 수행한 실제 실행 커맨드</td><td><code>curl -s -X PUT http://169.254.169.254/latest/api/token -H X-aws-ec2-metadata-token-ttl-seconds: 21600</code></td></tr>
-<tr><td><code>parent_cmd</code></td><td>해당 커맨드를 실행시킨 부모 프로세스 커맨드</td><td><code>bash -i</code></td></tr>
-<tr><td><code>user</code></td><td>명령을 실행한 사용자</td><td><code>root</code></td></tr>
-<tr><td><code>pod</code></td><td>행위가 발생한 Kubernetes Pod</td><td><code>pwned-pod-final</code></td></tr>
-<tr><td><code>ns</code></td><td>Pod가 속한 Kubernetes namespace</td><td><code>kube-system</code></td></tr>
-<tr><td><code>container_id</code></td><td>행위가 발생한 컨테이너 식별자</td><td><code>f8b62c77cf58</code></td></tr>
-<tr><td><code>dst</code></td><td>IMDS 접근 네트워크 목적지. 커맨드라인 기반 탐지에서는 <code>&lt;NA&gt;</code>일 수 있음</td><td><code>169.254.169.254:80</code> 또는 <code>&lt;NA&gt;:&lt;NA&gt;</code></td></tr>
-<tr><td><code>container_name</code></td><td>행위가 발생한 컨테이너 이름</td><td><code>pwned</code></td></tr>
-<tr><td><code>container_image_repository</code></td><td>컨테이너 이미지 저장소</td><td><code>docker.io/library/node</code></td></tr>
-<tr><td><code>container_image_tag</code></td><td>컨테이너 이미지 태그</td><td><code>20</code></td></tr>
-<tr><td><code>k8s_pod_name</code></td><td>Kubernetes Pod 이름</td><td><code>pwned-pod-final</code></td></tr>
-<tr><td><code>k8s_ns_name</code></td><td>Kubernetes namespace 이름</td><td><code>kube-system</code></td></tr>
+<tr><td><code>cmd</code></td><td>실행된 IMDS 접근 명령</td><td><code>curl ... 169.254.169.254/latest/meta-data/iam/security-credentials/</code></td></tr>
+<tr><td><code>pod</code></td><td>명령이 실행된 Pod</td><td><code>pwned-pod-final</code></td></tr>
+<tr><td><code>ns</code></td><td>Pod 네임스페이스</td><td><code>kube-system</code></td></tr>
+<tr><td><code>container_id</code></td><td>명령이 실행된 컨테이너 ID</td><td><code>f8b62c77cf58</code></td></tr>
 </tbody></table></div>
 <h2 id="커버-대상-techniques-used">커버 대상 Techniques Used</h2>
 <div class="table-wrap wide-table">
 <table>
 <thead><tr><th>Primary Log</th><th>Technique</th><th>Mapping Reason</th></tr></thead>
 <tbody>
-<tr><td>FL-005</td><td>T1552.005 Unsecured Credentials: Cloud Instance Metadata API</td><td>공격자가 <code>169.254.169.254</code> IMDS 엔드포인트와 <code>/latest/meta-data/iam/security-credentials/</code> 경로에 접근하여 EC2 Instance Profile 임시 자격증명을 조회한 행위를 설명한다.</td></tr>
+<tr><td>AL-001</td><td>T1552.005 Unsecured Credentials: Cloud Instance Metadata API</td><td>IMDS로 획득한 임시 자격증명으로 STS <code>GetCallerIdentity</code> API를 호출한 행위를 설명한다.</td></tr>
+<tr><td>FL-005</td><td>T1552.005 Unsecured Credentials: Cloud Instance Metadata API</td><td>IMDS 엔드포인트와 IAM security credentials 경로에 접근해 임시 자격증명을 조회한 행위를 설명한다.</td></tr>
 </tbody></table></div>
 <h2 id="탐지-포인트">탐지 포인트</h2>
 <div class="table-wrap wide-table">
 <table>
 <thead><tr><th>Technique</th><th>관찰 행위</th><th>주요 필드</th></tr></thead>
 <tbody>
-<tr><td>T1552.005 Unsecured Credentials: Cloud Instance Metadata API</td><td>Falco 로그에 <code>[FL-005] IMDS Credential Access</code> 이벤트가 생성되었는지 확인한다. 이는 프로세스 커맨드라인 또는 네트워크 연결이 IMDS 접근 조건과 매칭되었음을 의미한다.</td><td><code>rule/message</code>, <code>technique</code>, <code>priority</code></td></tr>
-<tr><td>T1552.005 Unsecured Credentials: Cloud Instance Metadata API</td><td><code>cmd</code> 필드에 <code>169.254.169.254</code> 또는 <code>/latest/api/token</code>이 포함되어 있는지 확인한다. 이는 IMDSv2 토큰 발급 요청이 실행되었음을 보여준다.</td><td><code>cmd</code></td></tr>
-<tr><td>T1552.005 Unsecured Credentials: Cloud Instance Metadata API</td><td><code>cmd</code> 필드에 <code>/latest/meta-data/iam/security-credentials/</code> 경로가 포함되어 있는지 확인한다. 이는 EC2 인스턴스에 연결된 IAM Role 이름 또는 Role 기반 임시 자격증명 조회 요청을 의미한다.</td><td><code>cmd</code></td></tr>
-<tr><td>T1552.005 Unsecured Credentials: Cloud Instance Metadata API</td><td><code>cmd</code> 필드에 <code>/latest/meta-data/iam/security-credentials/{role-name}</code> 형태의 경로가 기록되었는지 확인한다. 이는 단순 Role 이름 조회를 넘어 특정 Role의 임시 자격증명 값을 요청한 단계로 해석할 수 있다.</td><td><code>cmd</code></td></tr>
-<tr><td>T1552.005 Unsecured Credentials: Cloud Instance Metadata API</td><td><code>parent_cmd</code>가 <code>bash -i</code>인지 확인한다. 이는 IMDS 접근 명령이 대화형 shell 세션에서 실행되었음을 보여주며, 호스트의 정상 관리 프로세스와 구분하는 근거가 된다.</td><td><code>parent_cmd</code></td></tr>
-<tr><td>T1552.005 Unsecured Credentials: Cloud Instance Metadata API</td><td><code>pod</code>, <code>ns</code>, <code>container_id</code>를 확인하여 IMDS 접근이 어느 Kubernetes 실행 환경에서 발생했는지 식별한다. 공격자가 생성하거나 장악한 Pod에서 발생했다면 컨테이너 침해 이후 클라우드 자격증명 조회 단계로 판단할 수 있다.</td><td><code>pod</code>, <code>ns</code>, <code>container_id</code></td></tr>
-<tr><td>T1552.005 Unsecured Credentials: Cloud Instance Metadata API</td><td><code>user</code> 필드를 확인하여 해당 명령을 실행한 사용자 권한을 식별한다. <code>user=root</code>인 경우 컨테이너 내부 root 권한에서 IMDS 접근 명령이 실행되었음을 보여준다.</td><td><code>user</code></td></tr>
+<tr><td>T1552.005 Unsecured Credentials: Cloud Instance Metadata API</td><td>컨테이너 내부에서 IMDS 엔드포인트 접근 명령이 실행되었는지 확인한다.</td><td><code>cmd</code></td></tr>
+<tr><td>T1552.005 Unsecured Credentials: Cloud Instance Metadata API</td><td>IMDSv2 토큰 발급 요청이 발생했는지 확인한다.</td><td><code>cmd</code></td></tr>
+<tr><td>T1552.005 Unsecured Credentials: Cloud Instance Metadata API</td><td>IAM Role 이름 또는 임시 자격증명 경로가 조회되었는지 확인한다.</td><td><code>cmd</code></td></tr>
+<tr><td>T1552.005 Unsecured Credentials: Cloud Instance Metadata API</td><td>해당 명령이 <code>pwned-pod-final</code> 컨테이너에서 실행되었는지 확인한다.</td><td><code>pod</code>, <code>ns</code>, <code>container_id</code></td></tr>
+<tr><td>T1552.005 Unsecured Credentials: Cloud Instance Metadata API</td><td>FL-005 이후 AL-001에서 STS <code>GetCallerIdentity</code> 호출이 이어졌는지 확인한다.</td><td><code>cmd</code>, <code>pod</code></td></tr>
 </tbody></table></div>
       <footer class="footer">
         Spacebar Project. This campaign log page is scoped to SB-04.
