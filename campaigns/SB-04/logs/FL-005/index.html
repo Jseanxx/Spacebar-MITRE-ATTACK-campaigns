@@ -83,7 +83,7 @@
 <tr><td>Wazuh Dashboard</td><td>매칭된 alert를 <code>[FL-005] IMDS Credential Access</code> 이벤트로 표시</td></tr>
 </tbody></table></div>
 <h2 id="로그-출력-명령어">로그 출력 명령어</h2>
-<pre><code>sudo journalctl -u falco-modern-bpf.service --no-pager | grep -E &quot;\[FL-005\]</code></pre>
+<pre><code>sudo journalctl -u falco-modern-bpf.service --no-pager | grep -E &quot;\[FL-005\] IMDS Credential Access&quot;</code></pre>
 <h2 id="실제-관측-로그">실제 관측 로그</h2>
 <pre><code>May 27 02:15:48 ip-10-0-133-48 falco[28369]: 02:15:48.482415537: Warning [FL-005] IMDS Credential Access (technique=T1552.005 cmd=&quot;curl -s -X PUT http://169.254.169.254/latest/api/token -H X-aws-ec2-metadata-token-ttl-seconds: 21600&quot; parent_cmd=&quot;bash -i&quot; user=root pod=pwned-pod-final ns=kube-system container_id=f8b62c77cf58 dst=&lt;NA&gt;:&lt;NA&gt;) container_id=f8b62c77cf58 container_name=pwned container_image_repository=docker.io/library/node container_image_tag=20 k8s_pod_name=pwned-pod-final k8s_ns_name=kube-system</code></pre>
 <pre><code>May 27 02:15:56 ip-10-0-133-48 falco[28369]: 02:15:56.366299003: Warning [FL-005] IMDS Credential Access (technique=T1552.005 cmd=&quot;curl -s -H X-aws-ec2-metadata-token: AQAEAP7LAethDQ9zByQBHqydzdrK9byyq2VF8Pqij5yK9iV0BygILA== http://169.254.169.254/latest/meta-data/iam/security-credentials/&quot; parent_cmd=&quot;bash -i&quot; user=root pod=pwned-pod-final ns=kube-system container_id=f8b62c77cf58 dst=&lt;NA&gt;:&lt;NA&gt;) container_id=f8b62c77cf58 container_name=pwned container_image_repository=docker.io/library/node container_image_tag=20 k8s_pod_name=pwned-pod-final k8s_ns_name=kube-system</code></pre>
