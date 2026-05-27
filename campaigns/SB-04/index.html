@@ -67,7 +67,7 @@
 <tr><td>Enterprise</td><td>T1611</td><td>Escape to Host</td><td>캠페인 당시 공격 그룹은 과도하게 부여된 kube-system 내 파드 생성 권한을 악용하여, 특권(Privileged) 파드를 강제 생성함으로써 컨테이너 경계를 탈출하고 노드(Node)의 제어권을 탈취했다.</td><td><a href="/campaigns/SB-04/logs/KL-001/">KL-001</a>,<a href="/campaigns/SB-04/logs/FL-004/">FL-004</a></td></tr>
 <tr><td>Enterprise</td><td>T1552.005</td><td>Unsecured Credentials: Cloud Instance Metadata API</td><td>캠페인 당시 공격 그룹은 탈출한 노드에서 IMDS를 통해 Instance Profile 임시 자격 증명을 획득하고, STS로 AWS API 사용 가능성을 검증했다.</td><td><a href="/campaigns/SB-04/logs/AL-001/">AL-001</a>,<a href="/campaigns/SB-04/logs/FL-005/">FL-005</a></td></tr>
 <tr><td>Enterprise</td><td>T1213.006</td><td>Data from Information Repositories: Databases</td><td>캠페인 당시 공격 그룹은 획득한 AWS 임시 자격 증명으로 Secrets Manager를 조회해 nodefall-rds-credential을 식별하고, SecretString에서 RDS 접속 정보를 확보했다. 이후 RDS 메타데이터 조회 결과와 대조해 해당 접속 정보가 실제 사용 가능한 내부 RDS 자산임을 확인하고, MySQL 조회를 통해 내부 RDS 데이터 자산을 확보했다.</td><td><a href="/campaigns/SB-04/logs/AL-002/">AL-002</a>,<a href="/campaigns/SB-04/logs/FL-006/">FL-006</a></td></tr>
-<tr><td>Enterprise</td><td>T1567.002</td><td>Exfiltration Over Web Service: Exfiltration to Cloud Storage</td><td>캠페인 당시 공격 그룹은 내부 RDS 고객 데이터를 HTTPS POST 요청으로 외부 웹 수신지에 유출했다.</td><td>FL-007 missing</td></tr>
+<tr><td>Enterprise</td><td>T1567.002</td><td>Exfiltration Over Web Service: Exfiltration to Cloud Storage</td><td>캠페인 당시 공격 그룹은 내부 RDS 고객 데이터를 HTTPS POST 요청으로 외부 웹 수신지에 유출했다.</td><td><a href="/campaigns/SB-04/logs/FL-007/">FL-007</a></td></tr>
 </tbody></table></div>
 </section>
 <section id="matrix" class="view-panel">
@@ -212,6 +212,13 @@
       <p>Falco에서 MySQL 클라이언트 실행을 확인하여 내부 RDS 데이터베이스 접근 행위를 설명하는 런타임 탐지 로그</p>
       <div class="tag-row">
         <span class="tag">T1213.006</span>
+      </div>
+    </article>
+    <article class="card">
+      <h3><a href="/campaigns/SB-04/logs/FL-007/">FL-007 Falco HTTP Data Upload</a></h3>
+      <p>Falco에서 curl을 이용한 외부 HTTPS POST 전송을 확인하여 내부 RDS 고객 데이터 유출 행위를 설명하는 런타임 탐지 로그</p>
+      <div class="tag-row">
+        <span class="tag">T1567.002</span>
       </div>
     </article>
   </div>

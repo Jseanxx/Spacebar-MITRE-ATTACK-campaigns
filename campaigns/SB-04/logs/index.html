@@ -31,6 +31,7 @@
           <a class="sidebar-link" href="/campaigns/SB-04/logs/FL-005/"><span>FL-005</span>Falco IMDS Credential Access</a>
           <a class="sidebar-link" href="/campaigns/SB-04/logs/AL-002/"><span>AL-002</span>CloudTrail Secrets/RDS Discovery Log</a>
           <a class="sidebar-link" href="/campaigns/SB-04/logs/FL-006/"><span>FL-006</span>Falco DB Client Access</a>
+          <a class="sidebar-link" href="/campaigns/SB-04/logs/FL-007/"><span>FL-007</span>Falco HTTP Data Upload</a>
         </nav>
       </div>
       <div class="sidebar-block">
@@ -117,6 +118,13 @@
           <p>Falco에서 MySQL 클라이언트 실행을 확인하여 내부 RDS 데이터베이스 접근 행위를 설명하는 런타임 탐지 로그</p>
           <div class="tag-row">
             <span class="tag">T1213.006</span>
+          </div>
+        </article>
+        <article class="card">
+          <h3><a href="/campaigns/SB-04/logs/FL-007/">FL-007 Falco HTTP Data Upload</a></h3>
+          <p>Falco에서 curl을 이용한 외부 HTTPS POST 전송을 확인하여 내부 RDS 고객 데이터 유출 행위를 설명하는 런타임 탐지 로그</p>
+          <div class="tag-row">
+            <span class="tag">T1567.002</span>
           </div>
         </article>
       </div>
