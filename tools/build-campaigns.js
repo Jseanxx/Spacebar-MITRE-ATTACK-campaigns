@@ -4,6 +4,7 @@ const path = require("path");
 const root = path.resolve(__dirname, "..");
 const contentDir = path.join(root, "content", "campaigns");
 const detectionDir = path.join(root, "content", "detections");
+const evidenceDir = path.join(root, "content", "evidence");
 const logCatalogDir = path.join(root, "content", "log-catalog");
 const campaignLogDir = path.join(root, "content", "campaign-logs");
 const outDir = path.join(root, "campaigns");
@@ -111,8 +112,10 @@ function normalizeInternalLinks(html, campaignId = null) {
     .replace(/href="\/logs\/([A-Z]+-\d+)\/"/g, (_, id) => `href="${logHref(id)}"`)
     .replace(/href="(?:\.\.\/)?campaigns\/(SB-\d+)\.html"/g, 'href="/campaigns/$1/"')
     .replace(/href="(?:\.\.\/)?campaigns\/(SB-\d+)-detection-map\.html"/g, 'href="/campaigns/$1/detection-map/"')
+    .replace(/href="(?:\.\.\/)?campaigns\/(SB-\d+)-evidence\.html"/g, 'href="/campaigns/$1/evidence/"')
     .replace(/href="(SB-\d+)\.html"/g, 'href="/campaigns/$1/"')
-    .replace(/href="(SB-\d+)-detection-map\.html"/g, 'href="/campaigns/$1/detection-map/"');
+    .replace(/href="(SB-\d+)-detection-map\.html"/g, 'href="/campaigns/$1/detection-map/"')
+    .replace(/href="(SB-\d+)-evidence\.html"/g, 'href="/campaigns/$1/evidence/"');
 }
 
 function headingId(text) {
@@ -679,6 +682,28 @@ ${bodyHtml}
 `;
 }
 
+function renderEvidencePage(campaigns, evidence) {
+  const { data, body } = evidence;
+  const bodyHtml = normalizeInternalLinks(data.format === "html" ? body : markdownToHtml(body), data.campaign);
+  const campaign = campaigns.find((item) => item.data.id === data.campaign);
+  const campaignName = campaign ? campaign.data.name : data.campaign;
+  return `${renderHeader(`${data.name} | Spacebar Detection Evidence`)}
+
+  <div class="page-shell">
+${renderSidebar(campaigns, data.campaign, { logIndexHref: "/logs/", campaignLogsHref: `/campaigns/${data.campaign}/logs/` })}
+    <main class="page campaign-content">
+      <div class="breadcrumbs"><a href="/campaigns/">Home</a> / <a href="/campaigns/">Campaigns</a> / <a href="/campaigns/${data.campaign}/">${escapeHtml(campaignName)}</a> / <span>Detection Evidence</span></div>
+${bodyHtml}
+      <footer class="footer">
+        Spacebar Project. This evidence page records reproducible investigation pivots and observed artifacts.
+      </footer>
+    </main>
+  </div>
+</body>
+</html>
+`;
+}
+
 function renderCampaignLogSidebar(campaign, logs, currentId = null) {
   return `
     <aside class="campaign-sidebar" aria-label="Campaign log navigation">
@@ -892,6 +917,9 @@ function main() {
   const detections = readContentCollection(detectionDir, /^SB-\d+\.md$/, (file) =>
     file.replace(/\.md$/, "/detection-map/")
   );
+  const evidences = readContentCollection(evidenceDir, /^SB-\d+\.md$/, (file) =>
+    file.replace(/\.md$/, "/evidence/")
+  );
   const detectionByCampaign = new Map(detections.map((detection) => [detection.data.campaign, detection]));
   const logs = readContentCollection(logCatalogDir, /^[A-Z]+-\d+\.md$/, (file) =>
     file.replace(/\.md$/, "/")
@@ -917,6 +945,10 @@ function main() {
 
   detections.forEach((detection) => {
     writeSitePage(outDir, detection.slug, renderDetectionPage(campaigns, detection));
+  });
+
+  evidences.forEach((evidence) => {
+    writeSitePage(outDir, evidence.slug, renderEvidencePage(campaigns, evidence));
   });
 
   logs.forEach((log) => {
