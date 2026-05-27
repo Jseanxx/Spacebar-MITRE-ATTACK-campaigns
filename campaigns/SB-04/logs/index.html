@@ -29,6 +29,7 @@
           <a class="sidebar-link" href="/campaigns/SB-04/logs/FL-004/"><span>FL-004</span>Falco Host Namespace Entry Log</a>
           <a class="sidebar-link" href="/campaigns/SB-04/logs/AL-001/"><span>AL-001</span>CloudTrail GetCallerIdentity Log</a>
           <a class="sidebar-link" href="/campaigns/SB-04/logs/FL-005/"><span>FL-005</span>Falco IMDS Credential Access</a>
+          <a class="sidebar-link" href="/campaigns/SB-04/logs/AL-002/"><span>AL-002</span>CloudTrail Secrets/RDS Discovery Log</a>
         </nav>
       </div>
       <div class="sidebar-block">
@@ -101,6 +102,13 @@
           <p>AWS EC2 Instance Metadata Service(IMDS)에 접근하여 Instance Profile 임시 자격증명 획득을 시도하는 런타임 행위를 설명하는 Falco 탐지 로그</p>
           <div class="tag-row">
             <span class="tag">T1552.005</span>
+          </div>
+        </article>
+        <article class="card">
+          <h3><a href="/campaigns/SB-04/logs/AL-002/">AL-002 CloudTrail Secrets/RDS Discovery Log</a></h3>
+          <p>CloudTrail에서 Secrets Manager와 RDS 조회 이벤트를 확인하여 AWS 임시 자격증명으로 내부 DB 접속정보와 RDS 자산을 식별한 행위를 설명하는 AWS 로그</p>
+          <div class="tag-row">
+            <span class="tag">T1213.006</span>
           </div>
         </article>
       </div>
