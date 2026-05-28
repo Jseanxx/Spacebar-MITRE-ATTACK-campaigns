@@ -47,14 +47,14 @@
 <h1>SB-07 Detection Evidence</h1>
 
 <p class="summary">
-  이 페이지는 OZZY PMS Chain의 Page 3 Detection Evidence이다.
-  목적은 공격을 차단했다는 주장이 아니라, 공격 이후 분석가가 ELK와 Windows 원본 아티팩트로 흐름을 다시 찾을 수 있음을 증명하는 것이다.
-  따라서 각 증거는 <code>확인됨</code>, <code>추론</code>, <code>미확인</code>을 분리해 기록한다.
+  본 문서는 OZZY PMS Chain 침해 흐름에 대한 Detection Evidence 기록이다.
+  분석 목적은 차단 여부를 주장하는 것이 아니라, 사후 분석 단계에서 ELK 쿼리와 Windows 원본 아티팩트를 통해 동일한 흐름을 재구성할 수 있음을 입증하는 데 있다.
+  각 항목은 원본 이벤트, 수집 경로, 재현 가능한 KQL, 해석 한계를 함께 기록한다.
 </p>
 
 <div class="concept-banner">
-  <b>Evidence Principle</b>
-  <span>이 페이지의 핵심은 "공격이 있었다"를 멋있게 말하는 것이 아니라, 어떤 KQL과 어떤 원본 아티팩트로 같은 결론에 다시 도달할 수 있는지를 남기는 것이다.</span>
+  <b>Evidence Standard</b>
+  <span>모든 판단은 특정 Data View, KQL, Windows artifact, correlation rule에서 다시 추적 가능해야 한다. 원본 증거와 해석 결과는 동일한 분석 결과로 이어지더라도 별도로 구분한다.</span>
 </div>
 
 <h2 id="scope">Evidence Scope</h2>
@@ -76,7 +76,6 @@
     <thead>
       <tr>
         <th>Evidence</th>
-        <th>Status</th>
         <th>What It Proves</th>
         <th>Limit</th>
       </tr>
@@ -84,43 +83,36 @@
     <tbody>
       <tr>
         <td>HAD-005~HAD-009 loader artifact events</td>
-        <td><span class="tag">확인됨</span></td>
         <td>DC에서 loader chain 관련 Windows artifact를 ELK에서 다시 조회할 수 있다.</td>
         <td>이 자체가 manual mapping 내부 동작을 직접 기록한 것은 아니다.</td>
       </tr>
       <tr>
         <td>HAD-009 USN Journal summary</td>
-        <td><span class="tag">확인됨</span></td>
         <td><code>hgl_loader.exe</code>, <code>hgl_payload.enc</code>, <code>hgl_run.cmd</code> 파일 lifecycle이 남았다.</td>
         <td>USN은 파일 변경 증거이며 process memory behavior 증거는 아니다.</td>
       </tr>
       <tr>
         <td>HAD-005 Application Error / WER</td>
-        <td><span class="tag">확인됨</span></td>
         <td><code>hgl_loader.exe</code>가 실제 프로세스로 실행됐고 crash event가 남았다.</td>
         <td>crash만으로 LSASS access를 증명하지는 못한다.</td>
       </tr>
       <tr>
         <td>HAC-001 correlation alerts</td>
-        <td><span class="tag">확인됨</span></td>
         <td>단일 이벤트가 아니라 loader artifact와 Windows artifact를 시간창 내 incident 후보로 묶었다.</td>
         <td>alert는 원본 이벤트를 해석한 2차 산출물이다.</td>
       </tr>
       <tr>
         <td>HAD-003 Sysmon ProcessAccess</td>
-        <td><span class="tag">미확인</span></td>
         <td>설치 후 재현 시 <code>hgl_loader.exe -> lsass.exe</code> 직접 증거가 될 수 있다.</td>
         <td>현재는 과거 실행 시점의 Event ID 10이 없어 직접 증명하지 않는다.</td>
       </tr>
       <tr>
         <td>Full BAS validation run</td>
-        <td><span class="tag">확인됨</span></td>
         <td><code>run:SB07-FULL-BAS-20260528-111840</code> 기준 48개 emulation event가 수집되고, 개선 후 21개 custom correlation rule이 alert를 생성했다.</td>
         <td>실제 공격 재실행이 아니라 안전한 <code>event.action</code> emulation 기반 검증이다.</td>
       </tr>
       <tr>
         <td>No-Defender branch validation</td>
-        <td><span class="tag">확인됨</span></td>
         <td><code>sb07-lsass-no-defender-006</code> 룰은 Defender 이벤트가 없는 별도 run에서 alert 발생을 확인했다.</td>
         <td>full run에는 Defender block/action 이벤트가 포함되어 있어 별도 검증이 필요하다.</td>
       </tr>
@@ -130,8 +122,8 @@
 
 <h2 id="bas-validation">BAS Validation Evidence</h2>
 <p>
-  멘토님 피드백의 핵심은 자동 차단 여부가 아니라, 공격/PoC 이후 분석가가 로그와 쿼리로 같은 흐름을 다시 찾을 수 있음을 증명하는 것이다.
-  SB-07에서는 실제 loader artifact 증거와 별도로, 전체 Technique Used에 대응하는 안전한 BAS emulation event를 ELK에 투입해 custom correlation rule이 정상적으로 alert를 생성하는지 검증했다.
+  SB-07에서는 실제 loader artifact 증거와 별도로, 전체 Technique Used에 대응하는 안전한 BAS emulation event를 ELK에 투입했다.
+  이 검증은 source event 수집, custom correlator 처리, alert index 적재까지 이어지는 탐지 파이프라인의 재현성을 확인하기 위한 것이다.
 </p>
 
 <div class="concept-banner">
@@ -146,7 +138,6 @@
         <th>Validation Item</th>
         <th>Observed Result</th>
         <th>Evidence Query / Pivot</th>
-        <th>Judgment</th>
       </tr>
     </thead>
     <tbody>
@@ -154,37 +145,31 @@
         <td>Full BAS source ingestion</td>
         <td>48 events indexed</td>
         <td><code>run.id:"SB07-FULL-BAS-20260528-111840"</code> in <code>Hanguel AD Agent</code></td>
-        <td><span class="tag">확인됨</span></td>
       </tr>
       <tr>
         <td>Technique representation</td>
         <td>21 ATT&amp;CK techniques represented</td>
         <td><code>run.id:"SB07-FULL-BAS-20260528-111840"</code> + <code>threat.technique.id</code> aggregation</td>
-        <td><span class="tag">확인됨</span></td>
       </tr>
       <tr>
         <td>Full run alert output</td>
         <td>20 alerts in <code>hanguel-alerts-*</code></td>
         <td><code>correlation.key:"run:SB07-FULL-BAS-20260528-111840"</code></td>
-        <td><span class="tag">확인됨</span></td>
       </tr>
       <tr>
         <td>No-Defender variant</td>
         <td>2 alerts, including <code>sb07-lsass-no-defender-006</code></td>
         <td><code>correlation.key:"run:SB07-NO-DEFENDER-BAS-20260528-112012"</code></td>
-        <td><span class="tag">확인됨</span></td>
       </tr>
       <tr>
         <td>Custom rule coverage</td>
         <td>21/21 SB-07 custom rules fired</td>
         <td><code>rule.id: sb07-*</code> with the two BAS run IDs</td>
-        <td><span class="tag">확인됨</span></td>
       </tr>
       <tr>
         <td>Elastic native alert engine</td>
         <td><code>.internal.alerts-*</code> docs count 0 at check time</td>
         <td><code>_cat/indices/.alerts-*</code></td>
-        <td><span class="tag">미확인</span></td>
       </tr>
     </tbody>
   </table>
@@ -245,7 +230,6 @@
         <th>Alert Path</th>
         <th>Observed Result</th>
         <th>Evidence</th>
-        <th>Judgment</th>
       </tr>
     </thead>
     <tbody>
@@ -253,13 +237,11 @@
         <td>Hanguel AD custom correlator</td>
         <td><code>hanguel-alerts-*</code>에서 full BAS 20건, no-defender 2건 확인</td>
         <td><code>correlation.key:"run:SB07-FULL-BAS-20260528-111840"</code></td>
-        <td><span class="tag">확인됨</span></td>
       </tr>
       <tr>
         <td>Elastic Security native alert engine</td>
         <td><code>.internal.alerts-*</code> count 0</td>
         <td><code>GET .internal.alerts-*/_count?ignore_unavailable=true</code></td>
-        <td><span class="tag">미확인</span></td>
       </tr>
     </tbody>
   </table>
@@ -359,14 +341,13 @@ rule.id: "sb07-pass-the-hash-simulated-021"</code></pre>
         <th>Rule Range</th>
         <th>Coverage Purpose</th>
         <th>Observed Rules</th>
-        <th>Status</th>
       </tr>
     </thead>
     <tbody>
-      <tr><td>001~003</td><td>PMS patch, credential artifact, DC access chain</td><td><code>sb07-pms-patch-discovery-001</code>, <code>sb07-credential-dc-access-002</code>, <code>sb07-pms-credential-chain-003</code></td><td><span class="tag">확인됨</span></td></tr>
-      <tr><td>004~008</td><td>Authenticated DC access, loader, LSASS, Defender, scheduled task chain</td><td><code>sb07-dc-access-lsass-004</code> through <code>sb07-dc-loader-task-008</code></td><td><span class="tag">확인됨</span></td></tr>
-      <tr><td>009~014</td><td>Defender bypass inference, loader forensic triad, USN lifecycle, manual mapping inference</td><td><code>sb07-defender-bypass-inferred-009</code> through <code>sb07-manual-mapping-inferred-014</code></td><td><span class="tag">확인됨</span></td></tr>
-      <tr><td>015~021</td><td>Early-stage bastion/JBoss/PMS masquerading and simulated pass-the-hash coverage</td><td><code>sb07-bastion-ssh-entry-015</code> through <code>sb07-pass-the-hash-simulated-021</code></td><td><span class="tag">확인됨</span></td></tr>
+      <tr><td>001~003</td><td>PMS patch, credential artifact, DC access chain</td><td><code>sb07-pms-patch-discovery-001</code>, <code>sb07-credential-dc-access-002</code>, <code>sb07-pms-credential-chain-003</code></td></tr>
+      <tr><td>004~008</td><td>Authenticated DC access, loader, LSASS, Defender, scheduled task chain</td><td><code>sb07-dc-access-lsass-004</code> through <code>sb07-dc-loader-task-008</code></td></tr>
+      <tr><td>009~014</td><td>Defender bypass inference, loader forensic triad, USN lifecycle, manual mapping inference</td><td><code>sb07-defender-bypass-inferred-009</code> through <code>sb07-manual-mapping-inferred-014</code></td></tr>
+      <tr><td>015~021</td><td>Early-stage bastion/JBoss/PMS masquerading and simulated pass-the-hash coverage</td><td><code>sb07-bastion-ssh-entry-015</code> through <code>sb07-pass-the-hash-simulated-021</code></td></tr>
     </tbody>
   </table>
 </div>
@@ -384,25 +365,24 @@ rule.id: "sb07-pass-the-hash-simulated-021"</code></pre>
         <th>Alert Action</th>
         <th>Severity</th>
         <th>Run</th>
-        <th>Status</th>
       </tr>
     </thead>
     <tbody>
-      <tr><td><code>sb07-pms-patch-discovery-001</code></td><td><code>sb07_pms_patch_to_ad_discovery_sequence</code></td><td>high</td><td>full</td><td>확인됨</td></tr>
-      <tr><td><code>sb07-credential-dc-access-002</code></td><td><code>sb07_credential_artifact_to_dc_access_sequence</code></td><td>critical</td><td>full</td><td>확인됨</td></tr>
-      <tr><td><code>sb07-pms-credential-chain-003</code></td><td><code>sb07_pms_to_credential_chain_sequence</code></td><td>critical</td><td>full</td><td>확인됨</td></tr>
-      <tr><td><code>sb07-dc-access-lsass-004</code></td><td><code>sb07_authenticated_dc_access_to_lsass_activity_sequence</code></td><td>critical</td><td>full</td><td>확인됨</td></tr>
-      <tr><td><code>sb07-loader-lsass-005</code></td><td><code>sb07_manual_mapping_loader_to_lsass_sequence</code></td><td>critical</td><td>full/no-defender</td><td>확인됨</td></tr>
-      <tr><td><code>sb07-lsass-no-defender-006</code></td><td><code>sb07_lsass_activity_without_defender_sequence</code></td><td>high</td><td>no-defender</td><td>확인됨</td></tr>
-      <tr><td><code>sb07-defender-lsass-block-007</code></td><td><code>sb07_defender_lsass_blocked_sequence</code></td><td>critical</td><td>full</td><td>확인됨</td></tr>
-      <tr><td><code>sb07-dc-loader-task-008</code></td><td><code>sb07_dc_loader_task_observed_sequence</code></td><td>high</td><td>full</td><td>확인됨</td></tr>
-      <tr><td><code>sb07-defender-bypass-inferred-009</code></td><td><code>sb07_defender_bypass_inferred_sequence</code></td><td>high</td><td>full</td><td>확인됨</td></tr>
-      <tr><td><code>sb07-dump-bypass-inference-010</code></td><td><code>sb07_dump_artifact_and_bypass_inference_sequence</code></td><td>critical</td><td>full</td><td>확인됨</td></tr>
-      <tr><td><code>sb07-dump-after-defender-block-011</code></td><td><code>sb07_dump_artifact_after_defender_block_sequence</code></td><td>critical</td><td>full</td><td>확인됨</td></tr>
-      <tr><td><code>sb07-loader-forensic-triad-012</code></td><td><code>sb07_loader_forensic_triad_sequence</code></td><td>critical</td><td>full</td><td>확인됨</td></tr>
-      <tr><td><code>sb07-loader-file-lifecycle-013</code></td><td><code>sb07_loader_file_lifecycle_sequence</code></td><td>high</td><td>full</td><td>확인됨</td></tr>
-      <tr><td><code>sb07-manual-mapping-inferred-014</code></td><td><code>sb07_manual_mapping_inferred_from_artifacts_sequence</code></td><td>critical</td><td>full</td><td>확인됨</td></tr>
-      <tr><td><code>sb07-bastion-ssh-entry-015</code> ~ <code>sb07-pass-the-hash-simulated-021</code></td><td>초기 접근/JBoss/PMS/PTA simulation 보강 룰</td><td>low~medium</td><td>full</td><td>확인됨</td></tr>
+      <tr><td><code>sb07-pms-patch-discovery-001</code></td><td><code>sb07_pms_patch_to_ad_discovery_sequence</code></td><td>high</td><td>full</td></tr>
+      <tr><td><code>sb07-credential-dc-access-002</code></td><td><code>sb07_credential_artifact_to_dc_access_sequence</code></td><td>critical</td><td>full</td></tr>
+      <tr><td><code>sb07-pms-credential-chain-003</code></td><td><code>sb07_pms_to_credential_chain_sequence</code></td><td>critical</td><td>full</td></tr>
+      <tr><td><code>sb07-dc-access-lsass-004</code></td><td><code>sb07_authenticated_dc_access_to_lsass_activity_sequence</code></td><td>critical</td><td>full</td></tr>
+      <tr><td><code>sb07-loader-lsass-005</code></td><td><code>sb07_manual_mapping_loader_to_lsass_sequence</code></td><td>critical</td><td>full/no-defender</td></tr>
+      <tr><td><code>sb07-lsass-no-defender-006</code></td><td><code>sb07_lsass_activity_without_defender_sequence</code></td><td>high</td><td>no-defender</td></tr>
+      <tr><td><code>sb07-defender-lsass-block-007</code></td><td><code>sb07_defender_lsass_blocked_sequence</code></td><td>critical</td><td>full</td></tr>
+      <tr><td><code>sb07-dc-loader-task-008</code></td><td><code>sb07_dc_loader_task_observed_sequence</code></td><td>high</td><td>full</td></tr>
+      <tr><td><code>sb07-defender-bypass-inferred-009</code></td><td><code>sb07_defender_bypass_inferred_sequence</code></td><td>high</td><td>full</td></tr>
+      <tr><td><code>sb07-dump-bypass-inference-010</code></td><td><code>sb07_dump_artifact_and_bypass_inference_sequence</code></td><td>critical</td><td>full</td></tr>
+      <tr><td><code>sb07-dump-after-defender-block-011</code></td><td><code>sb07_dump_artifact_after_defender_block_sequence</code></td><td>critical</td><td>full</td></tr>
+      <tr><td><code>sb07-loader-forensic-triad-012</code></td><td><code>sb07_loader_forensic_triad_sequence</code></td><td>critical</td><td>full</td></tr>
+      <tr><td><code>sb07-loader-file-lifecycle-013</code></td><td><code>sb07_loader_file_lifecycle_sequence</code></td><td>high</td><td>full</td></tr>
+      <tr><td><code>sb07-manual-mapping-inferred-014</code></td><td><code>sb07_manual_mapping_inferred_from_artifacts_sequence</code></td><td>critical</td><td>full</td></tr>
+      <tr><td><code>sb07-bastion-ssh-entry-015</code> ~ <code>sb07-pass-the-hash-simulated-021</code></td><td>초기 접근/JBoss/PMS/PTA simulation 보강 룰</td><td>low~medium</td><td>full</td></tr>
     </tbody>
   </table>
 </div>
@@ -423,7 +403,7 @@ rule.id: "sb07-pass-the-hash-simulated-021"</code></pre>
       <tr><td>Technique representation</td><td>21 techniques</td><td>21 techniques</td><td>전체 Technique Used가 event.action 형태로 표현되었다.</td></tr>
       <tr><td>Technique alert coverage</td><td>13/21</td><td>21/21</td><td>초기 접근/JBoss/PMS masquerading/Pass-the-Hash simulation 쪽 룰을 보강했다.</td></tr>
       <tr><td>Unique custom rule fired</td><td>14/14</td><td>21/21</td><td>SB-07 custom correlation rule set 기준 전부 발화 확인.</td></tr>
-      <tr><td>Native Elastic Security alert</td><td>미확인</td><td>미확인</td><td>이번 검증 범위는 Hanguel custom correlator이다.</td></tr>
+      <tr><td>Native Elastic Security alert</td><td>Not observed</td><td>Out of scope</td><td>이번 검증 범위는 Hanguel custom correlator이다.</td></tr>
     </tbody>
   </table>
 </div>
@@ -452,7 +432,7 @@ rule.id: "sb07-pass-the-hash-simulated-021"</code></pre>
       <table>
         <thead><tr><th>Log ID</th><th>Observed Count</th><th>Evidence Meaning</th></tr></thead>
         <tbody>
-          <tr><td>HAD-005</td><td>384</td><td>Application Error / WER에서 <code>hgl_loader.exe</code> crash가 반복 확인됨</td></tr>
+          <tr><td>HAD-005</td><td>384</td><td>Application Error / WER에서 <code>hgl_loader.exe</code> crash가 반복 관측됨</td></tr>
           <tr><td>HAD-006</td><td>2</td><td>Amcache 계열 loader artifact 요약 이벤트 확인</td></tr>
           <tr><td>HAD-007</td><td>2</td><td>ShimCache/AppCompatCache에서 loader path context 확인</td></tr>
           <tr><td>HAD-008</td><td>4</td><td>TaskCache Registry 및 Task XML에서 loader task 확인</td></tr>
@@ -505,11 +485,11 @@ rule.id: "sb07-pass-the-hash-simulated-021"</code></pre>
     </div>
     <div class="table-wrap wide-table">
       <table>
-        <thead><tr><th>Rule ID</th><th>Status</th><th>Interpretation</th></tr></thead>
+        <thead><tr><th>Rule ID</th><th>Interpretation</th></tr></thead>
         <tbody>
-          <tr><td>sb07-loader-forensic-triad-012</td><td>확인됨</td><td>Task/Task XML 증거와 loader artifact evidence를 묶어 loader 실행 정황을 강화한다.</td></tr>
-          <tr><td>sb07-loader-file-lifecycle-013</td><td>확인됨</td><td>USN lifecycle 이벤트와 loader/dump artifact 조합을 묶어 파일 staging 흐름을 보강한다.</td></tr>
-          <tr><td>sb07-manual-mapping-inferred-014</td><td>확인됨</td><td>loader-side log/crash와 Windows artifact 조합으로 manual mapping 가능성을 추론한다.</td></tr>
+          <tr><td>sb07-loader-forensic-triad-012</td><td>Task/Task XML 증거와 loader artifact evidence를 묶어 loader 실행 정황을 강화한다.</td></tr>
+          <tr><td>sb07-loader-file-lifecycle-013</td><td>USN lifecycle 이벤트와 loader/dump artifact 조합을 묶어 파일 staging 흐름을 보강한다.</td></tr>
+          <tr><td>sb07-manual-mapping-inferred-014</td><td>loader-side log/crash와 Windows artifact 조합으로 manual mapping 가능성을 추론한다.</td></tr>
         </tbody>
       </table>
     </div>
@@ -530,7 +510,7 @@ rule.id: "sb07-pass-the-hash-simulated-021"</code></pre>
     </div>
     <div class="concept-banner">
       <b>Evidence Boundary</b>
-      <span>BAS 이벤트는 탐지룰 검증 증거이고, 실제 endpoint ProcessAccess 직접 증거는 아직 미확인이다. 그래서 <code>manual_mapping_inferred</code>는 직접 증거가 아니라 추론으로 유지한다.</span>
+      <span>BAS 이벤트는 탐지룰 검증 증거이고, 실제 endpoint ProcessAccess 직접 증거는 아직 확보되지 않았다. 그래서 <code>manual_mapping_inferred</code>는 직접 증거가 아니라 추론으로 유지한다.</span>
     </div>
   </div>
 </details>
@@ -577,7 +557,7 @@ rule.id: "sb07-pass-the-hash-simulated-021"</code></pre>
   <li>No-Defender branch는 <code>correlation.key:"run:SB07-NO-DEFENDER-BAS-20260528-112012"</code>로 재캡처 가능하다.</li>
   <li>Windows Event Viewer에서 Application Event ID 1000의 <code>hgl_loader.exe</code> crash를 캡처한다.</li>
   <li>ShimCache/AppCompatCache 또는 collector JSONL에서 <code>C:\Windows\Temp\hgl_loader.exe</code> context를 캡처한다.</li>
-  <li>실제 endpoint Sysmon Event ID 10은 아직 미확인으로 두고, 재현 후 별도 캡처한다.</li>
+  <li>실제 endpoint Sysmon Event ID 10은 재현 후 별도 캡처한다.</li>
 </ol>
 
 <h2 id="llm-prompt-playbook">LLM Prompt Playbook</h2>
@@ -614,12 +594,6 @@ produce 5 Kibana KQL pivots:
 - host/user pivot
 - custom alert pivot
 Also explain which data view to use.</code></pre>
-</div>
-
-<h2 id="final-judgment">Final Judgment</h2>
-<div class="concept-banner">
-  <b>결론</b>
-  <span>SB-07 Page 3는 loader 기반 실행과 dump artifact 흐름뿐 아니라, BAS emulation event가 ELK 수집과 custom correlation alert까지 이어지는 것을 Kibana 캡처로 보여준다. 다만 실제 endpoint 기준 <code>hgl_loader.exe -> lsass.exe</code> 직접 ProcessAccess와 Elastic native alert engine은 아직 미확인이므로, manual mapping은 <code>확인됨</code>이 아니라 <code>manual_mapping_inferred</code>로 분리한다.</span>
 </div>
       <footer class="footer">
         Spacebar Project. This evidence page records reproducible investigation pivots and observed artifacts.
