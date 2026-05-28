@@ -527,6 +527,73 @@ tbody tr:last-child td {
   color: var(--sb-muted);
 }
 
+.doc-link-grid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  margin: 22px 0 26px;
+}
+
+.doc-link-card {
+  display: grid;
+  gap: 8px;
+  min-height: 150px;
+  padding: 18px;
+  border: 1px solid var(--sb-line);
+  border-left: 5px solid var(--sb-link);
+  border-radius: 6px;
+  background: #fff;
+  color: var(--sb-text);
+  text-decoration: none;
+  box-shadow: 0 8px 22px rgba(16, 24, 40, 0.06);
+  transition: border-color 140ms ease, box-shadow 140ms ease, transform 140ms ease;
+}
+
+.doc-link-card:hover,
+.doc-link-card:focus-visible {
+  border-color: var(--sb-link);
+  box-shadow: 0 14px 30px rgba(16, 24, 40, 0.12);
+  transform: translateY(-2px);
+}
+
+.doc-link-card.featured {
+  border-left-color: var(--sb-red);
+  background: linear-gradient(180deg, #fff, #fff7f7);
+}
+
+.doc-link-kicker {
+  color: var(--sb-muted);
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.doc-link-card strong {
+  color: var(--sb-link);
+  font-size: 20px;
+}
+
+.doc-link-card > span:not(.doc-link-kicker):not(.doc-link-action) {
+  color: var(--sb-muted);
+  line-height: 1.55;
+}
+
+.doc-link-action {
+  align-self: end;
+  justify-self: start;
+  margin-top: 6px;
+  padding: 8px 12px;
+  border-radius: 4px;
+  background: var(--sb-link);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.doc-link-card.featured .doc-link-action {
+  background: var(--sb-red);
+}
+
 .technique-panel {
   margin: 12px 0;
   border: 1px solid var(--sb-line);
