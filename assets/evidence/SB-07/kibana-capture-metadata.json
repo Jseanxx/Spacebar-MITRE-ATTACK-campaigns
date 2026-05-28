@@ -1,0 +1,34 @@
+[
+  {
+    "file": "kibana-full-bas-source.png",
+    "kql": "run.id:\"SB07-FULL-BAS-20260528-111840\"",
+    "dataViewId": "29316223-c402-4ee7-8703-72ac49a18ac4",
+    "path": "C:\\Users\\LG\\Desktop\\침해사고분석_프로젝트\\Spacebar-MITRE-ATTACK-campaigns\\assets\\evidence\\SB-07\\kibana-full-bas-source.png",
+    "size": 239757,
+    "url": "http://127.0.0.1:15601/app/discover#/?_g=(filters:!(),refreshInterval:(pause:!t,value:60000),time:(from:'2026-05-28T00:00:00.000Z',to:'2026-05-28T23:59:59.999Z'))&_a=(columns:!(event.action,run.id,threat.technique.id,log.id),dataSource:(dataViewId:'29316223-c402-4ee7-8703-72ac49a18ac4',type:dataView),filters:!(),interval:auto,query:(language:kuery,query:'run.id%3A%22SB07-FULL-BAS-20260528-111840%22'),sort:!(!('@timestamp',desc)))"
+  },
+  {
+    "file": "kibana-full-bas-alerts.png",
+    "kql": "correlation.key:\"run:SB07-FULL-BAS-20260528-111840\"",
+    "dataViewId": "94d855ea-e5b8-4093-9be1-2edbb6c3413b",
+    "path": "C:\\Users\\LG\\Desktop\\침해사고분석_프로젝트\\Spacebar-MITRE-ATTACK-campaigns\\assets\\evidence\\SB-07\\kibana-full-bas-alerts.png",
+    "size": 246618,
+    "url": "http://127.0.0.1:15601/app/discover#/?_g=(filters:!(),refreshInterval:(pause:!t,value:60000),time:(from:'2026-05-28T00:00:00.000Z',to:'2026-05-28T23:59:59.999Z'))&_a=(columns:!(event.action,rule.id,severity,correlation.key),dataSource:(dataViewId:'94d855ea-e5b8-4093-9be1-2edbb6c3413b',type:dataView),filters:!(),interval:auto,query:(language:kuery,query:'correlation.key%3A%22run%3ASB07-FULL-BAS-20260528-111840%22'),sort:!(!('@timestamp',desc)))"
+  },
+  {
+    "file": "kibana-manual-mapping-rule.png",
+    "kql": "rule.id:\"sb07-manual-mapping-inferred-014\"",
+    "dataViewId": "94d855ea-e5b8-4093-9be1-2edbb6c3413b",
+    "path": "C:\\Users\\LG\\Desktop\\침해사고분석_프로젝트\\Spacebar-MITRE-ATTACK-campaigns\\assets\\evidence\\SB-07\\kibana-manual-mapping-rule.png",
+    "size": 184254,
+    "url": "http://127.0.0.1:15601/app/discover#/?_g=(filters:!(),refreshInterval:(pause:!t,value:60000),time:(from:'2026-05-28T00:00:00.000Z',to:'2026-05-28T23:59:59.999Z'))&_a=(columns:!(event.action,rule.id,severity,correlation.key),dataSource:(dataViewId:'94d855ea-e5b8-4093-9be1-2edbb6c3413b',type:dataView),filters:!(),interval:auto,query:(language:kuery,query:'rule.id%3A%22sb07-manual-mapping-inferred-014%22'),sort:!(!('@timestamp',desc)))"
+  },
+  {
+    "file": "kibana-dc-winrm-whoami.png",
+    "kql": "event.action:\"dc_winrm_whoami\"",
+    "dataViewId": "29316223-c402-4ee7-8703-72ac49a18ac4",
+    "path": "C:\\Users\\LG\\Desktop\\침해사고분석_프로젝트\\Spacebar-MITRE-ATTACK-campaigns\\assets\\evidence\\SB-07\\kibana-dc-winrm-whoami.png",
+    "size": 179049,
+    "url": "http://127.0.0.1:15601/app/discover#/?_g=(filters:!(),refreshInterval:(pause:!t,value:60000),time:(from:'2026-05-28T00:00:00.000Z',to:'2026-05-28T23:59:59.999Z'))&_a=(columns:!(event.action,host.name,user.name,campaign.id,run.id),dataSource:(dataViewId:'29316223-c402-4ee7-8703-72ac49a18ac4',type:dataView),filters:!(),interval:auto,query:(language:kuery,query:'event.action%3A%22dc_winrm_whoami%22'),sort:!(!('@timestamp',desc)))"
+  }
+]

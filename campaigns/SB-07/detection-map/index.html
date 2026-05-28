@@ -57,6 +57,11 @@
   <span>실제 KQL 조회와 Windows artifact 검증 흐름은 <a href="/campaigns/SB-07/evidence/">SB-07 Detection Evidence</a>에서 확인한다.</span>
 </div>
 
+<div class="concept-banner">
+  <b>Correlation Scope</b>
+  <span>현재 검증된 alert path는 Elastic Security native rule이 아니라 <code>hanguel-alerts-*</code>에 기록되는 Hanguel AD custom sequential correlator이다. Native <code>.internal.alerts-*</code>는 count 0이므로 별도 검증 과제로 둔다.</span>
+</div>
+
 <h2 id="environment">Environment Scope</h2>
 <div class="table-wrap wide-table">
   <table>
@@ -100,6 +105,64 @@
       <tr><td>12</td><td class="id-cell">T1027</td><td>Obfuscated Files or Information</td><td>관측 가능</td><td><a href="/campaigns/SB-07/logs/HAD-002/">HAD-002</a>, <a href="/campaigns/SB-07/logs/HAD-004/">HAD-004</a>, <a href="/campaigns/SB-07/logs/HAD-009/">HAD-009</a></td><td><code>encrypted_payload_artifact_found</code>, <code>loader_execution_log_found</code></td></tr>
       <tr><td>13</td><td class="id-cell">T1620</td><td>Reflective Code Loading</td><td>추론 포함</td><td><a href="/campaigns/SB-07/logs/HAD-003/">HAD-003</a>, <a href="/campaigns/SB-07/logs/HAD-004/">HAD-004</a>, <a href="/campaigns/SB-07/logs/HAD-005/">HAD-005</a>, <a href="/campaigns/SB-07/logs/HAD-006/">HAD-006</a>, <a href="/campaigns/SB-07/logs/HAD-007/">HAD-007</a>, <a href="/campaigns/SB-07/logs/HAD-008/">HAD-008</a>, <a href="/campaigns/SB-07/logs/HAC-001/">HAC-001</a></td><td><code>loader_execution_log_found</code>, <code>manual_mapping_inferred_from_artifacts</code></td></tr>
       <tr><td>14</td><td class="id-cell">T1003.001</td><td>OS Credential Dumping: LSASS Memory</td><td>조건부 관측</td><td><a href="/campaigns/SB-07/logs/HAD-002/">HAD-002</a>, <a href="/campaigns/SB-07/logs/HAD-003/">HAD-003</a>, <a href="/campaigns/SB-07/logs/HAD-004/">HAD-004</a>, <a href="/campaigns/SB-07/logs/HAD-005/">HAD-005</a>, <a href="/campaigns/SB-07/logs/HAC-001/">HAC-001</a></td><td><code>sysmon_lsass_process_access</code>, <code>loader_execution_log_found</code></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<h2 id="behavior-centric-detection">Behavior-Centric Detection Units</h2>
+<p>
+  멘토님 피드백에 맞춰 Technique 단위만 나열하지 않고, 실제 공격자가 수행하는 행위 단위로 탐지 단위를 재정의한다.
+  각 행위는 primary logs, KQL, 후속 pivot을 가진다.
+</p>
+<div class="table-wrap wide-table">
+  <table>
+    <thead>
+      <tr>
+        <th>Behavior Unit</th>
+        <th>What Happened</th>
+        <th>Primary Logs</th>
+        <th>KQL Pivot</th>
+        <th>Evidence State</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>PMS patch execution</td><td>PMS update path의 <code>patch.ps1</code>이 win01 PMS Agent에 의해 SYSTEM으로 실행됨</td><td>HAP-002, HAW-001, HAW-003, HAC-001</td><td><code>event.action:("pms_patch_executed" or "pms_patch_changed_emulated")</code></td><td>확인됨</td></tr>
+      <tr><td>AD/DC discovery</td><td>win01에서 DC DNS/SRV, 445/5985 reachability, domain context를 확인함</td><td>HAW-001, HTE-002</td><td><code>event.action:("domain_controller_discovery" or "dc_port_probe_445" or "dc_port_probe_5985")</code></td><td>확인됨</td></tr>
+      <tr><td>Credential artifact access</td><td><code>dc_cred.xml</code> 발견 및 복호화 가능한 컨텍스트에서 credential object 사용 가능성 확인</td><td>HAW-001, HAW-002, HTE-002</td><td><code>event.action:("dc_cred_xml_discovered" or "dc_cred_xml_imported")</code></td><td>확인됨</td></tr>
+      <tr><td>DC remote access</td><td>WinRM/C$ 기반 DC 접근 및 원격 task 등록 흐름 확인</td><td>HAW-002, HAW-003, HAW-004, HTE-002, HAC-001</td><td><code>event.action:("dc_winrm_whoami" or "dc_c_admin_share_access" or "dc_scheduled_task_registered")</code></td><td>확인됨</td></tr>
+      <tr><td>Loader artifact reconstruction</td><td>Task XML, Application Error, Amcache, ShimCache, USN Journal, loader run log로 loader 실행 흐름 재구성</td><td>HAD-004, HAD-005, HAD-006, HAD-007, HAD-008, HAD-009, HAC-001</td><td><code>log.id:("HAD-005" or "HAD-006" or "HAD-007" or "HAD-008" or "HAD-009")</code></td><td>확인됨 + 일부 추론</td></tr>
+      <tr><td>LSASS access direct proof</td><td>Sysmon Event ID 10으로 <code>hgl_loader.exe -> lsass.exe</code>를 직접 증명하는 단계</td><td>HAD-003</td><td><code>event.action:"sysmon_lsass_process_access" and not hanguel.test_runner:true</code></td><td>미확인</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<h2 id="log-source-documentation-standard">Log Source Documentation Standard</h2>
+<p>
+  Page 2의 각 Log ID는 단순 경로가 아니라, 발생 조건과 필드 의미까지 포함해야 한다.
+  아래 표는 SB-07에서 우선 보강한 실무형 로그 설명 기준이다.
+</p>
+<div class="table-wrap wide-table">
+  <table>
+    <thead>
+      <tr>
+        <th>Log ID</th>
+        <th>Original Location</th>
+        <th>When It Appears</th>
+        <th>Important Fields</th>
+        <th>Collection</th>
+        <th>Example KQL</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>HAW-001</td><td><code>C:\ProgramData\HanguelADAgent\logs\*.jsonl</code></td><td>win01 PMS patch/AD discovery/credential artifact 요약 이벤트 생성</td><td><code>event.action</code>, <code>host.name</code>, <code>user.name</code>, <code>hanguel.classification</code></td><td>Hanguel AD Agent -> Logstash HTTP -> ES</td><td><code>log.id:"HAW-001" and campaign.id:"SB-07"</code></td></tr>
+      <tr><td>HAW-002</td><td>PowerShell Operational / agent-normalized event</td><td>Import-Clixml, Invoke-Command, New-PSDrive 등 credential 사용 및 DC 접근</td><td><code>powershell.command</code>, <code>event.action</code>, <code>related.hosts</code></td><td>collector summary -> <code>hanguel-ad-agent-*</code></td><td><code>event.action:("dc_winrm_whoami" or "dc_c_admin_share_access")</code></td></tr>
+      <tr><td>HAD-003</td><td><code>Microsoft-Windows-Sysmon/Operational</code></td><td>Sysmon 설치 후 process create/access/file create/image load 발생</td><td><code>event.code</code>, <code>SourceImage</code>, <code>TargetImage</code>, <code>GrantedAccess</code></td><td>Sysmon + Windows Event collector</td><td><code>event.action:"sysmon_lsass_process_access"</code></td></tr>
+      <tr><td>HAD-005</td><td>Windows Logs > Application, Event ID 1000/1001</td><td><code>hgl_loader.exe</code> crash 또는 WER reporting 발생</td><td><code>process.name</code>, <code>error.code</code>, <code>event.code</code></td><td>collector summary -> <code>hanguel-ad-agent-*</code></td><td><code>log.id:"HAD-005" and event.action:"application_loader_crash_observed"</code></td></tr>
+      <tr><td>HAD-006</td><td><code>C:\Windows\AppCompat\Programs\Amcache.hve</code></td><td>Application Compatibility inventory에 실행 파일 metadata가 남을 때</td><td><code>file.path</code>, <code>pe.architecture</code>, <code>artifact.source</code></td><td>forensic collector summary</td><td><code>event.action:"amcache_loader_artifact_found"</code></td></tr>
+      <tr><td>HAD-007</td><td><code>HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\AppCompatCache</code></td><td>ShimCache/AppCompatCache에 executable path reference가 남을 때</td><td><code>registry.path</code>, <code>file.path</code>, <code>artifact.source</code></td><td>registry collector summary</td><td><code>event.action:"shimcache_loader_artifact_found"</code></td></tr>
+      <tr><td>HAD-008</td><td>TaskCache registry + <code>C:\Windows\System32\Tasks\*</code></td><td>DC loader scheduled task 등록/실행 action 확인</td><td><code>task.name</code>, <code>task.action</code>, <code>process.command_line</code></td><td>task collector summary</td><td><code>event.action:("taskcache_loader_task_found" or "task_xml_loader_action_found")</code></td></tr>
+      <tr><td>HAD-009</td><td><code>fsutil usn readjournal C: csv</code></td><td>loader/payload/run script 파일 생성/수정/close lifecycle 확인</td><td><code>file.name</code>, <code>file.path</code>, <code>usn.reason</code></td><td>USN collector summary</td><td><code>event.action:"usn_loader_file_lifecycle_observed"</code></td></tr>
+      <tr><td>HAC-001</td><td><code>hanguel-alerts-*</code></td><td>custom sequential correlator가 여러 event.action을 시간창 내에서 연결</td><td><code>rule.id</code>, <code>correlation.key</code>, <code>correlation.actions</code></td><td>Hanguel AD correlator -> ES</td><td><code>correlation.key:"run:SB07-FULL-BAS-20260528-111840"</code></td></tr>
     </tbody>
   </table>
 </div>

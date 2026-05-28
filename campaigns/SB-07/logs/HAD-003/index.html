@@ -61,12 +61,13 @@
 <div class="meta-label">Collection:</div>
 <div class="meta-value">Sysmon minimal config + Windows Event Log collector</div>
 <div class="meta-label">Current Status:</div>
-<div class="meta-value">Sysmon 설치 패키지와 config 배포됨. <code>hgl_loader.exe -&gt; lsass.exe</code> Event ID 10은 아직 미확인</div>
+<div class="meta-value">BAS emulation으로 <code>sysmon_lsass_process_access</code> event.action은 검증됨. 실제 endpoint 원본 Sysmon Event ID 10의 <code>hgl_loader.exe -&gt; lsass.exe</code> 관계는 아직 미확인</div>
 <div class="meta-label">Primary Use:</div>
 <div class="meta-value">loader가 LSASS를 열었는지 직접 ProcessAccess 증거 확보</div>
 </div>
 <h2 id="공격-행위-요약">공격 행위 요약</h2>
 <p>Windows 기본 로그만으로는 manual mapping 내부 단계나 LSASS handle open을 직접 보기 어렵다. Sysmon Event ID 10이 남으면 <code>SourceImage = hgl_loader.exe</code>, <code>TargetImage = lsass.exe</code> 관계를 직접 증명할 수 있다.</p>
+<p>현재 ELK에는 BAS 검증용 <code>sysmon_lsass_process_access</code> 이벤트가 존재한다. 그러나 이 이벤트는 <code>hanguel.test_runner:true</code>가 붙은 emulation event이므로 실제 DC endpoint에서 발생한 Sysmon 원본 이벤트와 구분해야 한다.</p>
 <h2 id="주요-이벤트">주요 이벤트</h2>
 <div class="table-wrap wide-table">
 <table>
@@ -93,6 +94,9 @@ loader_execution_observed</code></pre>
 </tbody></table></div>
 <h2 id="elk-query-예시">ELK Query 예시</h2>
 <pre><code>event.action:&quot;sysmon_lsass_process_access&quot; and data.message_excerpt:*hgl_loader.exe*</code></pre>
+<h2 id="evidence-boundary">Evidence Boundary</h2>
+<pre><code>event.action:&quot;sysmon_lsass_process_access&quot; and not hanguel.test_runner:true</code></pre>
+<p>위 쿼리에서 결과가 나와야 실제 endpoint ProcessAccess 직접 증거로 말할 수 있다. 현재 Page 3에서는 이 항목을 <code>미확인</code>으로 유지한다.</p>
       <footer class="footer">
         Spacebar Project. This campaign log page is scoped to SB-07.
       </footer>

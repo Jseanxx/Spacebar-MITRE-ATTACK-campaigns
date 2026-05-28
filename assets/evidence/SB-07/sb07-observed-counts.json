@@ -1,0 +1,54 @@
+{
+  "verified_at": "2026-05-28T06:01:01Z",
+  "observed": [
+    {
+      "data_view": "hanguel-ad-agent-*",
+      "count": 48,
+      "evidence": "full_bas_source",
+      "kql": "run.id:\"SB07-FULL-BAS-20260528-111840\"",
+      "status": "confirmed"
+    },
+    {
+      "data_view": "hanguel-alerts-*",
+      "count": 20,
+      "evidence": "full_bas_alerts",
+      "kql": "correlation.key:\"run:SB07-FULL-BAS-20260528-111840\"",
+      "status": "confirmed"
+    },
+    {
+      "data_view": "hanguel-alerts-*",
+      "count": 4,
+      "evidence": "manual_mapping_rule",
+      "kql": "rule.id:\"sb07-manual-mapping-inferred-014\"",
+      "status": "confirmed_custom_alert"
+    },
+    {
+      "data_view": "hanguel-ad-agent-*",
+      "count": 3,
+      "evidence": "dc_winrm_whoami",
+      "kql": "event.action:\"dc_winrm_whoami\"",
+      "status": "confirmed"
+    },
+    {
+      "data_view": "hanguel-ad-agent-*",
+      "count": 2,
+      "evidence": "sysmon_lsass_process_access_bas",
+      "kql": "event.action:\"sysmon_lsass_process_access\"",
+      "status": "confirmed_bas_emulation"
+    },
+    {
+      "data_view": "hanguel-ad-agent-*",
+      "count": 0,
+      "evidence": "sysmon_lsass_process_access_real_endpoint",
+      "kql": "event.action:\"sysmon_lsass_process_access\" and not hanguel.test_runner:true",
+      "status": "not_confirmed"
+    },
+    {
+      "data_view": ".internal.alerts-*",
+      "count": 0,
+      "evidence": "elastic_native_alerts",
+      "kql": "*",
+      "status": "not_confirmed"
+    }
+  ]
+}
