@@ -95,9 +95,11 @@
 <tbody>
 <tr><td><code>@timestamp</code></td><td>SSH 인증 이벤트 발생 시간</td><td><code>2026-05-26T04:00:00Z</code></td></tr>
 <tr><td><code>host.name</code></td><td>bastion 호스트명</td><td><code>hanguel-bastion</code></td></tr>
+<tr><td><code>message</code></td><td>원본 sshd 인증 메시지</td><td><code>Accepted publickey for ec2-user from ...</code></td></tr>
+<tr><td><code>process.name</code></td><td>인증 프로세스</td><td><code>sshd</code></td></tr>
 <tr><td><code>user.name</code></td><td>접속 계정</td><td><code>ec2-user</code></td></tr>
 <tr><td><code>source.ip</code></td><td>SSH 출발지</td><td>analyst public IP</td></tr>
-<tr><td><code>event.action</code></td><td>정규화된 행위</td><td><code>ssh_session_accepted</code></td></tr>
+<tr><td><code>event.action</code></td><td>정규화된 보조 행위</td><td><code>ssh_session_accepted</code></td></tr>
 </tbody></table></div>
 <h2 id="커버하는-techniques-used">커버하는 Techniques Used</h2>
 <div class="table-wrap wide-table">
@@ -112,7 +114,13 @@
 <li>허용된 실습자 IP가 아닌 출발지에서 <code>Accepted publickey</code>가 발생했는지 확인한다.</li>
 <li>bastion SSH 세션 직후 내부 <code>10.60.0.0/16</code> 스캔 또는 PMS 접근 로그가 이어지는지 본다.</li>
 </ol>
-<h2 id="elk-query-예시">ELK Query 예시</h2>
+<h2 id="analyst-hunting-kql">Analyst Hunting KQL</h2>
+<p>분석가는 먼저 원본 auth log 메시지와 sshd 프로세스를 기준으로 검색한다. <code>event.action</code>은 collector가 정규화한 뒤에만 존재할 수 있으므로 1차 헌팅 조건으로 사용하지 않는다.</p>
+<pre><code>host.name:&quot;hanguel-bastion&quot; and process.name:&quot;sshd&quot; and message:*Accepted publickey*</code></pre>
+<pre><code>host.name:&quot;hanguel-bastion&quot; and message:(*Accepted publickey* or *Failed password* or *session opened*)</code></pre>
+<pre><code>host.name:&quot;hanguel-bastion&quot; and message:*Accepted publickey* and user.name:&quot;ec2-user&quot;</code></pre>
+<h2 id="normalized-pivot">Normalized Pivot</h2>
+<p>정규화 파이프라인 동작 여부를 확인할 때만 보조적으로 사용한다.</p>
 <pre><code>host.name:&quot;hanguel-bastion&quot; and event.action:&quot;ssh_session_accepted&quot;</code></pre>
       <footer class="footer">
         Spacebar Project. This campaign log page is scoped to SB-07.

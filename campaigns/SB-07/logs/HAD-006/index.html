@@ -84,10 +84,16 @@ pe64_amd64
 <tbody>
 <tr><td><code>registry.hive.path</code></td><td>hive 경로</td><td><code>C:\Windows\AppCompat\Programs\Amcache.hve</code></td></tr>
 <tr><td><code>file.path</code></td><td>loader 경로</td><td><code>C:\Windows\Temp\hgl_loader.exe</code></td></tr>
-<tr><td><code>event.action</code></td><td>정규화된 행위</td><td><code>amcache_loader_artifact_found</code></td></tr>
+<tr><td><code>message</code></td><td>Amcache summary 또는 hive string context</td><td><code>pe64_amd64 hgl_loader.exe</code></td></tr>
+<tr><td><code>event.action</code></td><td>정규화된 보조 행위</td><td><code>amcache_loader_artifact_found</code></td></tr>
 <tr><td><code>evidence.confidence</code></td><td>증거 수준</td><td><code>observed</code></td></tr>
 </tbody></table></div>
-<h2 id="elk-query-예시">ELK Query 예시</h2>
+<h2 id="analyst-hunting-kql">Analyst Hunting KQL</h2>
+<p>Amcache는 hive 원문을 그대로 ELK에 넣기보다 경로/architecture/context 요약으로 수집한다. 분석가는 loader 파일명과 Amcache hive 경로를 함께 찾는다.</p>
+<pre><code>host.name:&quot;hanguel-dc01&quot; and message:(*Amcache.hve* and *hgl_loader.exe*)</code></pre>
+<pre><code>host.name:&quot;hanguel-dc01&quot; and message:(*hgl_loader.exe* and *pe64_amd64*)</code></pre>
+<pre><code>host.name:&quot;hanguel-dc01&quot; and file.path:*\\Windows\\Temp\\hgl_loader.exe</code></pre>
+<h2 id="normalized-pivot">Normalized Pivot</h2>
 <pre><code>log.id:&quot;HAD-006&quot; and event.action:&quot;amcache_loader_artifact_found&quot;</code></pre>
       <footer class="footer">
         Spacebar Project. This campaign log page is scoped to SB-07.

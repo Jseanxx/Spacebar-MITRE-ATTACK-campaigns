@@ -84,6 +84,8 @@ loader_execution_observed</code></pre>
 <tr><td><code>event.code</code></td><td>Windows Security event ID</td><td><code>4688</code></td></tr>
 <tr><td><code>process.executable</code></td><td>실행 파일</td><td><code>rundll32.exe</code>, <code>rdrleakdiag.exe</code>, <code>hgl_loader.exe</code></td></tr>
 <tr><td><code>process.command_line</code></td><td>명령줄</td><td><code>comsvcs.dll MiniDump</code></td></tr>
+<tr><td><code>winlog.event_data.NewProcessName</code></td><td>Security 4688 원본 실행 파일</td><td><code>C:\Windows\System32\rundll32.exe</code></td></tr>
+<tr><td><code>winlog.event_data.CommandLine</code></td><td>Security 4688 원본 command line</td><td><code>comsvcs.dll MiniDump ...</code></td></tr>
 <tr><td><code>user.name</code></td><td>실행 계정</td><td><code>SYSTEM</code></td></tr>
 </tbody></table></div>
 <h2 id="커버하는-techniques-used">커버하는 Techniques Used</h2>
@@ -95,7 +97,12 @@ loader_execution_observed</code></pre>
 <tr><td><a href="https://attack.mitre.org/techniques/T1620/">T1620 Reflective Code Loading</a></td><td>loader 프로세스 실행 자체를 확인한다.</td></tr>
 <tr><td><a href="https://attack.mitre.org/techniques/T1027/">T1027 Obfuscated Files or Information</a></td><td>encrypted payload와 loader 조합의 실행 흐름을 보조한다.</td></tr>
 </tbody></table></div>
-<h2 id="elk-query-예시">ELK Query 예시</h2>
+<h2 id="analyst-hunting-kql">Analyst Hunting KQL</h2>
+<p>Security 4688은 process creation 원본 필드로 먼저 검색한다. command line auditing이 꺼져 있으면 <code>winlog.event_data.CommandLine</code>이 비어 있을 수 있으므로 <code>process.executable</code>, <code>NewProcessName</code>, <code>message</code>를 함께 본다.</p>
+<pre><code>winlog.channel:&quot;Security&quot; and event.code:4688 and winlog.event_data.NewProcessName:(*\\rundll32.exe or *\\rdrleakdiag.exe or *\\hgl_loader.exe)</code></pre>
+<pre><code>winlog.channel:&quot;Security&quot; and event.code:4688 and winlog.event_data.CommandLine:(*comsvcs.dll* or *MiniDump* or *rdrleakdiag* or *hgl_loader* or *hgl_payload*)</code></pre>
+<pre><code>winlog.channel:&quot;Security&quot; and event.code:4688 and message:(*lsass* or *MiniDump* or *hgl_loader* or *rdrleakdiag*)</code></pre>
+<h2 id="normalized-pivot">Normalized Pivot</h2>
 <pre><code>log.id:&quot;HAW-004&quot; and event.action:(&quot;comsvcs_lsass_dump_attempt&quot; or &quot;rdrleakdiag_lsass_dump_attempt&quot; or &quot;loader_execution_observed&quot;)</code></pre>
       <footer class="footer">
         Spacebar Project. This campaign log page is scoped to SB-07.

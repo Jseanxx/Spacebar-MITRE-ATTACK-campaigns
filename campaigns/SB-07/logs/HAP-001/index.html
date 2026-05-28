@@ -87,9 +87,11 @@
 <thead><tr><th>필드</th><th>의미</th><th>예시</th></tr></thead>
 <tbody>
 <tr><td><code>url.path</code></td><td>요청 경로</td><td><code>/invoker/JMXInvokerServlet</code></td></tr>
+<tr><td><code>http.request.method</code></td><td>HTTP method</td><td><code>GET</code>, <code>POST</code></td></tr>
 <tr><td><code>http.response.status_code</code></td><td>응답 코드</td><td><code>200</code>, <code>500</code></td></tr>
 <tr><td><code>source.ip</code></td><td>요청 출발지</td><td><code>10.60.30.10</code></td></tr>
-<tr><td><code>event.action</code></td><td>정규화된 행위</td><td><code>jboss_invoker_probe</code>, <code>pms_patch_downloaded</code></td></tr>
+<tr><td><code>message</code></td><td>원본 access/journal/docker log line</td><td><code>GET /updates/patch.ps1 HTTP/1.1</code></td></tr>
+<tr><td><code>event.action</code></td><td>정규화된 보조 행위</td><td><code>jboss_invoker_probe</code>, <code>pms_patch_downloaded</code></td></tr>
 </tbody></table></div>
 <h2 id="커버하는-techniques-used">커버하는 Techniques Used</h2>
 <div class="table-wrap wide-table">
@@ -105,8 +107,13 @@
 <li><code>source.ip:10.60.30.10</code> win01이 patch를 주기적으로 조회하는 정상 baseline을 만든다.</li>
 <li>bastion 또는 비정상 source가 JBoss invoker, deploy path, update path를 짧은 시간에 탐색하는지 본다.</li>
 </ol>
-<h2 id="elk-query-예시">ELK Query 예시</h2>
-<pre><code>host.name:&quot;hanguel-ops-pms&quot; and url.path:(&quot;/invoker/JMXInvokerServlet&quot; or &quot;/updates/patch.ps1&quot; or &quot;/updates/manifest.json&quot;)</code></pre>
+<h2 id="analyst-hunting-kql">Analyst Hunting KQL</h2>
+<p>HTTP 로그는 원본 요청 경로와 응답 코드로 먼저 탐색한다. <code>event.action</code>은 보조 피벗이며, JBoss/PMS 로그가 정규화되지 않은 경우에는 <code>message</code> 필드가 가장 넓게 동작한다.</p>
+<pre><code>host.name:&quot;hanguel-ops-pms&quot; and url.path:(&quot;/invoker/JMXInvokerServlet&quot; or &quot;/invoker/readonly&quot; or &quot;/updates/manifest.json&quot; or &quot;/updates/patch.ps1&quot;)</code></pre>
+<pre><code>host.name:&quot;hanguel-ops-pms&quot; and message:(*&quot;/invoker/JMXInvokerServlet&quot;* or *&quot;/updates/patch.ps1&quot;* or *&quot;/updates/manifest.json&quot;*)</code></pre>
+<pre><code>host.name:&quot;hanguel-ops-pms&quot; and source.ip:&quot;10.60.30.10&quot; and message:*&quot;/updates/patch.ps1&quot;*</code></pre>
+<h2 id="normalized-pivot">Normalized Pivot</h2>
+<pre><code>host.name:&quot;hanguel-ops-pms&quot; and event.action:(&quot;jboss_invoker_probe&quot; or &quot;pms_patch_downloaded&quot;)</code></pre>
       <footer class="footer">
         Spacebar Project. This campaign log page is scoped to SB-07.
       </footer>

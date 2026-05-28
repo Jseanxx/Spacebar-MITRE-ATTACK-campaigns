@@ -85,6 +85,16 @@
 <pre><code>dc_scheduled_task_registered
 taskcache_loader_task_found
 task_xml_loader_action_found</code></pre>
+<h2 id="주요-필드">주요 필드</h2>
+<div class="table-wrap wide-table">
+<table>
+<thead><tr><th>필드</th><th>의미</th><th>예시</th></tr></thead>
+<tbody>
+<tr><td><code>winlog.channel</code></td><td>Task Scheduler 로그 채널</td><td><code>Microsoft-Windows-TaskScheduler/Operational</code></td></tr>
+<tr><td><code>event.code</code></td><td>task 등록/시작/완료 이벤트</td><td><code>106</code>, <code>129</code>, <code>200</code>, <code>201</code></td></tr>
+<tr><td><code>message</code></td><td>원본 task scheduler 메시지</td><td><code>Task Scheduler successfully completed task</code></td></tr>
+<tr><td><code>process.command_line</code></td><td>task action 요약</td><td><code>cmd.exe /c C:\Windows\Temp\hgl_run.cmd</code></td></tr>
+</tbody></table></div>
 <h2 id="커버하는-techniques-used">커버하는 Techniques Used</h2>
 <div class="table-wrap wide-table">
 <table>
@@ -93,7 +103,12 @@ task_xml_loader_action_found</code></pre>
 <tr><td><a href="https://attack.mitre.org/techniques/T1053/005/">T1053.005 Scheduled Task</a></td><td>patch 실행과 loader task 실행 모두 작업 스케줄러에 의존한다.</td></tr>
 <tr><td><a href="https://attack.mitre.org/techniques/T1620/">T1620 Reflective Code Loading</a></td><td>task action이 loader wrapper를 실행한다.</td></tr>
 </tbody></table></div>
-<h2 id="elk-query-예시">ELK Query 예시</h2>
+<h2 id="analyst-hunting-kql">Analyst Hunting KQL</h2>
+<p>작업 스케줄러 로그는 task name, action command, Event ID를 기준으로 먼저 헌팅한다.</p>
+<pre><code>winlog.channel:&quot;Microsoft-Windows-TaskScheduler/Operational&quot; and message:(*HanguelLoaderDiag* or *hgl_run.cmd* or *hgl_loader.exe*)</code></pre>
+<pre><code>winlog.channel:&quot;Microsoft-Windows-TaskScheduler/Operational&quot; and event.code:(106 or 129 or 200 or 201) and message:*HanguelLoaderDiag*</code></pre>
+<pre><code>message:(*&quot;C:\\Windows\\System32\\Tasks\\HanguelLoaderDiag&quot;* or *&quot;C:\\Windows\\Temp\\hgl_run.cmd&quot;*)</code></pre>
+<h2 id="normalized-pivot">Normalized Pivot</h2>
 <pre><code>event.action:(&quot;dc_scheduled_task_registered&quot; or &quot;taskcache_loader_task_found&quot; or &quot;task_xml_loader_action_found&quot;)</code></pre>
       <footer class="footer">
         Spacebar Project. This campaign log page is scoped to SB-07.

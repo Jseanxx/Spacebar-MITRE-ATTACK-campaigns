@@ -85,9 +85,15 @@ Faulting application path: C:\Windows\Temp\hgl_loader.exe</code></pre>
 <tr><td><code>event.code</code></td><td>Application Error/WER 이벤트 ID</td><td><code>1000</code>, <code>1001</code></td></tr>
 <tr><td><code>process.name</code></td><td>faulting application</td><td><code>hgl_loader.exe</code></td></tr>
 <tr><td><code>error.code</code></td><td>exception code</td><td><code>0xc0000005</code></td></tr>
-<tr><td><code>event.action</code></td><td>정규화된 행위</td><td><code>application_loader_crash_observed</code></td></tr>
+<tr><td><code>message</code></td><td>Application/WER 원본 메시지</td><td><code>Faulting application name: hgl_loader.exe</code></td></tr>
+<tr><td><code>event.action</code></td><td>정규화된 보조 행위</td><td><code>application_loader_crash_observed</code></td></tr>
 </tbody></table></div>
-<h2 id="elk-query-예시">ELK Query 예시</h2>
+<h2 id="analyst-hunting-kql">Analyst Hunting KQL</h2>
+<p>Application Error/WER는 Windows 원본 채널, Event ID, faulting application 문자열을 기준으로 찾는다.</p>
+<pre><code>winlog.channel:&quot;Application&quot; and event.code:(1000 or 1001) and message:*hgl_loader.exe*</code></pre>
+<pre><code>winlog.channel:&quot;Application&quot; and event.code:1000 and message:(*&quot;Faulting application name: hgl_loader.exe&quot;* or *&quot;Faulting module name: unknown&quot;* or *&quot;Exception code: 0xc0000005&quot;*)</code></pre>
+<pre><code>host.name:&quot;hanguel-dc01&quot; and message:(*hgl_loader.exe* and *0xc0000005*)</code></pre>
+<h2 id="normalized-pivot">Normalized Pivot</h2>
 <pre><code>log.id:&quot;HAD-005&quot; and event.action:&quot;application_loader_crash_observed&quot;</code></pre>
       <footer class="footer">
         Spacebar Project. This campaign log page is scoped to SB-07.

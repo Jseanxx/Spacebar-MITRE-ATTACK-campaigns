@@ -79,7 +79,9 @@
 <tbody>
 <tr><td><code>campaign.id</code></td><td>캠페인 ID</td><td><code>SB-07</code></td></tr>
 <tr><td><code>log.id</code></td><td>로그 소스 ID</td><td><code>HAW-001</code></td></tr>
-<tr><td><code>event.action</code></td><td>행위 이름</td><td><code>domain_controller_discovery</code></td></tr>
+<tr><td><code>message</code></td><td>collector가 요약한 원본 명령 결과</td><td><code>nltest /dsgetdc:hanguel.local</code></td></tr>
+<tr><td><code>process.command_line</code></td><td>원본 명령 또는 script command</td><td><code>whoami /all</code>, <code>ipconfig /all</code>, <code>nltest /dsgetdc</code></td></tr>
+<tr><td><code>event.action</code></td><td>정규화된 보조 행위</td><td><code>domain_controller_discovery</code></td></tr>
 <tr><td><code>hanguel.classification</code></td><td>분류</td><td><code>normal</code>, <code>suspicious</code>, <code>attack</code></td></tr>
 <tr><td><code>threat.technique.id</code></td><td>MITRE technique</td><td><code>T1482</code></td></tr>
 </tbody></table></div>
@@ -105,7 +107,12 @@ dc_c_admin_share_access</code></pre>
 <tr><td><a href="https://attack.mitre.org/techniques/T1552/">T1552 Unsecured Credentials</a></td><td><code>dc_cred.xml</code> artifact 발견 이벤트를 기록한다.</td></tr>
 <tr><td><a href="https://attack.mitre.org/techniques/T1021/006/">T1021.006 WinRM</a></td><td>DC WinRM 접근 검증 또는 emulation 이벤트를 기록한다.</td></tr>
 </tbody></table></div>
-<h2 id="elk-query-예시">ELK Query 예시</h2>
+<h2 id="analyst-hunting-kql">Analyst Hunting KQL</h2>
+<p>이 로그는 원본 Windows Event Log가 아니라 Hanguel AD Agent가 명령 결과를 요약한 enriched event다. 분석가는 먼저 명령어, DC IP, credential artifact 경로 같은 행위 단서를 기준으로 검색하고, 이후 <code>event.action</code>으로 좁힌다.</p>
+<pre><code>host.name:&quot;hanguel-win01&quot; and message:(*whoami* or *ipconfig* or *nltest* or *Resolve-DnsName* or *Test-NetConnection*)</code></pre>
+<pre><code>host.name:&quot;hanguel-win01&quot; and message:(*&quot;10.60.20.10&quot;* or *&quot;hanguel-dc01&quot;* or *&quot;hanguel.local&quot;*)</code></pre>
+<pre><code>host.name:&quot;hanguel-win01&quot; and message:*&quot;C:\\ProgramData\\HanguelPMS\\dc_cred.xml&quot;*</code></pre>
+<h2 id="normalized-pivot">Normalized Pivot</h2>
 <pre><code>log.id:&quot;HAW-001&quot; and campaign.id:&quot;SB-07&quot;</code></pre>
       <footer class="footer">
         Spacebar Project. This campaign log page is scoped to SB-07.

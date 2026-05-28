@@ -84,6 +84,18 @@
 <tr><td>11</td><td>File Create</td><td><code>hgl_diag.bin</code> 생성 확인</td></tr>
 <tr><td>25</td><td>Process Tampering</td><td>process hollowing/tampering 계열 정황</td></tr>
 </tbody></table></div>
+<h2 id="주요-필드">주요 필드</h2>
+<div class="table-wrap wide-table">
+<table>
+<thead><tr><th>필드</th><th>의미</th><th>예시</th></tr></thead>
+<tbody>
+<tr><td><code>winlog.channel</code></td><td>Sysmon 로그 채널</td><td><code>Microsoft-Windows-Sysmon/Operational</code></td></tr>
+<tr><td><code>event.code</code></td><td>Sysmon Event ID</td><td><code>1</code>, <code>7</code>, <code>10</code>, <code>11</code>, <code>25</code></td></tr>
+<tr><td><code>winlog.event_data.SourceImage</code></td><td>접근 주체 프로세스</td><td><code>C:\Windows\Temp\hgl_loader.exe</code></td></tr>
+<tr><td><code>winlog.event_data.TargetImage</code></td><td>접근 대상 프로세스</td><td><code>C:\Windows\System32\lsass.exe</code></td></tr>
+<tr><td><code>winlog.event_data.GrantedAccess</code></td><td>요청된 접근 권한</td><td><code>0x1010</code>, <code>0x1fffff</code></td></tr>
+<tr><td><code>winlog.event_data.TargetFilename</code></td><td>생성된 파일 경로</td><td><code>C:\Windows\Temp\hgl_diag.bin</code></td></tr>
+</tbody></table></div>
 <h2 id="주요-event-action">주요 event.action</h2>
 <pre><code>sysmon_lsass_process_access
 lsass_dump_file_created
@@ -97,8 +109,12 @@ loader_execution_observed</code></pre>
 <tr><td><a href="https://attack.mitre.org/techniques/T1003/001/">T1003.001 LSASS Memory</a></td><td>LSASS process access와 dump 파일 생성 이벤트를 확인한다.</td></tr>
 <tr><td><a href="https://attack.mitre.org/techniques/T1620/">T1620 Reflective Code Loading</a></td><td>loader 프로세스 실행과 suspicious memory execution 정황을 보조한다.</td></tr>
 </tbody></table></div>
-<h2 id="elk-query-예시">ELK Query 예시</h2>
-<pre><code>event.action:&quot;sysmon_lsass_process_access&quot; and data.message_excerpt:*hgl_loader.exe*</code></pre>
+<h2 id="analyst-hunting-kql">Analyst Hunting KQL</h2>
+<p>Sysmon은 원본 Event ID와 event_data 필드를 기준으로 직접 탐색한다. <code>event.action</code>은 Hanguel collector가 붙인 요약값이므로 보조 피벗이다.</p>
+<pre><code>winlog.channel:&quot;Microsoft-Windows-Sysmon/Operational&quot; and event.code:10 and winlog.event_data.TargetImage:*\\lsass.exe</code></pre>
+<pre><code>winlog.channel:&quot;Microsoft-Windows-Sysmon/Operational&quot; and event.code:10 and winlog.event_data.TargetImage:*\\lsass.exe and winlog.event_data.SourceImage:(*\\hgl_loader.exe or *\\rundll32.exe or *\\rdrleakdiag.exe)</code></pre>
+<pre><code>winlog.channel:&quot;Microsoft-Windows-Sysmon/Operational&quot; and event.code:11 and winlog.event_data.TargetFilename:(*\\hgl_diag.bin or *\\lsass*.dmp or *\\lsass*.dump)</code></pre>
+<pre><code>winlog.channel:&quot;Microsoft-Windows-Sysmon/Operational&quot; and event.code:7 and winlog.event_data.ImageLoaded:(*\\comsvcs.dll or *\\dbghelp.dll or *\\dbgcore.dll)</code></pre>
 <h2 id="evidence-boundary">Evidence Boundary</h2>
 <pre><code>event.action:&quot;sysmon_lsass_process_access&quot; and not hanguel.test_runner:true</code></pre>
 <p>위 쿼리에서 결과가 나와야 실제 endpoint ProcessAccess 직접 증거로 말할 수 있다. 현재 Page 3에서는 이 항목을 <code>미확인</code>으로 유지한다.</p>

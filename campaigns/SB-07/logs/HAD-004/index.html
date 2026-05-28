@@ -87,7 +87,9 @@ hgl_diag.bin 131,396,273 bytes</code></pre>
 <tr><td><code>data.decrypted_magic</code></td><td>복호화 후 PE signature</td><td><code>4d 5a</code></td></tr>
 <tr><td><code>data.entry</code></td><td>entry point 출력</td><td><code>0x...</code></td></tr>
 <tr><td><code>data.exit_code</code></td><td>loader 종료 코드</td><td><code>-1073741819</code></td></tr>
-<tr><td><code>event.action</code></td><td>정규화된 행위</td><td><code>loader_execution_log_found</code></td></tr>
+<tr><td><code>file.path</code></td><td>loader run log 경로</td><td><code>C:\Windows\Temp\hgl_loader_run.log</code></td></tr>
+<tr><td><code>message</code></td><td>loader stdout/stderr 요약</td><td><code>decrypted_magic=4d 5a</code></td></tr>
+<tr><td><code>event.action</code></td><td>정규화된 보조 행위</td><td><code>loader_execution_log_found</code></td></tr>
 </tbody></table></div>
 <h2 id="커버하는-techniques-used">커버하는 Techniques Used</h2>
 <div class="table-wrap wide-table">
@@ -97,7 +99,12 @@ hgl_diag.bin 131,396,273 bytes</code></pre>
 <tr><td><a href="https://attack.mitre.org/techniques/T1620/">T1620 Reflective Code Loading</a></td><td>PE 복호화와 entry point 실행 정황을 보여준다.</td></tr>
 <tr><td><a href="https://attack.mitre.org/techniques/T1027/">T1027 Obfuscated Files or Information</a></td><td>encrypted payload 사용을 확인한다.</td></tr>
 </tbody></table></div>
-<h2 id="elk-query-예시">ELK Query 예시</h2>
+<h2 id="analyst-hunting-kql">Analyst Hunting KQL</h2>
+<p>이 로그는 Windows Event Log가 아니라 loader wrapper가 만든 파일이다. 따라서 파일 경로와 원문 문자열을 기준으로 먼저 탐색한다.</p>
+<pre><code>host.name:&quot;hanguel-dc01&quot; and file.path:*\\hgl_loader_run.log</code></pre>
+<pre><code>host.name:&quot;hanguel-dc01&quot; and message:(*decrypted_magic* or *encrypted_size* or *entry=* or *EXIT=* or *hgl_diag.bin*)</code></pre>
+<pre><code>host.name:&quot;hanguel-dc01&quot; and message:(*&quot;4d 5a&quot;* or *&quot;hgl_diag.bin&quot;* or *&quot;Access violation&quot;*)</code></pre>
+<h2 id="normalized-pivot">Normalized Pivot</h2>
 <pre><code>event.action:&quot;loader_execution_log_found&quot; and data.message_excerpt:*decrypted_magic*</code></pre>
       <footer class="footer">
         Spacebar Project. This campaign log page is scoped to SB-07.

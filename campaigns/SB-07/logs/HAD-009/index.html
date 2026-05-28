@@ -89,10 +89,16 @@ Close</code></pre>
 <tbody>
 <tr><td><code>file.name</code></td><td>파일명</td><td><code>hgl_loader.exe</code></td></tr>
 <tr><td><code>file.path</code></td><td>파일 경로</td><td><code>C:\Windows\Temp\hgl_loader.exe</code></td></tr>
-<tr><td><code>event.action</code></td><td>정규화된 행위</td><td><code>usn_loader_file_lifecycle_observed</code></td></tr>
+<tr><td><code>event.action</code></td><td>정규화된 보조 행위</td><td><code>usn_loader_file_lifecycle_observed</code></td></tr>
 <tr><td><code>data.usn_reasons</code></td><td>USN reason summary</td><td><code>File create</code>, <code>Close</code></td></tr>
+<tr><td><code>message</code></td><td>USN reason 요약</td><td><code>File create, Data extend, Close</code></td></tr>
 </tbody></table></div>
-<h2 id="elk-query-예시">ELK Query 예시</h2>
+<h2 id="analyst-hunting-kql">Analyst Hunting KQL</h2>
+<p>USN Journal은 파일 lifecycle을 보여주는 원본 파일시스템 아티팩트다. 파일명과 USN reason을 기준으로 탐색한다.</p>
+<pre><code>host.name:&quot;hanguel-dc01&quot; and file.name:(&quot;hgl_loader.exe&quot; or &quot;hgl_payload.enc&quot; or &quot;hgl_run.cmd&quot;)</code></pre>
+<pre><code>host.name:&quot;hanguel-dc01&quot; and message:(*USN* and (*hgl_loader.exe* or *hgl_payload.enc* or *hgl_run.cmd*))</code></pre>
+<pre><code>host.name:&quot;hanguel-dc01&quot; and message:(*&quot;File create&quot;* or *&quot;Data extend&quot;* or *&quot;Data overwrite&quot;* or *&quot;Close&quot;*) and message:*hgl*</code></pre>
+<h2 id="normalized-pivot">Normalized Pivot</h2>
 <pre><code>log.id:&quot;HAD-009&quot; and event.action:&quot;usn_loader_file_lifecycle_observed&quot;</code></pre>
       <footer class="footer">
         Spacebar Project. This campaign log page is scoped to SB-07.

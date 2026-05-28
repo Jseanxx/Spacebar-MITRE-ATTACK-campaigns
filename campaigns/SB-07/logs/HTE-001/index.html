@@ -91,7 +91,11 @@ normal_traffic_run_completed</code></pre>
 <tr><td><code>event.action</code></td><td>정상 행위 이름</td><td><code>normal_pms_manifest_http_get</code></td></tr>
 <tr><td><code>hanguel.classification</code></td><td>분류</td><td><code>normal</code></td></tr>
 </tbody></table></div>
-<h2 id="elk-query-예시">ELK Query 예시</h2>
+<h2 id="analyst-hunting-kql">Analyst Hunting KQL</h2>
+<p>이 로그는 실제 침해 증거가 아니라 정상 baseline 검증 이벤트다. 원본 운영 로그에서는 PMS manifest 조회, DNS lookup, WinRM reachability 같은 정상 점검 행위를 먼저 찾고, emulation 태그는 오탐 검증에만 사용한다.</p>
+<pre><code>host.name:&quot;hanguel-win01&quot; and message:(*manifest.json* or *Resolve-DnsName* or *Test-NetConnection* or *5985*)</code></pre>
+<pre><code>host.name:&quot;hanguel-win01&quot; and hanguel.classification:&quot;normal&quot;</code></pre>
+<h2 id="validation-pivot">Validation Pivot</h2>
 <pre><code>log.id:&quot;HTE-001&quot; or event.action:normal_*</code></pre>
       <footer class="footer">
         Spacebar Project. This campaign log page is scoped to SB-07.

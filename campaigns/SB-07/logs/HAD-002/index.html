@@ -84,7 +84,8 @@ C:\Windows\Temp\hgl_diag.bin</code></pre>
 <tbody>
 <tr><td><code>file.path</code></td><td>확인된 artifact 경로</td><td><code>C:\Windows\Temp\hgl_diag.bin</code></td></tr>
 <tr><td><code>file.size</code></td><td>파일 크기</td><td><code>131396273</code></td></tr>
-<tr><td><code>event.action</code></td><td>정규화된 행위</td><td><code>dump_file_artifact_found</code></td></tr>
+<tr><td><code>message</code></td><td>artifact collector 요약 원문</td><td><code>C:\Windows\Temp\hgl_loader.exe exists</code></td></tr>
+<tr><td><code>event.action</code></td><td>정규화된 보조 행위</td><td><code>dump_file_artifact_found</code></td></tr>
 <tr><td><code>evidence.confidence</code></td><td>증거 수준</td><td><code>observed</code></td></tr>
 </tbody></table></div>
 <h2 id="커버하는-techniques-used">커버하는 Techniques Used</h2>
@@ -95,7 +96,12 @@ C:\Windows\Temp\hgl_diag.bin</code></pre>
 <tr><td><a href="https://attack.mitre.org/techniques/T1620/">T1620 Reflective Code Loading</a></td><td>loader와 encrypted payload 배치를 확인한다.</td></tr>
 <tr><td><a href="https://attack.mitre.org/techniques/T1003/001/">T1003.001 LSASS Memory</a></td><td>dump-like artifact의 존재를 확인한다.</td></tr>
 </tbody></table></div>
-<h2 id="elk-query-예시">ELK Query 예시</h2>
+<h2 id="analyst-hunting-kql">Analyst Hunting KQL</h2>
+<p>파일 아티팩트는 파일명과 경로를 기준으로 먼저 탐색한다. <code>log.id</code>는 수집기가 생성한 보조 식별자이므로 1차 조건으로 고정하지 않는다.</p>
+<pre><code>host.name:&quot;hanguel-dc01&quot; and (file.path:*\\hgl_loader.exe or file.path:*\\hgl_payload.enc or file.path:*\\hgl_run.cmd or file.path:*\\hgl_diag.bin)</code></pre>
+<pre><code>host.name:&quot;hanguel-dc01&quot; and message:(*hgl_loader.exe* or *hgl_payload.enc* or *hgl_run.cmd* or *hgl_diag.bin*)</code></pre>
+<pre><code>host.name:&quot;hanguel-dc01&quot; and file.path:*\\Windows\\Temp\\hgl*</code></pre>
+<h2 id="normalized-pivot">Normalized Pivot</h2>
 <pre><code>log.id:&quot;HAD-002&quot; or data.path:*hgl_diag.bin*</code></pre>
       <footer class="footer">
         Spacebar Project. This campaign log page is scoped to SB-07.

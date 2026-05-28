@@ -84,8 +84,9 @@ powershell_lsass_chain_observed</code></pre>
 <tbody>
 <tr><td><code>winlog.channel</code></td><td>Windows 로그 채널</td><td><code>Microsoft-Windows-PowerShell/Operational</code></td></tr>
 <tr><td><code>event.code</code></td><td>이벤트 ID</td><td><code>4103</code>, <code>4104</code></td></tr>
+<tr><td><code>message</code></td><td>PowerShell Operational 원문 메시지</td><td><code>CommandInvocation(Invoke-Command)</code></td></tr>
 <tr><td><code>powershell.command.value</code></td><td>명령 일부</td><td><code>Import-Clixml</code>, <code>Invoke-Command</code></td></tr>
-<tr><td><code>event.action</code></td><td>정규화된 행위</td><td><code>dc_winrm_command_observed</code></td></tr>
+<tr><td><code>event.action</code></td><td>정규화된 보조 행위</td><td><code>dc_winrm_command_observed</code></td></tr>
 </tbody></table></div>
 <h2 id="커버하는-techniques-used">커버하는 Techniques Used</h2>
 <div class="table-wrap wide-table">
@@ -96,7 +97,12 @@ powershell_lsass_chain_observed</code></pre>
 <tr><td><a href="https://attack.mitre.org/techniques/T1021/006/">T1021.006 Windows Remote Management</a></td><td><code>Invoke-Command</code> 기반 WinRM 접근을 확인한다.</td></tr>
 <tr><td><a href="https://attack.mitre.org/techniques/T1021/002/">T1021.002 SMB/Windows Admin Shares</a></td><td><code>New-PSDrive \\10.60.20.10\C$</code> 접근을 확인한다.</td></tr>
 </tbody></table></div>
-<h2 id="elk-query-예시">ELK Query 예시</h2>
+<h2 id="analyst-hunting-kql">Analyst Hunting KQL</h2>
+<p>PowerShell 로그는 Event ID 4103/4104와 원본 command text를 기준으로 먼저 본다.</p>
+<pre><code>winlog.channel:&quot;Microsoft-Windows-PowerShell/Operational&quot; and event.code:(4103 or 4104) and message:(*Import-Clixml* or *dc_cred.xml* or *Invoke-Command* or *New-PSDrive*)</code></pre>
+<pre><code>winlog.channel:&quot;Microsoft-Windows-PowerShell/Operational&quot; and event.code:(4103 or 4104) and message:(*&quot;10.60.20.10&quot;* or *&quot;\\\\10.60.20.10\\C$&quot;* or *&quot;hanguel-dc01&quot;*)</code></pre>
+<pre><code>winlog.channel:&quot;Microsoft-Windows-PowerShell/Operational&quot; and event.code:(4103 or 4104) and message:(*hgl_loader* or *hgl_payload* or *hgl_run* or *lsass*)</code></pre>
+<h2 id="normalized-pivot">Normalized Pivot</h2>
 <pre><code>log.id:&quot;HAW-002&quot; and event.action:(&quot;dc_cred_xml_imported&quot; or &quot;dc_winrm_command_observed&quot; or &quot;dc_c_admin_share_access_observed&quot;)</code></pre>
       <footer class="footer">
         Spacebar Project. This campaign log page is scoped to SB-07.

@@ -97,7 +97,11 @@ attack_traffic_run_completed</code></pre>
 <tr><td><code>event.action</code></td><td>공격 흐름 행위</td><td><code>dc_cred_xml_discovered</code></td></tr>
 <tr><td><code>threat.technique.id</code></td><td>MITRE technique</td><td><code>T1552</code></td></tr>
 </tbody></table></div>
-<h2 id="elk-query-예시">ELK Query 예시</h2>
+<h2 id="analyst-hunting-kql">Analyst Hunting KQL</h2>
+<p>이 로그는 안전한 BAS 검증 이벤트다. 실제 사고 분석에서는 아래처럼 공격 행위의 원본 단서를 먼저 찾고, emulation tag는 rule 검증에만 사용한다.</p>
+<pre><code>host.name:&quot;hanguel-win01&quot; and message:(*patch.ps1* or *nltest* or *dc_cred.xml* or *Invoke-Command* or *\\\\10.60.20.10\\C$*)</code></pre>
+<pre><code>host.name:(&quot;hanguel-win01&quot; or &quot;hanguel-dc01&quot;) and message:(*hgl_loader.exe* or *hgl_payload.enc* or *HanguelLoaderDiag* or *hgl_diag.bin*)</code></pre>
+<h2 id="validation-pivot">Validation Pivot</h2>
 <pre><code>log.id:&quot;HTE-002&quot; or event.action:(&quot;pms_patch_executed&quot; or &quot;domain_controller_discovery&quot; or &quot;dc_cred_xml_discovered&quot; or &quot;dc_winrm_whoami&quot; or &quot;dc_c_admin_share_access&quot;)</code></pre>
       <footer class="footer">
         Spacebar Project. This campaign log page is scoped to SB-07.

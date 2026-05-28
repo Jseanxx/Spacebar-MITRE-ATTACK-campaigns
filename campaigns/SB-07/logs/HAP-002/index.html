@@ -88,7 +88,8 @@
 <tbody>
 <tr><td><code>file.path</code></td><td>변경 파일 경로</td><td><code>/opt/hanguel-pms/updates/patch.ps1</code></td></tr>
 <tr><td><code>file.hash.sha256</code></td><td>파일 해시</td><td>redacted hash</td></tr>
-<tr><td><code>event.action</code></td><td>정규화된 행위</td><td><code>pms_patch_changed_emulated</code></td></tr>
+<tr><td><code>message</code></td><td>manifest/hash snapshot 원문 또는 collector 요약</td><td><code>patch.ps1 sha256=...</code></td></tr>
+<tr><td><code>event.action</code></td><td>정규화된 보조 행위</td><td><code>pms_patch_changed_emulated</code></td></tr>
 <tr><td><code>hanguel.classification</code></td><td>분류</td><td><code>suspicious</code></td></tr>
 </tbody></table></div>
 <h2 id="커버하는-techniques-used">커버하는 Techniques Used</h2>
@@ -105,7 +106,12 @@
 <li>manifest version/hash 변경 직후 win01의 patch download/execution 이벤트가 발생하는지 본다.</li>
 <li>변경 주체와 시간대가 정상 배포 절차와 일치하는지 확인한다.</li>
 </ol>
-<h2 id="elk-query-예시">ELK Query 예시</h2>
+<h2 id="analyst-hunting-kql">Analyst Hunting KQL</h2>
+<p>공급망 변조는 먼저 파일 경로, manifest, patch 해시 변경 흔적을 기준으로 찾는다.</p>
+<pre><code>host.name:&quot;hanguel-ops-pms&quot; and file.path:(&quot;/opt/hanguel-pms/updates/manifest.json&quot; or &quot;/opt/hanguel-pms/updates/patch.ps1&quot;)</code></pre>
+<pre><code>host.name:&quot;hanguel-ops-pms&quot; and message:(*manifest.json* or *patch.ps1* or *sha256* or *patch_hashes*)</code></pre>
+<pre><code>host.name:&quot;hanguel-ops-pms&quot; and file.path:*patch.ps1* and file.hash.sha256:*</code></pre>
+<h2 id="normalized-pivot">Normalized Pivot</h2>
 <pre><code>log.id:&quot;HAP-002&quot; or event.action:&quot;pms_patch_changed_emulated&quot;</code></pre>
       <footer class="footer">
         Spacebar Project. This campaign log page is scoped to SB-07.

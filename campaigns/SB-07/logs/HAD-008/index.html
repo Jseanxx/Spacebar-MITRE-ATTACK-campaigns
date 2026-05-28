@@ -86,8 +86,14 @@ task_xml_loader_action_found</code></pre>
 <tr><td><code>task.name</code></td><td>작업 이름</td><td><code>HanguelLoaderDiag</code></td></tr>
 <tr><td><code>process.command_line</code></td><td>task action</td><td><code>cmd.exe /c C:\Windows\Temp\hgl_run.cmd</code></td></tr>
 <tr><td><code>registry.path</code></td><td>TaskCache path</td><td><code>...\TaskCache\Tree\HanguelLoaderDiag</code></td></tr>
+<tr><td><code>message</code></td><td>TaskCache/Task XML 요약</td><td><code>cmd.exe /c C:\Windows\Temp\hgl_run.cmd</code></td></tr>
 </tbody></table></div>
-<h2 id="elk-query-예시">ELK Query 예시</h2>
+<h2 id="analyst-hunting-kql">Analyst Hunting KQL</h2>
+<p>TaskCache와 Task XML은 task 이름, action command, registry path를 기준으로 탐색한다.</p>
+<pre><code>host.name:&quot;hanguel-dc01&quot; and message:(*HanguelLoaderDiag* or *hgl_run.cmd* or *hgl_loader.exe*)</code></pre>
+<pre><code>host.name:&quot;hanguel-dc01&quot; and registry.path:*\\Schedule\\TaskCache* and message:*HanguelLoaderDiag*</code></pre>
+<pre><code>host.name:&quot;hanguel-dc01&quot; and message:(*&quot;C:\\Windows\\System32\\Tasks\\HanguelLoaderDiag&quot;* or *&quot;cmd.exe /c&quot;* or *&quot;C:\\Windows\\Temp\\hgl_run.cmd&quot;*)</code></pre>
+<h2 id="normalized-pivot">Normalized Pivot</h2>
 <pre><code>log.id:&quot;HAD-008&quot; and event.action:(&quot;taskcache_loader_task_found&quot; or &quot;task_xml_loader_action_found&quot;)</code></pre>
       <footer class="footer">
         Spacebar Project. This campaign log page is scoped to SB-07.
