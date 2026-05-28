@@ -77,6 +77,16 @@
 Faulting module name: unknown
 Exception code: 0xc0000005
 Faulting application path: C:\Windows\Temp\hgl_loader.exe</code></pre>
+<h2 id="원본-로그-기준-탐색-포인트">원본 로그 기준 탐색 포인트</h2>
+<div class="table-wrap wide-table">
+<table>
+<thead><tr><th>관찰할 행위</th><th>원본 필드/문자열</th><th>분석 의미</th></tr></thead>
+<tbody>
+<tr><td>loader crash</td><td>Event ID <code>1000</code>, <code>Faulting application name: hgl_loader.exe</code></td><td>loader 프로세스 실행과 crash 확인</td></tr>
+<tr><td>unknown module</td><td><code>Faulting module name: unknown</code></td><td>메모리 매핑/비정상 module 정황. 단독 확정 증거는 아님</td></tr>
+<tr><td>access violation</td><td><code>Exception code: 0xc0000005</code></td><td><code>EXIT=-1073741819</code>와 연결 가능한 crash code</td></tr>
+<tr><td>WER report</td><td>Event ID <code>1001</code></td><td>crash report 생성 여부 확인</td></tr>
+</tbody></table></div>
 <h2 id="주요-필드">주요 필드</h2>
 <div class="table-wrap wide-table">
 <table>

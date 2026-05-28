@@ -66,17 +66,28 @@
 <div class="meta-label">Collection:</div>
 <div class="meta-value">Hanguel AD Agent artifact collector summary</div>
 <div class="meta-label">Current Status:</div>
-<div class="meta-value">ELK에서 이벤트 확인됨</div>
+<div class="meta-value">ELK collector 요약 이벤트 기준 확인됨. raw hive 단순 문자열 검색만으로 항상 재현되는 증거로 단정하지 않음</div>
 <div class="meta-label">Primary Use:</div>
 <div class="meta-value"><code>hgl_loader.exe</code>가 Windows application compatibility inventory에 남았는지 확인</div>
 </div>
 <h2 id="공격-행위-요약">공격 행위 요약</h2>
 <p>Amcache는 실행 파일 metadata와 application compatibility inventory를 제공하는 Windows 포렌식 아티팩트다. SB-07에서는 <code>C:\Windows\Temp\hgl_loader.exe</code> 경로와 <code>pe64_amd64</code> 정황을 확인하는 보조 증거로 사용한다.</p>
 <h2 id="관측된-내용">관측된 내용</h2>
+<p>아래 값은 HAD-006 collector summary와 Page 3 집계 기준의 관측값이다. 원본 <code>Amcache.hve</code>는 바이너리 hive이므로 단순 ASCII/Unicode 문자열 검색만으로 같은 결과가 나오지 않을 수 있으며, 최종 재검증은 전용 Amcache parser 또는 collector JSONL 원문으로 수행한다.</p>
 <pre><code>hgl_loader.exe
 c:\windows\temp\hgl_loader.exe
 pe64_amd64
 05/22/2026 03:58:44</code></pre>
+<h2 id="원본-아티팩트-기준-탐색-포인트">원본 아티팩트 기준 탐색 포인트</h2>
+<div class="table-wrap wide-table">
+<table>
+<thead><tr><th>관찰할 행위</th><th>원본 필드/문자열</th><th>분석 의미</th></tr></thead>
+<tbody>
+<tr><td>Amcache hive 확보</td><td><code>C:\Windows\AppCompat\Programs\Amcache.hve</code></td><td>Windows compatibility inventory 원본 위치 확인</td></tr>
+<tr><td>loader 경로 context</td><td><code>hgl_loader.exe</code>, <code>C:\Windows\Temp\hgl_loader.exe</code></td><td>loader 파일이 inventory에 요약됐는지 확인</td></tr>
+<tr><td>PE architecture</td><td><code>pe64_amd64</code></td><td>loader binary architecture 정황</td></tr>
+<tr><td>collector boundary</td><td><code>message</code>, <code>file.path</code>, <code>registry.hive.path</code></td><td>ELK summary와 원본 hive parser 결과를 분리</td></tr>
+</tbody></table></div>
 <h2 id="주요-필드">주요 필드</h2>
 <div class="table-wrap wide-table">
 <table>

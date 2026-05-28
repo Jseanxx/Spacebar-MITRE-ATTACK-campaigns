@@ -74,6 +74,16 @@
 <p>ShimCache/AppCompatCache는 실행 또는 실행 가능 파일 참조 흔적을 제공한다. OS 버전에 따라 실행 시각/실행 여부 해석이 제한되므로, 단독 증거가 아니라 Amcache, Application Error, Task XML, USN Journal과 함께 봐야 한다.</p>
 <h2 id="관측된-내용">관측된 내용</h2>
 <pre><code>C:\Windows\Temp\hgl_loader.exe</code></pre>
+<h2 id="원본-아티팩트-기준-탐색-포인트">원본 아티팩트 기준 탐색 포인트</h2>
+<div class="table-wrap wide-table">
+<table>
+<thead><tr><th>관찰할 행위</th><th>원본 필드/문자열</th><th>분석 의미</th></tr></thead>
+<tbody>
+<tr><td>AppCompatCache value 확인</td><td><code>HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\AppCompatCache</code></td><td>Windows compatibility cache 원본 위치 확인</td></tr>
+<tr><td>loader path context</td><td><code>C:\Windows\Temp\hgl_loader.exe</code></td><td>DC에서 loader 경로가 cache에 남았는지 확인</td></tr>
+<tr><td>실행 여부 한계</td><td>OS별 ShimCache 해석 차이</td><td>단독으로 실행 시각/실행 여부를 확정하지 않음</td></tr>
+<tr><td>교차 검증</td><td>HAD-005, HAD-008, HAD-009</td><td>crash, task, USN과 묶어 실행 정황 강화</td></tr>
+</tbody></table></div>
 <h2 id="주요-필드">주요 필드</h2>
 <div class="table-wrap wide-table">
 <table>
@@ -89,6 +99,7 @@
 <pre><code>host.name:&quot;hanguel-dc01&quot; and message:(*AppCompatCache* and *hgl_loader.exe*)</code></pre>
 <pre><code>host.name:&quot;hanguel-dc01&quot; and registry.path:*AppCompatCache* and message:*C:\\Windows\\Temp\\hgl_loader.exe*</code></pre>
 <pre><code>host.name:&quot;hanguel-dc01&quot; and message:*&quot;C:\\Windows\\Temp\\hgl_loader.exe&quot;*</code></pre>
+<pre><code>host.name:&quot;hanguel-dc01&quot; and message:(*ShimCache* or *AppCompatCache*) and message:*Windows\\Temp*</code></pre>
 <h2 id="normalized-pivot">Normalized Pivot</h2>
 <pre><code>log.id:&quot;HAD-007&quot; and event.action:&quot;shimcache_loader_artifact_found&quot;</code></pre>
       <footer class="footer">

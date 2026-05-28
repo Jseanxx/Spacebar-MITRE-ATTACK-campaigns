@@ -97,11 +97,22 @@ loader_execution_observed</code></pre>
 <tr><td><a href="https://attack.mitre.org/techniques/T1620/">T1620 Reflective Code Loading</a></td><td>loader 프로세스 실행 자체를 확인한다.</td></tr>
 <tr><td><a href="https://attack.mitre.org/techniques/T1027/">T1027 Obfuscated Files or Information</a></td><td>encrypted payload와 loader 조합의 실행 흐름을 보조한다.</td></tr>
 </tbody></table></div>
+<h2 id="원본-로그-기준-탐색-포인트">원본 로그 기준 탐색 포인트</h2>
+<div class="table-wrap wide-table">
+<table>
+<thead><tr><th>관찰할 행위</th><th>원본 필드/문자열</th><th>분석 의미</th></tr></thead>
+<tbody>
+<tr><td>comsvcs MiniDump 시도</td><td><code>NewProcessName:rundll32.exe</code>, <code>CommandLine:*comsvcs.dll*MiniDump*</code></td><td>Defender 차단 전 LotL dump 시도 확인</td></tr>
+<tr><td>rdrleakdiag 사용</td><td><code>NewProcessName:rdrleakdiag.exe</code></td><td>Windows 정상 도구 기반 dump 시도 확인</td></tr>
+<tr><td>loader 실행</td><td><code>NewProcessName:*hgl_loader.exe</code></td><td>C++ loader가 실제 프로세스로 생성됐는지 확인</td></tr>
+<tr><td>command line 부재</td><td><code>CommandLine</code> 비어 있음</td><td>4688 command line audit 설정 미흡 가능성으로 분리</td></tr>
+</tbody></table></div>
 <h2 id="analyst-hunting-kql">Analyst Hunting KQL</h2>
 <p>Security 4688은 process creation 원본 필드로 먼저 검색한다. command line auditing이 꺼져 있으면 <code>winlog.event_data.CommandLine</code>이 비어 있을 수 있으므로 <code>process.executable</code>, <code>NewProcessName</code>, <code>message</code>를 함께 본다.</p>
 <pre><code>winlog.channel:&quot;Security&quot; and event.code:4688 and winlog.event_data.NewProcessName:(*\\rundll32.exe or *\\rdrleakdiag.exe or *\\hgl_loader.exe)</code></pre>
 <pre><code>winlog.channel:&quot;Security&quot; and event.code:4688 and winlog.event_data.CommandLine:(*comsvcs.dll* or *MiniDump* or *rdrleakdiag* or *hgl_loader* or *hgl_payload*)</code></pre>
 <pre><code>winlog.channel:&quot;Security&quot; and event.code:4688 and message:(*lsass* or *MiniDump* or *hgl_loader* or *rdrleakdiag*)</code></pre>
+<pre><code>winlog.channel:&quot;Security&quot; and event.code:4688 and winlog.event_data.NewProcessName:*\\cmd.exe and winlog.event_data.CommandLine:*hgl_run.cmd*</code></pre>
 <h2 id="normalized-pivot">Normalized Pivot</h2>
 <pre><code>log.id:&quot;HAW-004&quot; and event.action:(&quot;comsvcs_lsass_dump_attempt&quot; or &quot;rdrleakdiag_lsass_dump_attempt&quot; or &quot;loader_execution_observed&quot;)</code></pre>
       <footer class="footer">

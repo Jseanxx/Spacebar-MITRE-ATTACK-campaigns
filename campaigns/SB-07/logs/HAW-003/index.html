@@ -103,11 +103,22 @@ task_xml_loader_action_found</code></pre>
 <tr><td><a href="https://attack.mitre.org/techniques/T1053/005/">T1053.005 Scheduled Task</a></td><td>patch 실행과 loader task 실행 모두 작업 스케줄러에 의존한다.</td></tr>
 <tr><td><a href="https://attack.mitre.org/techniques/T1620/">T1620 Reflective Code Loading</a></td><td>task action이 loader wrapper를 실행한다.</td></tr>
 </tbody></table></div>
+<h2 id="원본-로그-기준-탐색-포인트">원본 로그 기준 탐색 포인트</h2>
+<div class="table-wrap wide-table">
+<table>
+<thead><tr><th>관찰할 행위</th><th>원본 필드/문자열</th><th>분석 의미</th></tr></thead>
+<tbody>
+<tr><td>task 등록</td><td>Event ID <code>106</code>, <code>HanguelLoaderDiag</code></td><td>DC에 loader 실행 task가 만들어졌는지 확인</td></tr>
+<tr><td>task action 실행</td><td>Event ID <code>200</code>, <code>Action started</code></td><td><code>cmd.exe /c C:\Windows\Temp\hgl_run.cmd</code> 실행 시점 확인</td></tr>
+<tr><td>task 완료</td><td>Event ID <code>201</code>, <code>Action completed</code></td><td>task가 종료된 시점과 exit 상태 확인</td></tr>
+<tr><td>Task XML 확인</td><td><code>C:\Windows\System32\Tasks\HanguelLoaderDiag</code></td><td>이벤트 로그가 부족할 때 action command를 원본 파일로 재검증</td></tr>
+</tbody></table></div>
 <h2 id="analyst-hunting-kql">Analyst Hunting KQL</h2>
 <p>작업 스케줄러 로그는 task name, action command, Event ID를 기준으로 먼저 헌팅한다.</p>
 <pre><code>winlog.channel:&quot;Microsoft-Windows-TaskScheduler/Operational&quot; and message:(*HanguelLoaderDiag* or *hgl_run.cmd* or *hgl_loader.exe*)</code></pre>
 <pre><code>winlog.channel:&quot;Microsoft-Windows-TaskScheduler/Operational&quot; and event.code:(106 or 129 or 200 or 201) and message:*HanguelLoaderDiag*</code></pre>
 <pre><code>message:(*&quot;C:\\Windows\\System32\\Tasks\\HanguelLoaderDiag&quot;* or *&quot;C:\\Windows\\Temp\\hgl_run.cmd&quot;*)</code></pre>
+<pre><code>winlog.channel:&quot;Microsoft-Windows-TaskScheduler/Operational&quot; and event.code:(106 or 140 or 200 or 201) and message:(*cmd.exe* or *hgl_run.cmd*)</code></pre>
 <h2 id="normalized-pivot">Normalized Pivot</h2>
 <pre><code>event.action:(&quot;dc_scheduled_task_registered&quot; or &quot;taskcache_loader_task_found&quot; or &quot;task_xml_loader_action_found&quot;)</code></pre>
       <footer class="footer">

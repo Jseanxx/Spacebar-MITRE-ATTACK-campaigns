@@ -97,11 +97,22 @@ powershell_lsass_chain_observed</code></pre>
 <tr><td><a href="https://attack.mitre.org/techniques/T1021/006/">T1021.006 Windows Remote Management</a></td><td><code>Invoke-Command</code> 기반 WinRM 접근을 확인한다.</td></tr>
 <tr><td><a href="https://attack.mitre.org/techniques/T1021/002/">T1021.002 SMB/Windows Admin Shares</a></td><td><code>New-PSDrive \\10.60.20.10\C$</code> 접근을 확인한다.</td></tr>
 </tbody></table></div>
+<h2 id="원본-로그-기준-탐색-포인트">원본 로그 기준 탐색 포인트</h2>
+<div class="table-wrap wide-table">
+<table>
+<thead><tr><th>관찰할 행위</th><th>원본 필드/문자열</th><th>분석 의미</th></tr></thead>
+<tbody>
+<tr><td>credential XML 사용</td><td><code>Import-Clixml</code>, <code>dc_cred.xml</code></td><td>DPAPI credential artifact 사용 여부 확인</td></tr>
+<tr><td>WinRM 원격 명령</td><td><code>Invoke-Command</code>, <code>ComputerName</code>, <code>10.60.20.10</code></td><td>win01에서 DC 명령 실행 시도 확인</td></tr>
+<tr><td>SMB admin share 접근</td><td><code>New-PSDrive</code>, <code>\\10.60.20.10\C$</code></td><td>DC C$ 접근 흐름 확인</td></tr>
+<tr><td>loader staging 명령</td><td><code>Copy-Item</code>, <code>hgl_loader.exe</code>, <code>hgl_payload.enc</code>, <code>hgl_run.cmd</code></td><td>DC Temp에 loader chain 전달 여부 확인</td></tr>
+</tbody></table></div>
 <h2 id="analyst-hunting-kql">Analyst Hunting KQL</h2>
 <p>PowerShell 로그는 Event ID 4103/4104와 원본 command text를 기준으로 먼저 본다.</p>
 <pre><code>winlog.channel:&quot;Microsoft-Windows-PowerShell/Operational&quot; and event.code:(4103 or 4104) and message:(*Import-Clixml* or *dc_cred.xml* or *Invoke-Command* or *New-PSDrive*)</code></pre>
 <pre><code>winlog.channel:&quot;Microsoft-Windows-PowerShell/Operational&quot; and event.code:(4103 or 4104) and message:(*&quot;10.60.20.10&quot;* or *&quot;\\\\10.60.20.10\\C$&quot;* or *&quot;hanguel-dc01&quot;*)</code></pre>
 <pre><code>winlog.channel:&quot;Microsoft-Windows-PowerShell/Operational&quot; and event.code:(4103 or 4104) and message:(*hgl_loader* or *hgl_payload* or *hgl_run* or *lsass*)</code></pre>
+<pre><code>winlog.channel:&quot;Microsoft-Windows-PowerShell/Operational&quot; and event.code:(4103 or 4104) and message:(*Copy-Item* and (*hgl_loader.exe* or *hgl_payload.enc* or *hgl_run.cmd*))</code></pre>
 <h2 id="normalized-pivot">Normalized Pivot</h2>
 <pre><code>log.id:&quot;HAW-002&quot; and event.action:(&quot;dc_cred_xml_imported&quot; or &quot;dc_winrm_command_observed&quot; or &quot;dc_c_admin_share_access_observed&quot;)</code></pre>
       <footer class="footer">

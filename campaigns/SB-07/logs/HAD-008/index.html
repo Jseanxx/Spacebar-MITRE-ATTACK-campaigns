@@ -88,11 +88,22 @@ task_xml_loader_action_found</code></pre>
 <tr><td><code>registry.path</code></td><td>TaskCache path</td><td><code>...\TaskCache\Tree\HanguelLoaderDiag</code></td></tr>
 <tr><td><code>message</code></td><td>TaskCache/Task XML 요약</td><td><code>cmd.exe /c C:\Windows\Temp\hgl_run.cmd</code></td></tr>
 </tbody></table></div>
+<h2 id="원본-아티팩트-기준-탐색-포인트">원본 아티팩트 기준 탐색 포인트</h2>
+<div class="table-wrap wide-table">
+<table>
+<thead><tr><th>관찰할 행위</th><th>원본 필드/문자열</th><th>분석 의미</th></tr></thead>
+<tbody>
+<tr><td>TaskCache tree</td><td><code>...\TaskCache\Tree\HanguelLoaderDiag</code></td><td>task 이름과 registry 흔적 확인</td></tr>
+<tr><td>Task XML 파일</td><td><code>C:\Windows\System32\Tasks\HanguelLoaderDiag</code></td><td>실제 action command 원본 확인</td></tr>
+<tr><td>실행 action</td><td><code>cmd.exe /c &quot;C:\Windows\Temp\hgl_run.cmd&quot;</code></td><td>loader wrapper 실행 경로 확인</td></tr>
+<tr><td>SYSTEM 실행 여부</td><td>Task XML <code>Principal</code>, <code>UserId</code>, <code>RunLevel</code></td><td>권한 context 확인. 값이 없으면 별도 원본 확인 필요</td></tr>
+</tbody></table></div>
 <h2 id="analyst-hunting-kql">Analyst Hunting KQL</h2>
 <p>TaskCache와 Task XML은 task 이름, action command, registry path를 기준으로 탐색한다.</p>
 <pre><code>host.name:&quot;hanguel-dc01&quot; and message:(*HanguelLoaderDiag* or *hgl_run.cmd* or *hgl_loader.exe*)</code></pre>
 <pre><code>host.name:&quot;hanguel-dc01&quot; and registry.path:*\\Schedule\\TaskCache* and message:*HanguelLoaderDiag*</code></pre>
 <pre><code>host.name:&quot;hanguel-dc01&quot; and message:(*&quot;C:\\Windows\\System32\\Tasks\\HanguelLoaderDiag&quot;* or *&quot;cmd.exe /c&quot;* or *&quot;C:\\Windows\\Temp\\hgl_run.cmd&quot;*)</code></pre>
+<pre><code>host.name:&quot;hanguel-dc01&quot; and message:(*TaskCache* and (*HanguelLoaderDiag* or *hgl_run.cmd*))</code></pre>
 <h2 id="normalized-pivot">Normalized Pivot</h2>
 <pre><code>log.id:&quot;HAD-008&quot; and event.action:(&quot;taskcache_loader_task_found&quot; or &quot;task_xml_loader_action_found&quot;)</code></pre>
       <footer class="footer">

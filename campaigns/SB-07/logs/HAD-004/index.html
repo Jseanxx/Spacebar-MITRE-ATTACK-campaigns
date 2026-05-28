@@ -99,11 +99,23 @@ hgl_diag.bin 131,396,273 bytes</code></pre>
 <tr><td><a href="https://attack.mitre.org/techniques/T1620/">T1620 Reflective Code Loading</a></td><td>PE 복호화와 entry point 실행 정황을 보여준다.</td></tr>
 <tr><td><a href="https://attack.mitre.org/techniques/T1027/">T1027 Obfuscated Files or Information</a></td><td>encrypted payload 사용을 확인한다.</td></tr>
 </tbody></table></div>
+<h2 id="원본-파일-기준-탐색-포인트">원본 파일 기준 탐색 포인트</h2>
+<div class="table-wrap wide-table">
+<table>
+<thead><tr><th>관찰할 행위</th><th>원본 필드/문자열</th><th>분석 의미</th></tr></thead>
+<tbody>
+<tr><td>encrypted payload 입력</td><td><code>encrypted_size=...</code></td><td>loader가 암호화 payload를 읽었는지 확인</td></tr>
+<tr><td>PE 복호화 정황</td><td><code>decrypted_magic=4d 5a</code></td><td>복호화 결과가 PE signature로 보이는지 확인</td></tr>
+<tr><td>entry point 호출</td><td><code>entry=0x...</code></td><td>loader가 수동 매핑 후 entry point로 넘어간 정황</td></tr>
+<tr><td>비정상 종료</td><td><code>EXIT=-1073741819</code>, <code>0xc0000005</code></td><td>access violation 계열 crash와 Application Error를 연결</td></tr>
+<tr><td>dump 산출물 listing</td><td><code>hgl_diag.bin ... bytes</code></td><td>loader 실행 후 산출물 존재 여부 확인</td></tr>
+</tbody></table></div>
 <h2 id="analyst-hunting-kql">Analyst Hunting KQL</h2>
 <p>이 로그는 Windows Event Log가 아니라 loader wrapper가 만든 파일이다. 따라서 파일 경로와 원문 문자열을 기준으로 먼저 탐색한다.</p>
 <pre><code>host.name:&quot;hanguel-dc01&quot; and file.path:*\\hgl_loader_run.log</code></pre>
 <pre><code>host.name:&quot;hanguel-dc01&quot; and message:(*decrypted_magic* or *encrypted_size* or *entry=* or *EXIT=* or *hgl_diag.bin*)</code></pre>
 <pre><code>host.name:&quot;hanguel-dc01&quot; and message:(*&quot;4d 5a&quot;* or *&quot;hgl_diag.bin&quot;* or *&quot;Access violation&quot;*)</code></pre>
+<pre><code>host.name:&quot;hanguel-dc01&quot; and file.path:*\\hgl_loader_run.log and message:(*done* or *EXIT=*)</code></pre>
 <h2 id="normalized-pivot">Normalized Pivot</h2>
 <pre><code>event.action:&quot;loader_execution_log_found&quot; and data.message_excerpt:*decrypted_magic*</code></pre>
       <footer class="footer">

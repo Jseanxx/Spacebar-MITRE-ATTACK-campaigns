@@ -96,11 +96,23 @@ C:\Windows\Temp\hgl_diag.bin</code></pre>
 <tr><td><a href="https://attack.mitre.org/techniques/T1620/">T1620 Reflective Code Loading</a></td><td>loader와 encrypted payload 배치를 확인한다.</td></tr>
 <tr><td><a href="https://attack.mitre.org/techniques/T1003/001/">T1003.001 LSASS Memory</a></td><td>dump-like artifact의 존재를 확인한다.</td></tr>
 </tbody></table></div>
+<h2 id="원본-아티팩트-기준-탐색-포인트">원본 아티팩트 기준 탐색 포인트</h2>
+<div class="table-wrap wide-table">
+<table>
+<thead><tr><th>관찰할 행위</th><th>원본 필드/문자열</th><th>분석 의미</th></tr></thead>
+<tbody>
+<tr><td>loader 파일 배치</td><td><code>C:\Windows\Temp\hgl_loader.exe</code></td><td>DC에 loader wrapper가 배치됐는지 확인</td></tr>
+<tr><td>encrypted payload 배치</td><td><code>C:\Windows\Temp\hgl_payload.enc</code></td><td>복호화 전 payload가 디스크에 남았는지 확인</td></tr>
+<tr><td>wrapper script 배치</td><td><code>C:\Windows\Temp\hgl_run.cmd</code></td><td>task가 실제 실행한 command wrapper 확인</td></tr>
+<tr><td>dump-like 산출물</td><td><code>C:\Windows\Temp\hgl_diag.bin</code></td><td>LSASS dump로 분석된 파일 존재 여부 확인</td></tr>
+<tr><td>파일 metadata</td><td><code>file.size</code>, <code>file.hash.sha256</code></td><td>복사/생성된 파일 동일성 검증</td></tr>
+</tbody></table></div>
 <h2 id="analyst-hunting-kql">Analyst Hunting KQL</h2>
 <p>파일 아티팩트는 파일명과 경로를 기준으로 먼저 탐색한다. <code>log.id</code>는 수집기가 생성한 보조 식별자이므로 1차 조건으로 고정하지 않는다.</p>
 <pre><code>host.name:&quot;hanguel-dc01&quot; and (file.path:*\\hgl_loader.exe or file.path:*\\hgl_payload.enc or file.path:*\\hgl_run.cmd or file.path:*\\hgl_diag.bin)</code></pre>
 <pre><code>host.name:&quot;hanguel-dc01&quot; and message:(*hgl_loader.exe* or *hgl_payload.enc* or *hgl_run.cmd* or *hgl_diag.bin*)</code></pre>
 <pre><code>host.name:&quot;hanguel-dc01&quot; and file.path:*\\Windows\\Temp\\hgl*</code></pre>
+<pre><code>host.name:&quot;hanguel-dc01&quot; and message:(*&quot;C:\\Windows\\Temp\\hgl_loader.exe&quot;* or *&quot;C:\\Windows\\Temp\\hgl_payload.enc&quot;* or *&quot;C:\\Windows\\Temp\\hgl_run.cmd&quot;* or *&quot;C:\\Windows\\Temp\\hgl_diag.bin&quot;*)</code></pre>
 <h2 id="normalized-pivot">Normalized Pivot</h2>
 <pre><code>log.id:&quot;HAD-002&quot; or data.path:*hgl_diag.bin*</code></pre>
       <footer class="footer">

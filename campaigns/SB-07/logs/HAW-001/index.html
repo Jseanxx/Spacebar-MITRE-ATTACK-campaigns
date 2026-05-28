@@ -107,11 +107,23 @@ dc_c_admin_share_access</code></pre>
 <tr><td><a href="https://attack.mitre.org/techniques/T1552/">T1552 Unsecured Credentials</a></td><td><code>dc_cred.xml</code> artifact 발견 이벤트를 기록한다.</td></tr>
 <tr><td><a href="https://attack.mitre.org/techniques/T1021/006/">T1021.006 WinRM</a></td><td>DC WinRM 접근 검증 또는 emulation 이벤트를 기록한다.</td></tr>
 </tbody></table></div>
+<h2 id="원본-로그-기준-탐색-포인트">원본 로그 기준 탐색 포인트</h2>
+<div class="table-wrap wide-table">
+<table>
+<thead><tr><th>관찰할 행위</th><th>원본 필드/문자열</th><th>분석 의미</th></tr></thead>
+<tbody>
+<tr><td>PMS patch 실행 컨텍스트</td><td><code>whoami</code>, <code>nt authority\system</code></td><td>win01 PMS Agent가 SYSTEM으로 실행됐는지 확인</td></tr>
+<tr><td>네트워크/DNS 구성 확인</td><td><code>ipconfig /all</code>, <code>DNS Servers 10.60.20.10</code></td><td>win01이 AD DNS를 사용 중인지 확인</td></tr>
+<tr><td>DC discovery</td><td><code>nltest /dsgetdc:hanguel.local</code>, <code>_ldap._tcp.dc._msdcs</code></td><td>DC 이름/IP 확인 행위 추적</td></tr>
+<tr><td>DC 서비스 접근성</td><td><code>Test-NetConnection 10.60.20.10 -Port 445/5985</code></td><td>SMB/WinRM 후속 접근 가능성 확인</td></tr>
+<tr><td>credential artifact 발견</td><td><code>C:\ProgramData\HanguelPMS\dc_cred.xml</code></td><td>다음 단계 credential 사용의 출발점 확인</td></tr>
+</tbody></table></div>
 <h2 id="analyst-hunting-kql">Analyst Hunting KQL</h2>
 <p>이 로그는 원본 Windows Event Log가 아니라 Hanguel AD Agent가 명령 결과를 요약한 enriched event다. 분석가는 먼저 명령어, DC IP, credential artifact 경로 같은 행위 단서를 기준으로 검색하고, 이후 <code>event.action</code>으로 좁힌다.</p>
 <pre><code>host.name:&quot;hanguel-win01&quot; and message:(*whoami* or *ipconfig* or *nltest* or *Resolve-DnsName* or *Test-NetConnection*)</code></pre>
 <pre><code>host.name:&quot;hanguel-win01&quot; and message:(*&quot;10.60.20.10&quot;* or *&quot;hanguel-dc01&quot;* or *&quot;hanguel.local&quot;*)</code></pre>
 <pre><code>host.name:&quot;hanguel-win01&quot; and message:*&quot;C:\\ProgramData\\HanguelPMS\\dc_cred.xml&quot;*</code></pre>
+<pre><code>host.name:&quot;hanguel-win01&quot; and message:(*&quot;nt authority\\system&quot;* or *&quot;TcpTestSucceeded : True&quot;* or *&quot;_ldap._tcp.dc._msdcs.hanguel.local&quot;*)</code></pre>
 <h2 id="normalized-pivot">Normalized Pivot</h2>
 <pre><code>log.id:&quot;HAW-001&quot; and campaign.id:&quot;SB-07&quot;</code></pre>
       <footer class="footer">

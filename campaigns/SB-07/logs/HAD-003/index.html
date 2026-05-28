@@ -109,12 +109,25 @@ loader_execution_observed</code></pre>
 <tr><td><a href="https://attack.mitre.org/techniques/T1003/001/">T1003.001 LSASS Memory</a></td><td>LSASS process access와 dump 파일 생성 이벤트를 확인한다.</td></tr>
 <tr><td><a href="https://attack.mitre.org/techniques/T1620/">T1620 Reflective Code Loading</a></td><td>loader 프로세스 실행과 suspicious memory execution 정황을 보조한다.</td></tr>
 </tbody></table></div>
+<h2 id="원본-로그-기준-탐색-포인트">원본 로그 기준 탐색 포인트</h2>
+<div class="table-wrap wide-table">
+<table>
+<thead><tr><th>관찰할 행위</th><th>원본 필드/문자열</th><th>분석 의미</th></tr></thead>
+<tbody>
+<tr><td>loader 프로세스 생성</td><td>Event ID <code>1</code>, <code>Image:*hgl_loader.exe</code></td><td>loader가 프로세스로 시작됐는지 확인</td></tr>
+<tr><td>LSASS 접근</td><td>Event ID <code>10</code>, <code>SourceImage:*hgl_loader.exe</code>, <code>TargetImage:*lsass.exe</code></td><td>직접 ProcessAccess 증거. 현재 실제 endpoint 증거는 미확인</td></tr>
+<tr><td>dump 파일 생성</td><td>Event ID <code>11</code>, <code>TargetFilename:*hgl_diag.bin</code></td><td>dump-like 파일 생성 시점 확인</td></tr>
+<tr><td>dump 관련 DLL load</td><td>Event ID <code>7</code>, <code>ImageLoaded:*comsvcs.dll/dbghelp.dll/dbgcore.dll</code></td><td>LotL 또는 dump helper DLL 사용 정황 확인</td></tr>
+<tr><td>tampering 후보</td><td>Event ID <code>25</code></td><td>process tampering 계열 정황. 발생 시 별도 검증 필요</td></tr>
+</tbody></table></div>
 <h2 id="analyst-hunting-kql">Analyst Hunting KQL</h2>
 <p>Sysmon은 원본 Event ID와 event_data 필드를 기준으로 직접 탐색한다. <code>event.action</code>은 Hanguel collector가 붙인 요약값이므로 보조 피벗이다.</p>
 <pre><code>winlog.channel:&quot;Microsoft-Windows-Sysmon/Operational&quot; and event.code:10 and winlog.event_data.TargetImage:*\\lsass.exe</code></pre>
 <pre><code>winlog.channel:&quot;Microsoft-Windows-Sysmon/Operational&quot; and event.code:10 and winlog.event_data.TargetImage:*\\lsass.exe and winlog.event_data.SourceImage:(*\\hgl_loader.exe or *\\rundll32.exe or *\\rdrleakdiag.exe)</code></pre>
 <pre><code>winlog.channel:&quot;Microsoft-Windows-Sysmon/Operational&quot; and event.code:11 and winlog.event_data.TargetFilename:(*\\hgl_diag.bin or *\\lsass*.dmp or *\\lsass*.dump)</code></pre>
 <pre><code>winlog.channel:&quot;Microsoft-Windows-Sysmon/Operational&quot; and event.code:7 and winlog.event_data.ImageLoaded:(*\\comsvcs.dll or *\\dbghelp.dll or *\\dbgcore.dll)</code></pre>
+<pre><code>winlog.channel:&quot;Microsoft-Windows-Sysmon/Operational&quot; and event.code:1 and winlog.event_data.Image:*\\hgl_loader.exe</code></pre>
+<pre><code>winlog.channel:&quot;Microsoft-Windows-Sysmon/Operational&quot; and event.code:25 and message:(*hgl_loader* or *lsass* or *hgl_diag*)</code></pre>
 <h2 id="evidence-boundary">Evidence Boundary</h2>
 <pre><code>event.action:&quot;sysmon_lsass_process_access&quot; and not hanguel.test_runner:true</code></pre>
 <p>위 쿼리에서 결과가 나와야 실제 endpoint ProcessAccess 직접 증거로 말할 수 있다. 현재 Page 3에서는 이 항목을 <code>미확인</code>으로 유지한다.</p>

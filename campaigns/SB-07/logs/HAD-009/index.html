@@ -93,11 +93,23 @@ Close</code></pre>
 <tr><td><code>data.usn_reasons</code></td><td>USN reason summary</td><td><code>File create</code>, <code>Close</code></td></tr>
 <tr><td><code>message</code></td><td>USN reason 요약</td><td><code>File create, Data extend, Close</code></td></tr>
 </tbody></table></div>
+<h2 id="원본-아티팩트-기준-탐색-포인트">원본 아티팩트 기준 탐색 포인트</h2>
+<div class="table-wrap wide-table">
+<table>
+<thead><tr><th>관찰할 행위</th><th>원본 필드/문자열</th><th>분석 의미</th></tr></thead>
+<tbody>
+<tr><td>파일 생성</td><td><code>File create</code>, <code>hgl_loader.exe</code></td><td>loader chain 파일 최초 생성 확인</td></tr>
+<tr><td>payload 쓰기</td><td><code>Data extend</code>, <code>Data overwrite</code>, <code>hgl_payload.enc</code></td><td>payload가 실제 파일로 기록됐는지 확인</td></tr>
+<tr><td>wrapper 변경</td><td><code>Basic info change</code>, <code>hgl_run.cmd</code></td><td>task action 대상 script의 lifecycle 확인</td></tr>
+<tr><td>파일 close</td><td><code>Close</code></td><td>쓰기 완료 시점 확인</td></tr>
+<tr><td>한계</td><td>USN reason은 파일시스템 evidence</td><td>process memory behavior 또는 LSASS access 직접 증거는 아님</td></tr>
+</tbody></table></div>
 <h2 id="analyst-hunting-kql">Analyst Hunting KQL</h2>
 <p>USN Journal은 파일 lifecycle을 보여주는 원본 파일시스템 아티팩트다. 파일명과 USN reason을 기준으로 탐색한다.</p>
 <pre><code>host.name:&quot;hanguel-dc01&quot; and file.name:(&quot;hgl_loader.exe&quot; or &quot;hgl_payload.enc&quot; or &quot;hgl_run.cmd&quot;)</code></pre>
 <pre><code>host.name:&quot;hanguel-dc01&quot; and message:(*USN* and (*hgl_loader.exe* or *hgl_payload.enc* or *hgl_run.cmd*))</code></pre>
 <pre><code>host.name:&quot;hanguel-dc01&quot; and message:(*&quot;File create&quot;* or *&quot;Data extend&quot;* or *&quot;Data overwrite&quot;* or *&quot;Close&quot;*) and message:*hgl*</code></pre>
+<pre><code>host.name:&quot;hanguel-dc01&quot; and message:(*hgl_loader.exe* and (*&quot;File create&quot;* or *&quot;Close&quot;*))</code></pre>
 <h2 id="normalized-pivot">Normalized Pivot</h2>
 <pre><code>log.id:&quot;HAD-009&quot; and event.action:&quot;usn_loader_file_lifecycle_observed&quot;</code></pre>
       <footer class="footer">

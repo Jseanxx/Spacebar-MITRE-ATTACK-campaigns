@@ -96,12 +96,24 @@ sb07-manual-mapping-inferred-014</code></pre>
 <li><code>HTE-002</code> attack 이벤트는 patch -&gt; discovery -&gt; credential -&gt; DC access sequence로 묶여야 한다.</li>
 <li><code>manual_mapping_inferred</code>는 직접 증거가 아니라 추론 alert로 유지한다.</li>
 </ol>
+<h2 id="원본-로그-기준-상관분석-포인트">원본 로그 기준 상관분석 포인트</h2>
+<div class="table-wrap wide-table">
+<table>
+<thead><tr><th>연결할 원본 행위</th><th>연결 필드</th><th>분석 의미</th></tr></thead>
+<tbody>
+<tr><td>patch 실행 후 AD discovery</td><td><code>host.name</code>, <code>@timestamp</code>, <code>message:*nltest*</code></td><td>PMS patch 이후 내부 정찰이 이어졌는지 확인</td></tr>
+<tr><td>credential artifact 후 DC access</td><td><code>message:*dc_cred.xml*</code>, <code>message:*Invoke-Command*</code>, <code>message:*C$*</code></td><td>credential 발견이 원격 접근으로 이어졌는지 확인</td></tr>
+<tr><td>loader staging 후 task 실행</td><td><code>message:*hgl_loader.exe*</code>, <code>message:*HanguelLoaderDiag*</code></td><td>DC에 loader chain 배치 후 task가 실행됐는지 확인</td></tr>
+<tr><td>loader forensic triad</td><td>HAD-005, HAD-007, HAD-008, HAD-009</td><td>crash, cache, task, USN을 묶어 loader 실행 정황 판단</td></tr>
+<tr><td>직접 증거와 추론 분리</td><td>HAD-003 Sysmon Event ID 10 존재 여부</td><td><code>manual_mapping_inferred</code>와 직접 ProcessAccess 증거를 분리</td></tr>
+</tbody></table></div>
 <h2 id="analyst-workflow">Analyst Workflow</h2>
 <p>Correlation alert는 1차 헌팅 출발점이 아니라, 원본 로그에서 찾은 행위를 시간창 안에서 묶어 incident 후보로 확인하는 2차 산출물이다. 분석 순서는 원본 로그 검색 -&gt; host/time/user/path pivot -&gt; correlation alert 확인 순서로 둔다.</p>
 <h2 id="analyst-hunting-kql">Analyst Hunting KQL</h2>
 <p>원본 이벤트를 먼저 찾은 뒤, 같은 시간대의 alert를 확인한다.</p>
 <pre><code>campaign.id:&quot;SB-07&quot; and host.name:(&quot;hanguel-win01&quot; or &quot;hanguel-dc01&quot;) and message:(*dc_cred.xml* or *hgl_loader.exe* or *HanguelLoaderDiag* or *lsass*)</code></pre>
 <pre><code>campaign.id:&quot;SB-07&quot; and event.category:(&quot;process&quot; or &quot;file&quot; or &quot;authentication&quot;) and host.name:(&quot;hanguel-win01&quot; or &quot;hanguel-dc01&quot;)</code></pre>
+<pre><code>campaign.id:&quot;SB-07&quot; and message:(*patch.ps1* or *dc_cred.xml* or *hgl_loader.exe* or *HanguelLoaderDiag* or *hgl_diag.bin*)</code></pre>
 <h2 id="correlation-pivot">Correlation Pivot</h2>
 <p>정규화 alert 검증 또는 보고서용 묶음 확인에 사용한다.</p>
 <pre><code>rule.id:(&quot;sb07-pms-patch-discovery-001&quot; or &quot;sb07-credential-dc-access-002&quot; or &quot;sb07-pms-credential-chain-003&quot; or &quot;sb07-loader-forensic-triad-012&quot; or &quot;sb07-manual-mapping-inferred-014&quot;)</code></pre>
