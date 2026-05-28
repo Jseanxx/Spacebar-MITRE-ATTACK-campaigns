@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>WF-SCAN-001 | Spacebar Blue Team Playbooks</title>
+  <link rel="stylesheet" href="/assets/campaign.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="/campaigns/"><img class="brand-logo" src="/assets/spacebarLogo.png" alt="Spacebar"><span>Spacebar Campaigns</span></a>
+      <nav class="nav" aria-label="Primary navigation">
+        <a href="/campaigns/">Campaigns</a>
+        <a href="/workflows/">Blue Team Playbooks</a>
+        <a href="/logs/">Log Catalog</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="page">
+    <div class="breadcrumbs"><a href="/campaigns/">Home</a> / <a href="/workflows/">Blue Team Playbooks</a> / <span>WF-SCAN-001</span></div>
+    <h1>WF-SCAN-001 내부망 스캔 의심 대응</h1>
+    <p class="summary">
+      내부망에서 짧은 시간 동안 여러 IP 또는 여러 포트로 연결을 시도한 정황이 보였을 때 사용하는 행위 기반 IR Workflow다.
+      분석자는 이 문서로 스캔 행위의 의미, 우선 확인 로그, 판단 기준, AI 분석 보조자에게 줄 프롬프트를 빠르게 확인한다.
+    </p>
+    <div class="tag-row">
+      <span class="tag">T1046 Network Service Discovery</span>
+      <span class="tag">T1018 Remote System Discovery</span>
+      <span class="tag">T1592 Gather Victim Host Information</span>
+      <span class="tag">T1059 Command and Scripting Interpreter</span>
+    </div>
+
+    <div class="info-grid">
+      <div class="info-cell">
+        <b>분석 대상 행위</b>
+        <span>내부 IP/포트 스캔, 서비스 배너 확인, 짧은 시간 다수 연결 시도</span>
+      </div>
+      <div class="info-cell">
+        <b>관련 캠페인</b>
+        <span>SB-01, SB-03, 내부망 침투 캠페인 공통</span>
+      </div>
+      <div class="info-cell">
+        <b>분석 결과물</b>
+        <span>스캔 주체, 대상 대역, 대상 포트, 정상 점검 여부, 후속 침투 후보</span>
+      </div>
+    </div>
+
+    <h2>1. 행위 정의</h2>
+    <p>
+      공격자가 내부망에 진입한 뒤 다음 이동 대상을 찾기 위해 IP 대역, 포트, 서비스 응답을 탐색하는 행위다.
+      단일 연결 실패가 아니라 같은 출발지에서 짧은 시간 동안 여러 대상 또는 여러 포트로 반복 연결이 발생하는지를 본다.
+    </p>
+
+    <div class="concept-banner">
+      <b>이 Workflow를 쓰는 상황</b>
+      <span>특정 PC 또는 서버가 짧은 시간 안에 여러 내부 IP/포트로 접속을 시도했거나, nmap, Test-NetConnection, curl, nc 같은 탐색 명령이 확인된 경우.</span>
+    </div>
+
+    <h2>2. 먼저 확인할 로그</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>환경</th>
+            <th>대표 로그</th>
+            <th>핵심 필드</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>AWS / Network</td>
+            <td>VPC Flow Logs</td>
+            <td><code>srcaddr</code>, <code>dstaddr</code>, <code>dstport</code>, <code>action</code>, <code>start</code>, <code>end</code></td>
+          </tr>
+          <tr>
+            <td>Linux</td>
+            <td>Syslog, auditd, shell history 후보</td>
+            <td><code>process.name</code>, <code>process.command_line</code>, <code>user.name</code>, <code>source.ip</code></td>
+          </tr>
+          <tr>
+            <td>Windows</td>
+            <td>Sysmon Event ID 1, 3 / PowerShell 4104</td>
+            <td><code>process.command_line</code>, <code>destination.ip</code>, <code>destination.port</code>, <code>ScriptBlockText</code></td>
+          </tr>
+          <tr>
+            <td>Firewall / EDR</td>
+            <td>Connection allowed/blocked, port scan alert</td>
+            <td>source, destination, port, verdict, rule name</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2>3. 빠른 KQL</h2>
+    <div class="code-grid">
+      <div>
+        <h3>스캔 도구 실행 후보</h3>
+        <pre><code>process.command_line: ("nmap" or "masscan" or "Test-NetConnection" or "nc " or "curl ")</code></pre>
+      </div>
+      <div>
+        <h3>Windows PowerShell 스캔 후보</h3>
+        <pre><code>winlog.event_id: 4104 and winlog.event_data.ScriptBlockText: ("Test-NetConnection" or "TcpClient" or "port" or "foreach")</code></pre>
+      </div>
+      <div>
+        <h3>Sysmon 네트워크 연결</h3>
+        <pre><code>winlog.provider_name: "Microsoft-Windows-Sysmon" and winlog.event_id: 3 and destination.port: *</code></pre>
+      </div>
+    </div>
+
+    <h2>4. 분석자가 할 일</h2>
+    <div class="flow">
+      <div class="flow-step">
+        <b>1. 출발지 고정</b>
+        <span>같은 source IP/host에서 반복 연결이 발생했는지 확인한다.</span>
+      </div>
+      <div class="flow-step">
+        <b>2. 대상 범위 확인</b>
+        <span>다수 IP 대상인지, 단일 서버의 다수 포트 대상인지 구분한다.</span>
+      </div>
+      <div class="flow-step">
+        <b>3. 정상 점검 여부 확인</b>
+        <span>취약점 점검, 모니터링, BAS 실행 시간대와 겹치는지 확인한다.</span>
+      </div>
+      <div class="flow-step">
+        <b>4. 후속 침투 Pivot</b>
+        <span>스캔 직후 인증 시도, 원격 접속, 파일 전송이 이어졌는지 본다.</span>
+      </div>
+    </div>
+
+    <h2>5. 판단 기준</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>구분</th>
+            <th>확인 기준</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>의심</td>
+            <td>같은 출발지에서 짧은 시간 내 다수 IP 또는 다수 포트로 연결 시도</td>
+          </tr>
+          <tr>
+            <td>의심</td>
+            <td>스캔 직후 인증 시도, WinRM/SSH/RDP 접속, 파일 전송, credential 접근이 이어짐</td>
+          </tr>
+          <tr>
+            <td>정상 가능성</td>
+            <td>승인된 취약점 점검, 모니터링, 자산 스캐너, BAS 실행 시간대와 일치</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2>6. LLM Prompt Template</h2>
+    <p>
+      ELK, Splunk 등 SIEM 로그를 조회할 수 있는 AI 분석 보조자에게 내부망 스캔 의심 정황을 조사시키는 프롬프트다.
+      핵심은 스캔 주체, 대상 범위, 정상 점검 가능성, 후속 공격 여부를 로그 근거로 확인하는 것이다.
+    </p>
+    <pre><code>너는 ELK, Splunk 등 SIEM에 연결된 침해사고 분석 보조자다.
+다음 조건으로 "내부망 스캔 또는 서비스 탐색" 의심 정황을 조사하라.
+반드시 조회한 로그 근거를 기반으로 판단하고, 확인되지 않은 내용은 추정이라고 표시하라.
+
+입력:
+- 시간 범위:
+- 의심 출발지:
+- 대상 대역 또는 대상 서버:
+- 의심 포트:
+- 관측된 단서:
+
+요청:
+1. 관련 네트워크/호스트 로그를 조회하라.
+   - VPC Flow Logs 또는 방화벽 로그
+   - Sysmon Network Event ID 3
+   - PowerShell 4104
+   - Linux process/audit 로그
+2. 같은 출발지에서 접근한 대상 IP 수, 대상 포트 수, 시간 간격을 요약하라.
+3. 정상 점검/모니터링 가능성과 공격 정찰 가능성을 구분하라.
+4. 스캔 이후 인증 시도, 원격 접속, 파일 전송, credential 접근이 이어졌는지 확인하라.
+5. 추가 Pivot과 초동 대응 조치를 작성하라.
+
+출력 형식:
+- 관측된 사실
+- 스캔 주체
+- 대상 범위
+- 의심 근거
+- 정상 가능성
+- 추가 Pivot
+- 대응 조치</code></pre>
+
+    <h2>7. 대응 요약</h2>
+    <ul>
+      <li>스캔 출발지와 대상 대역을 먼저 고정한다.</li>
+      <li>정상 취약점 점검, 모니터링, BAS 실행 여부를 확인한다.</li>
+      <li>비정상으로 판단되면 출발지 호스트 격리, 계정 사용 내역 확인, 동일 패턴 확장 검색을 수행한다.</li>
+      <li>스캔 이후 성공한 인증, 원격 접속, 데이터 접근 로그를 우선 확인한다.</li>
+    </ul>
+
+    <footer class="footer">
+      Spacebar Project. This workflow is an educational blue team playbook artifact.
+    </footer>
+  </main>
+</body>
+</html>

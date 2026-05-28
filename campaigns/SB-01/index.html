@@ -10,6 +10,11 @@
   <header class="topbar">
     <div class="topbar-inner">
       <a class="brand" href="/campaigns/"><img class="brand-logo" src="/assets/spacebarLogo.png" alt="Spacebar"><span>Spacebar Campaigns</span></a>
+      <nav class="nav" aria-label="Primary navigation">
+        <a href="/campaigns/">Campaigns</a>
+        <a href="/workflows/">Blue Team Playbooks</a>
+        <a href="/logs/">Log Catalog</a>
+      </nav>
     </div>
   </header>
 
@@ -215,6 +220,15 @@
     </article>
   </div>
 </section>
+<h2 id="related-blue-team-playbooks">Related Blue Team Playbooks</h2>
+<div class="table-wrap wide-table">
+<table>
+<thead><tr><th>Workflow ID</th><th>Behavior</th><th>Related Techniques</th><th>Primary Logs</th><th>Purpose</th></tr></thead>
+<tbody>
+<tr><td><a href="/workflows/WF-REMOTE-001/">WF-REMOTE-001</a></td><td>내부망 원격 접속 및 원격 명령 실행 분석</td><td>T1021.004, T1078</td><td><a href="/campaigns/SB-01/logs/LL-001/">LL-001</a>, <a href="/campaigns/SB-01/logs/JL-002/">JL-002</a></td><td>Jenkins 배포 credential 또는 정상 계정이 내부 서버 접근에 사용된 정황을 분석한다.</td></tr>
+<tr><td><a href="/workflows/">WF-CRED-001</a></td><td>Credential 파일 접근 분석</td><td>T1552.001, T1552.004</td><td><a href="/campaigns/SB-01/logs/JL-002/">JL-002</a>, <a href="/campaigns/SB-01/logs/LL-002/">LL-002</a></td><td>Jenkins/App 설정 파일에서 credential 단서에 접근한 흔적을 분석한다.</td></tr>
+<tr><td><a href="/workflows/">WF-DATA-001</a></td><td>데이터 staging 및 유출 준비 분석</td><td>T1074.001, T1048.002</td><td><a href="/campaigns/SB-01/logs/LL-002/">LL-002</a>, <a href="/campaigns/SB-01/logs/AWSL-001/">AWSL-001</a></td><td>임시 경로 staging, archive 생성, 외부 전송 후보를 분석한다.</td></tr>
+</tbody></table></div>
 <h2 id="software">Software</h2>
 <div class="table-wrap wide-table">
 <table>

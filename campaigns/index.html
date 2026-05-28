@@ -10,6 +10,11 @@
   <header class="topbar">
     <div class="topbar-inner">
       <a class="brand" href="/campaigns/"><img class="brand-logo" src="/assets/spacebarLogo.png" alt="Spacebar"><span>Spacebar Campaigns</span></a>
+      <nav class="nav" aria-label="Primary navigation">
+        <a href="/campaigns/">Campaigns</a>
+        <a href="/workflows/">Blue Team Playbooks</a>
+        <a href="/logs/">Log Catalog</a>
+      </nav>
     </div>
   </header>
 
@@ -21,18 +26,25 @@
       각 캠페인은 공통 목표와 대상 시스템을 기준으로 공격자의 TTPs를 정리하고, 이를 MITRE ATT&amp;CK Campaign 페이지 형식에 맞춰 구성한 결과물이다.
     </p>
 
-    <h2>Campaign List</h2>
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Name</th>
-            <th>Description</th>
-            <th>Owner</th>
-          </tr>
-        </thead>
-        <tbody>
+    <div class="view-switch" aria-label="Campaign index views">
+      <button class="active" type="button" data-view="index-campaigns">Campaign List</button>
+      <button type="button" data-view="index-workflows">Blue Team Playbooks</button>
+      <button type="button" data-view="index-logs">Log Catalog</button>
+    </div>
+
+    <section class="view-panel active" id="index-campaigns">
+      <h2>Campaign List</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Name</th>
+              <th>Description</th>
+              <th>Owner</th>
+            </tr>
+          </thead>
+          <tbody>
           <tr>
             <td class="id-cell">SB-00</td>
             <td><a href="SB-00/">SB-01 Demo</a></td>
@@ -81,9 +93,201 @@
             <td>JBoss 기반 PMS 업데이트 경로 변조로 win01 SYSTEM 실행을 확보하고, DC C$/WinRM 접근과 manual-mapping LSASS dump를 통해 도메인 관리자 credential material을 회수하는 AD 공급망 침해 캠페인.</td>
             <td>오한결</td>
           </tr>
-        </tbody>
-      </table>
-    </div>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="view-panel" id="index-workflows">
+      <h2>Blue Team Playbooks</h2>
+      <p class="summary">
+        Technique별 프롬프트가 아니라, 내부망 원격 실행, 내부망 스캔, credential 접근, 데이터 staging 같은
+        반복 공격 행위별 IR Workflow를 정리한다.
+      </p>
+      <div class="cards">
+        <article class="card">
+          <h3><a href="/workflows/WF-REMOTE-001/">WF-REMOTE-001 내부망 원격 실행 분석</a></h3>
+          <p>SSH, WinRM, PowerShell 원격 실행처럼 내부 서버로 이동하거나 명령을 실행한 흔적을 분석한다.</p>
+          <div class="tag-row">
+            <span class="tag">T1021.004</span>
+            <span class="tag">T1021.006</span>
+            <span class="tag">T1059.001</span>
+            <span class="tag">T1078</span>
+          </div>
+        </article>
+        <article class="card">
+          <h3><a href="/workflows/WF-SCAN-001/">WF-SCAN-001 내부망 스캔 의심 대응</a></h3>
+          <p>짧은 시간 동안 여러 내부 IP 또는 여러 포트로 연결을 시도한 정찰 행위를 분석한다.</p>
+          <div class="tag-row">
+            <span class="tag">T1046</span>
+            <span class="tag">T1018</span>
+            <span class="tag">T1592</span>
+            <span class="tag">T1059</span>
+          </div>
+        </article>
+        <article class="card">
+          <h3>WF-00</h3>
+          <p>설명.</p>
+          <div class="tag-row">
+            <span class="tag">Technique</span>
+          </div>
+        </article>
+        <article class="card">
+          <h3>WF-00</h3>
+          <p>설명.</p>
+          <div class="tag-row">
+            <span class="tag">Technique</span>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="view-panel" id="index-logs">
+      <h2>Log Catalog</h2>
+      <p class="summary">
+        로그별 저장 위치, 수집 방식, 주요 필드, 연결 Technique을 분리해 정리한 공통 로그 사전이다.
+      </p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Name</th>
+              <th>Description</th>
+              <th>Techniques</th>
+            </tr>
+          </thead>
+          <tbody>
+          <tr>
+            <td class="id-cell"><a href="/logs/AWSL-001/">AWSL-001</a></td>
+            <td>AWS VPC Flow Log</td>
+            <td>AWS VPC 네트워크 흐름에서 외부 전송과 서버 간 통신을 확인하는 로그.</td>
+            <td>T1048.002,T1021.004</td>
+          </tr>
+          <tr>
+            <td class="id-cell"><a href="/logs/DBL-001/">DBL-001</a></td>
+            <td>PostgreSQL Connection and Query Log</td>
+            <td>PostgreSQL 접속과 쿼리 실행 흔적을 확인하는 데이터베이스 로그.</td>
+            <td>T1213.006,T1078</td>
+          </tr>
+          <tr>
+            <td class="id-cell"><a href="/logs/HFA-001/">HFA-001</a></td>
+            <td>Linux auditd Execve Log</td>
+            <td>Linux auditd execve 이벤트로 shell/python 실행, discovery 명령, tool transfer 명령을 확인하는 로그.</td>
+            <td>T1059,T1059.004,T1059.006,T1082,T1083,T1105</td>
+          </tr>
+          <tr>
+            <td class="id-cell"><a href="/logs/HFA-002/">HFA-002</a></td>
+            <td>Linux auditd Sensitive File Access Log</td>
+            <td>auditd로 `/etc/passwd`, `/etc/shadow`, `/etc/sudoers` 등 민감 파일 접근을 확인하는 로그.</td>
+            <td>T1005,T1003</td>
+          </tr>
+          <tr>
+            <td class="id-cell"><a href="/logs/HFA-003/">HFA-003</a></td>
+            <td>Linux auditd Docker Socket Access Log</td>
+            <td>auditd로 `/var/run/docker.sock` 접근을 확인하여 container escape 또는 host Docker 제어 시도를 분석하는 로그.</td>
+            <td>T1611</td>
+          </tr>
+          <tr>
+            <td class="id-cell"><a href="/logs/HFA-004/">HFA-004</a></td>
+            <td>Linux auditd Tool Transfer Log</td>
+            <td>auditd에서 `curl`, `wget` 실행을 추적하여 RCE 이후 도구 다운로드 시도를 확인하는 로그.</td>
+            <td>T1105</td>
+          </tr>
+          <tr>
+            <td class="id-cell"><a href="/logs/HFC-001/">HFC-001</a></td>
+            <td>CloudTrail Management Event</td>
+            <td>AWS API 사용, IAM/보안그룹 변경, EC2 start/stop, CloudTrail/WAF/GuardDuty 설정 변경을 추적하는 보조 로그.</td>
+            <td>T1078,T1098,T1562</td>
+          </tr>
+          <tr>
+            <td class="id-cell"><a href="/logs/HFE-001/">HFE-001</a></td>
+            <td>Logstash Ingested Event</td>
+            <td>Logstash HTTP input으로 수집된 Hanguel IR Agent 이벤트의 수집 상태와 저장 index를 확인하는 로그.</td>
+            <td>T1190,T1059,T1082,T1083,T1005,T1105</td>
+          </tr>
+          <tr>
+            <td class="id-cell"><a href="/logs/HFE-002/">HFE-002</a></td>
+            <td>Sequential Correlator Alert</td>
+            <td>시간창 내 복수 이벤트를 묶어 RCE confirmed, RCE to collection, recon to exploit 같은 incident 후보를 생성하는 상관분석 알림.</td>
+            <td>T1595,T1190,T1059,T1005,T1105,T1611</td>
+          </tr>
+          <tr>
+            <td class="id-cell"><a href="/logs/HFL-001/">HFL-001</a></td>
+            <td>Langflow/Nginx Access Log</td>
+            <td>Langflow 앞단 Nginx 및 Docker JSON access log에서 API 접근, 스캐닝, 취약 API 호출, path traversal, SSRF 의심 요청을 확인하는 로그.</td>
+            <td>T1595,T1190,T1005,T1059</td>
+          </tr>
+          <tr>
+            <td class="id-cell"><a href="/logs/HFL-002/">HFL-002</a></td>
+            <td>Langflow App Container Log</td>
+            <td>Langflow application/container stdout에서 application error, command output, discovery command 흔적을 확인하는 로그.</td>
+            <td>T1059,T1059.006,T1082,T1083,T1005,T1105</td>
+          </tr>
+          <tr>
+            <td class="id-cell"><a href="/logs/HFL-003/">HFL-003</a></td>
+            <td>Hanguel IR Agent Enriched Event</td>
+            <td>Hanguel IR Agent가 Docker log, host log, auditd log를 ECS 유사 JSON으로 enrich하여 Logstash로 전송한 정규화 이벤트.</td>
+            <td>T1595,T1190,T1059.006,T1059.004,T1082,T1083,T1005,T1003,T1105,T1611,T1110,T1078</td>
+          </tr>
+          <tr>
+            <td class="id-cell"><a href="/logs/HFL-004/">HFL-004</a></td>
+            <td>Linux SSH Auth Log</td>
+            <td>Linux `/var/log/auth.log`에서 SSH 실패, 성공, 세션 이벤트를 확인하는 로그. 현재 Hanguel agent는 실패 탐지가 우선 구현되어 있다.</td>
+            <td>T1110,T1021.004,T1078</td>
+          </tr>
+          <tr>
+            <td class="id-cell"><a href="/logs/HFW-001/">HFW-001</a></td>
+            <td>AWS WAF Log</td>
+            <td>ALB 앞단 AWS WAF에서 web attack, scanning, known bad input 판단을 확인하는 보조 로그.</td>
+            <td>T1190,T1595</td>
+          </tr>
+          <tr>
+            <td class="id-cell"><a href="/logs/HFW-002/">HFW-002</a></td>
+            <td>VPC Flow Log</td>
+            <td>VPC 네트워크 흐름에서 내부 통신, 외부 통신, C2 의심 연결, 비정상 egress를 분석하는 보조 로그.</td>
+            <td>T1041,T1048,T1021,T1595,T1105</td>
+          </tr>
+          <tr>
+            <td class="id-cell"><a href="/logs/JL-001/">JL-001</a></td>
+            <td>Jenkins HTTP Access Log</td>
+            <td>Jenkins Web UI와 CLI jar 접근 흔적을 확인하는 HTTP access log.</td>
+            <td>T1592,T1190,T1213</td>
+          </tr>
+          <tr>
+            <td class="id-cell"><a href="/logs/JL-002/">JL-002</a></td>
+            <td>Jenkins Docker and System Log</td>
+            <td>Jenkins 컨테이너 표준 출력과 내부 시스템 이벤트를 확인하는 로그.</td>
+            <td>T1078,T1190,T1213,T1552.004</td>
+          </tr>
+          <tr>
+            <td class="id-cell"><a href="/logs/LL-001/">LL-001</a></td>
+            <td>Linux SSH Auth Log</td>
+            <td>Linux SSH 인증 성공/실패와 세션 이벤트를 확인하는 로그.</td>
+            <td>T1021.004,T1078,T1110</td>
+          </tr>
+          <tr>
+            <td class="id-cell"><a href="/logs/LL-002/">LL-002</a></td>
+            <td>Linux auditd File Access Log</td>
+            <td>Linux auditd로 민감 경로 접근과 명령 실행을 추적하는 로그.</td>
+            <td>T1083,T1074.001,T1552.001</td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
   </main>
+  <script>
+    document.querySelectorAll("[data-view]").forEach((button) => {
+      button.addEventListener("click", () => {
+        const target = button.dataset.view;
+        const switcher = button.closest(".view-switch");
+        if (switcher) {
+          switcher.querySelectorAll("[data-view]").forEach((item) => item.classList.toggle("active", item === button));
+        }
+        document.querySelectorAll(".view-panel").forEach((panel) => panel.classList.toggle("active", panel.id === target));
+      });
+    });
+  </script>
 </body>
 </html>

@@ -608,6 +608,11 @@ function renderHeader(title, cssHref = assetHref, logo = logoSrc) {
   <header class="topbar">
     <div class="topbar-inner">
       <a class="brand" href="/campaigns/"><img class="brand-logo" src="${logo}" alt="Spacebar"><span>Spacebar Campaigns</span></a>
+      <nav class="nav" aria-label="Primary navigation">
+        <a href="/campaigns/">Campaigns</a>
+        <a href="/workflows/">Blue Team Playbooks</a>
+        <a href="/logs/">Log Catalog</a>
+      </nav>
     </div>
   </header>`;
 }
@@ -870,7 +875,7 @@ ${logs
 `;
 }
 
-function renderIndex(campaigns, detectionByCampaign = new Map()) {
+function renderIndex(campaigns, detectionByCampaign = new Map(), logs = []) {
   return `${renderHeader("Spacebar Campaigns")}
 
   <main class="page">
@@ -881,18 +886,25 @@ function renderIndex(campaigns, detectionByCampaign = new Map()) {
       각 캠페인은 공통 목표와 대상 시스템을 기준으로 공격자의 TTPs를 정리하고, 이를 MITRE ATT&amp;CK Campaign 페이지 형식에 맞춰 구성한 결과물이다.
     </p>
 
-    <h2>Campaign List</h2>
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Name</th>
-            <th>Description</th>
-            <th>Owner</th>
-          </tr>
-        </thead>
-        <tbody>
+    <div class="view-switch" aria-label="Campaign index views">
+      <button class="active" type="button" data-view="index-campaigns">Campaign List</button>
+      <button type="button" data-view="index-workflows">Blue Team Playbooks</button>
+      <button type="button" data-view="index-logs">Log Catalog</button>
+    </div>
+
+    <section class="view-panel active" id="index-campaigns">
+      <h2>Campaign List</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Name</th>
+              <th>Description</th>
+              <th>Owner</th>
+            </tr>
+          </thead>
+          <tbody>
 ${campaigns
   .map((campaign) => {
     return `          <tr>
@@ -903,10 +915,98 @@ ${campaigns
           </tr>`;
   })
   .join("\n")}
-        </tbody>
-      </table>
-    </div>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="view-panel" id="index-workflows">
+      <h2>Blue Team Playbooks</h2>
+      <p class="summary">
+        Technique별 프롬프트가 아니라, 내부망 원격 실행, 내부망 스캔, credential 접근, 데이터 staging 같은
+        반복 공격 행위별 IR Workflow를 정리한다.
+      </p>
+      <div class="cards">
+        <article class="card">
+          <h3><a href="/workflows/WF-REMOTE-001/">WF-REMOTE-001 내부망 원격 실행 분석</a></h3>
+          <p>SSH, WinRM, PowerShell 원격 실행처럼 내부 서버로 이동하거나 명령을 실행한 흔적을 분석한다.</p>
+          <div class="tag-row">
+            <span class="tag">T1021.004</span>
+            <span class="tag">T1021.006</span>
+            <span class="tag">T1059.001</span>
+            <span class="tag">T1078</span>
+          </div>
+        </article>
+        <article class="card">
+          <h3><a href="/workflows/WF-SCAN-001/">WF-SCAN-001 내부망 스캔 의심 대응</a></h3>
+          <p>짧은 시간 동안 여러 내부 IP 또는 여러 포트로 연결을 시도한 정찰 행위를 분석한다.</p>
+          <div class="tag-row">
+            <span class="tag">T1046</span>
+            <span class="tag">T1018</span>
+            <span class="tag">T1592</span>
+            <span class="tag">T1059</span>
+          </div>
+        </article>
+        <article class="card">
+          <h3>WF-00</h3>
+          <p>설명.</p>
+          <div class="tag-row">
+            <span class="tag">Technique</span>
+          </div>
+        </article>
+        <article class="card">
+          <h3>WF-00</h3>
+          <p>설명.</p>
+          <div class="tag-row">
+            <span class="tag">Technique</span>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="view-panel" id="index-logs">
+      <h2>Log Catalog</h2>
+      <p class="summary">
+        로그별 저장 위치, 수집 방식, 주요 필드, 연결 Technique을 분리해 정리한 공통 로그 사전이다.
+      </p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Name</th>
+              <th>Description</th>
+              <th>Techniques</th>
+            </tr>
+          </thead>
+          <tbody>
+${logs
+  .map((log) => {
+    return `          <tr>
+            <td class="id-cell"><a href="/logs/${log.slug}">${escapeHtml(log.data.id)}</a></td>
+            <td>${escapeHtml(log.data.name || "")}</td>
+            <td>${escapeHtml(log.data.description || "")}</td>
+            <td>${escapeHtml(log.data.techniques || "")}</td>
+          </tr>`;
+  })
+  .join("\n")}
+          </tbody>
+        </table>
+      </div>
+    </section>
   </main>
+  <script>
+    document.querySelectorAll("[data-view]").forEach((button) => {
+      button.addEventListener("click", () => {
+        const target = button.dataset.view;
+        const switcher = button.closest(".view-switch");
+        if (switcher) {
+          switcher.querySelectorAll("[data-view]").forEach((item) => item.classList.toggle("active", item === button));
+        }
+        document.querySelectorAll(".view-panel").forEach((panel) => panel.classList.toggle("active", panel.id === target));
+      });
+    });
+  </script>
 </body>
 </html>
 `;
@@ -967,7 +1067,7 @@ function main() {
     });
   });
 
-  fs.writeFileSync(path.join(outDir, "index.html"), renderIndex(campaigns, detectionByCampaign));
+  fs.writeFileSync(path.join(outDir, "index.html"), renderIndex(campaigns, detectionByCampaign, logs));
   fs.writeFileSync(path.join(logsOutDir, "index.html"), renderLogIndex(logs));
 }
 
