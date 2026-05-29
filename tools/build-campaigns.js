@@ -13,6 +13,25 @@ const logsOutDir = path.join(root, "logs");
 const workflowsOutDir = path.join(root, "workflows");
 const assetHref = "/assets/campaign.css";
 const logoSrc = "/assets/spacebarLogo.png";
+const workflowOrder = [
+  "WF-RECON-001",
+  "WF-INITIAL-001",
+  "WF-CICD-001",
+  "WF-CRED-001",
+  "WF-REMOTE-001",
+  "WF-CMD-001",
+  "WF-DISCOVERY-001",
+  "WF-K8S-001",
+  "WF-CLOUD-001",
+  "WF-PRIVESC-001",
+  "WF-PERSIST-001",
+  "WF-SUPPLY-001",
+  "WF-AD-001",
+  "WF-LOLBIN-001",
+  "WF-DATA-001",
+  "WF-STAGING-001",
+  "WF-EXFIL-001",
+];
 
 function escapeHtml(value) {
   return String(value ?? "")
@@ -1072,7 +1091,13 @@ function main() {
   );
   const workflows = readContentCollection(workflowDir, /^WF-[A-Z0-9-]+\.md$/, (file) =>
     file.replace(/\.md$/, "/")
-  );
+  ).sort((a, b) => {
+    const aIndex = workflowOrder.indexOf(a.data.id);
+    const bIndex = workflowOrder.indexOf(b.data.id);
+    const aOrder = aIndex === -1 ? Number.MAX_SAFE_INTEGER : aIndex;
+    const bOrder = bIndex === -1 ? Number.MAX_SAFE_INTEGER : bIndex;
+    return aOrder - bOrder || a.data.id.localeCompare(b.data.id);
+  });
   const allCampaignLogsByCampaign = readCampaignLogCollections(campaigns);
   const campaignLogsByCampaign = new Map(
     campaigns.map((campaign) => {

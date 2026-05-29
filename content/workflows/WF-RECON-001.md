@@ -1,0 +1,142 @@
+---
+id: WF-RECON-001
+name: "외부 노출 서비스 및 취약 표면 정찰"
+description: "공개 노출된 웹/API/CI-CD/Ingress 서비스의 배너, URL, 포트, 취약 버전 식별 정황을 분석한다."
+techniques: "T1595, T1595.002, T1592, T1590, T1593"
+---
+
+# WF-RECON-001 외부 노출 서비스 및 취약 표면 정찰
+
+공개 인터넷 또는 외부 접근 경로에서 서비스 배너, HTTP 응답, URL 구조, 포트, 버전 정보, 관리 UI 노출 여부를 수집한 정황이 보였을 때 사용하는 행위 기반 IR Workflow다.
+분석자는 이 문서로 정찰 행위의 의미, 우선 확인 로그, 정상 점검과 공격 준비 행위의 구분 기준, AI 분석 보조자에게 줄 프롬프트를 빠르게 확인한다.
+
+| Field | Value |
+| --- | --- |
+| 분석 대상 행위 | 외부 노출 서비스 식별, 배너/버전 수집, URL/API 구조 탐색, 취약 표면 확인 |
+| 관련 캠페인 | SB-01, SB-04, SB-06, SB-07, 외부 노출 서비스 기반 침투 캠페인 공통 |
+| 분석 결과물 | 정찰 주체, 대상 서비스, 수집된 표면 정보, 취약점 악용 가능성, 후속 Pivot |
+
+## 1. 행위 정의
+
+공격자가 초기 침투 전에 외부에서 접근 가능한 서비스를 탐색하고, 응답 헤더, 배너, URL 경로, API 포트, 관리 UI, 취약 버전 여부를 확인하는 행위다.
+단순 접속 1건보다 같은 출발지에서 짧은 시간 동안 여러 경로와 포트를 반복 요청했는지, 취약점 PoC 경로 또는 관리 기능 확인 요청이 이어졌는지를 함께 봐야 한다.
+
+이 Workflow는 외부 노출 표면을 대상으로 한다.
+내부망 진입 이후 여러 내부 IP와 포트를 훑는 행위는 [WF-SCAN-001](/workflows/WF-SCAN-001/)에서 분석한다.
+
+## 2. 관련 Technique
+
+| Technique | Name | 확인 관점 |
+| --- | --- | --- |
+| T1595 | Active Scanning | 외부 노출 서비스에 대한 반복 요청, 포트 확인, HTTP 스캔 여부 확인 |
+| T1595.002 | Vulnerability Scanning | 알려진 취약점 경로, 버전 확인, PoC 요청 패턴 확인 |
+| T1592 | Gather Victim Host Information | 서버 배너, 프레임워크, 런타임, 운영 환경 정보 수집 여부 확인 |
+| T1590 | Gather Victim Network Information | 공개 IP, 포트, reverse proxy, ingress, ALB 등 네트워크 진입점 식별 여부 확인 |
+| T1593 | Search Open Websites/Domains | 공개 웹 경로, URL 구조, 문서화된 API, 관리 페이지 탐색 여부 확인 |
+
+## 3. 먼저 확인할 로그
+
+| 환경 | 대표 로그 | 핵심 필드 |
+| --- | --- | --- |
+| Web / Reverse Proxy | Nginx, Apache, reverse proxy access log | `@timestamp`, `source.ip`, `http.request.method`, `url.path`, `http.response.status_code`, `user_agent.original` |
+| Cloud / Edge | ALB access log, WAF log, CDN log | `client_ip`, `target_group`, `request_url`, `elb_status_code`, `target_status_code`, `rule_id`, `terminatingRuleId` |
+| CI/CD | Jenkins access log, controller log, audit log | user, source IP, request path, CLI jar request, plugin/version page access |
+| Kubernetes / Ingress | Ingress controller log, API server audit 후보 | namespace, ingress host, path, status, user agent, source IP |
+| Application | App access log, framework error log | route, handler, exception, stack trace, version/banner exposure |
+| Firewall / EDR | 외부 접속 허용/차단, 스캔 탐지 | source, destination, port, verdict, rule name |
+
+## 4. 빠른 KQL
+
+### 외부 HTTP 스캔 후보
+
+```text
+http.request.method: ("GET" or "HEAD" or "OPTIONS") and
+url.path: ("/" or "/api*" or "/admin*" or "/login*" or "/version*" or "/debug*" or "/.env") and
+source.ip: *
+```
+
+### 취약점/관리 경로 탐색 후보
+
+```text
+url.path: ("*/cli*" or "*/script*" or "*/actuator*" or "*/debug*" or "*/api/v1*" or "*/validate*" or "*/upload*" or "*/config*")
+```
+
+### 비정상 User-Agent 또는 자동화 도구 후보
+
+```text
+user_agent.original: ("*curl*" or "*wget*" or "*python-requests*" or "*Go-http-client*" or "*nmap*" or "*masscan*" or "*sqlmap*")
+```
+
+### 짧은 시간 다수 경로 요청 후보
+
+```text
+source.ip: * and http.response.status_code: (200 or 301 or 302 or 401 or 403 or 404 or 500)
+```
+
+이 쿼리는 후보를 넓게 잡는 용도다.
+실제 분석에서는 같은 `source.ip`가 접근한 고유 `url.path` 수, 대상 host 수, status code 분포, 요청 간격을 집계해서 판단한다.
+
+## 5. 분석자가 할 일
+
+1. 의심 source IP, user agent, 대상 host, 시간 범위를 고정한다.
+2. 같은 출발지에서 접근한 URL 경로, 포트, host 수를 집계한다.
+3. 단순 방문인지, 배너/버전/관리 UI/취약점 경로를 확인한 것인지 구분한다.
+4. 승인된 취약점 점검, ASM, WAF 헬스체크, 모니터링, 검색엔진 크롤러 가능성을 확인한다.
+5. 정찰 직후 인증 시도, 취약점 악용 요청, 파일 접근, credential 접근, 원격 명령 실행이 이어졌는지 Pivot한다.
+
+## 6. 판단 기준
+
+| 구분 | 확인 기준 |
+| --- | --- |
+| 의심 | 같은 source IP가 짧은 시간 동안 다수 경로, 다수 host, 다수 포트로 반복 요청 |
+| 의심 | Jenkins CLI, Langflow API, JBoss 관리 경로, K8s Ingress, `.env`, `/config`, `/debug` 등 민감 경로 확인 |
+| 의심 | 서비스 버전, 응답 헤더, 에러 메시지, framework fingerprint를 유도하는 요청 패턴 |
+| 의심 | 정찰 직후 RCE, 인증 우회, credential 접근, 원격 접속, 데이터 접근이 이어짐 |
+| 정상 가능성 | 승인된 취약점 점검, 외부 공격표면 관리(ASM), 모니터링, WAF 점검, 검색엔진 크롤러와 일치 |
+
+## 7. LLM Prompt Template
+
+```text
+너는 ELK, Splunk 등 SIEM에 연결된 침해사고 분석 보조자다.
+다음 조건으로 "외부 노출 서비스 및 취약 표면 정찰" 의심 정황을 조사하라.
+반드시 조회한 로그 근거를 기반으로 판단하고, 확인되지 않은 내용은 추정이라고 표시하라.
+
+입력:
+- 시간 범위:
+- 의심 source IP 또는 user agent:
+- 대상 도메인/서비스:
+- 관측된 URL 경로 또는 포트:
+- 관측된 단서:
+
+요청:
+1. 관련 외부 접근 로그를 조회하라.
+   - Web/reverse proxy access log
+   - ALB/WAF/CDN log
+   - Jenkins 또는 애플리케이션 access/audit log
+   - Kubernetes ingress log
+   - Firewall 또는 EDR network log
+2. 같은 source IP가 접근한 대상 host, URL path, port, status code 분포를 요약하라.
+3. 배너/버전/관리 UI/취약점 경로 확인 정황을 구분하라.
+4. 승인된 점검, 모니터링, 검색엔진 크롤러 가능성과 공격 정찰 가능성을 구분하라.
+5. 정찰 이후 취약점 악용, 인증 시도, credential 접근, 원격 명령 실행으로 이어진 로그가 있는지 Pivot하라.
+6. 초동 대응 조치를 작성하라.
+
+출력 형식:
+- 관측된 사실
+- 타임라인
+- 정찰 주체 후보
+- 대상 서비스와 노출 표면
+- 의심 근거
+- 정상 가능성
+- 추가 Pivot
+- 대응 조치
+```
+
+## 8. 대응 요약
+
+- 원본 access log, WAF/ALB/CDN 로그, 애플리케이션 에러 로그를 보존한다.
+- 의심 source IP, user agent, 대상 host, URL 경로 목록을 고정한다.
+- 승인된 점검 또는 모니터링이 아니라면 WAF 룰, rate limit, 접근 제어, 관리 UI 차단 상태를 확인한다.
+- 정찰된 서비스의 버전, 취약점 노출 여부, 불필요한 헤더/에러 정보 노출 여부를 점검한다.
+- 동일 source IP, 동일 user agent, 동일 URL 패턴으로 전체 캠페인 로그를 확장 검색한다.
+- 정찰 이후 발생한 RCE, 인증 시도, credential 접근, 원격 접속 로그를 우선 확인한다.
