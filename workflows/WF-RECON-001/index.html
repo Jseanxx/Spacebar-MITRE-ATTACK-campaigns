@@ -26,7 +26,7 @@
 <div class="meta-label">분석 대상 행위:</div>
 <div class="meta-value">외부 노출 서비스 식별, 배너/버전 수집, URL/API 구조 탐색, 취약 표면 확인</div>
 <div class="meta-label">관련 캠페인:</div>
-<div class="meta-value">SB-01, SB-04, SB-06, SB-07, 외부 노출 서비스 기반 침투 캠페인 공통</div>
+<div class="meta-value">SB-04, SB-06, 외부 노출 서비스 기반 침투 캠페인 공통</div>
 <div class="meta-label">분석 결과물:</div>
 <div class="meta-value">정찰 주체, 대상 서비스, 수집된 표면 정보, 취약점 악용 가능성, 후속 Pivot</div>
 </div>
@@ -45,29 +45,41 @@
 <tr><td>T1593</td><td>Search Open Websites/Domains</td><td>공개 웹 경로, URL 구조, 문서화된 API, 관리 페이지 탐색 여부 확인</td></tr>
 </tbody></table></div>
 <h2 id="3-먼저-확인할-로그">3. 먼저 확인할 로그</h2>
+<p>&gt; 본 표의 핵심 필드는 원본 로그 필드명이 아니라, ELK/ECS 등 SIEM에서 정규화했을 때 우선 확인할 분석 필드 기준이다. 실제 원본 필드명은 Nginx, ALB, WAF, CDN, EDR 제품에 따라 다를 수 있다.</p>
 <div class="table-wrap wide-table">
 <table>
 <thead><tr><th>환경</th><th>대표 로그</th><th>핵심 필드</th></tr></thead>
 <tbody>
-<tr><td>Web / Reverse Proxy</td><td>Nginx, Apache, reverse proxy access log</td><td><code>@timestamp</code>, <code>source.ip</code>, <code>http.request.method</code>, <code>url.path</code>, <code>http.response.status_code</code>, <code>user_agent.original</code></td></tr>
-<tr><td>Cloud / Edge</td><td>ALB access log, WAF log, CDN log</td><td><code>client_ip</code>, <code>target_group</code>, <code>request_url</code>, <code>elb_status_code</code>, <code>target_status_code</code>, <code>rule_id</code>, <code>terminatingRuleId</code></td></tr>
-<tr><td>CI/CD</td><td>Jenkins access log, controller log, audit log</td><td>user, source IP, request path, CLI jar request, plugin/version page access</td></tr>
-<tr><td>Kubernetes / Ingress</td><td>Ingress controller log, API server audit 후보</td><td>namespace, ingress host, path, status, user agent, source IP</td></tr>
-<tr><td>Application</td><td>App access log, framework error log</td><td>route, handler, exception, stack trace, version/banner exposure</td></tr>
-<tr><td>Firewall / EDR</td><td>외부 접속 허용/차단, 스캔 탐지</td><td>source, destination, port, verdict, rule name</td></tr>
+<tr><td>Web / Reverse Proxy</td><td>Nginx/Apache 등 웹 서버 access log, reverse proxy access log</td><td><code>@timestamp</code>, <code>source.ip</code>, <code>http.request.method</code>, <code>url.path</code>, <code>http.response.status_code</code>, <code>user_agent.original</code></td></tr>
+<tr><td>Cloud / Edge</td><td>ALB access log, WAF log, CDN log</td><td><code>source.ip</code> 또는 <code>client.ip</code>, <code>url.original</code>, <code>url.path</code>, <code>http.request.method</code>, <code>http.response.status_code</code>, <code>user_agent.original</code>, <code>target_group_arn</code>, <code>event.action</code>, <code>rule.id</code>, <code>terminatingRuleId</code></td></tr>
+<tr><td>Application</td><td>App access log, framework error log</td><td><code>route</code> 또는 <code>url.path</code>, <code>handler</code>, <code>error.type</code>, <code>error.message</code>, <code>stack_trace</code>, <code>trace.id</code>, <code>response.header.*</code></td></tr>
+<tr><td>Firewall / EDR</td><td>외부 접속 허용/차단, 스캔 탐지</td><td><code>source.ip</code>, <code>destination.ip</code>, <code>destination.port</code>, <code>network.transport</code>, <code>event.action</code>, <code>event.outcome</code>, <code>rule.name</code></td></tr>
 </tbody></table></div>
 <h2 id="4-빠른-kql">4. 빠른 KQL</h2>
+<p>이 쿼리는 차단용 탐지 룰이 아니라, 정찰 후보를 넓게 찾기 위한 헌팅 쿼리다. 실제 판단은 같은 <code>source.ip</code>의 요청 수, 고유 <code>url.path</code> 수, 상태 코드 분포, User-Agent, 요청 간격, 승인된 스캐너 여부를 함께 확인한다.</p>
 <h3 id="외부-http-스캔-후보">외부 HTTP 스캔 후보</h3>
 <pre><code>http.request.method: (&quot;GET&quot; or &quot;HEAD&quot; or &quot;OPTIONS&quot;) and
-url.path: (&quot;/&quot; or &quot;/api*&quot; or &quot;/admin*&quot; or &quot;/login*&quot; or &quot;/version*&quot; or &quot;/debug*&quot; or &quot;/.env&quot;) and
+url.path: (&quot;/&quot; or &quot;/api*&quot; or &quot;/admin*&quot; or &quot;/login*&quot; or &quot;/version*&quot; or &quot;/debug*&quot; or &quot;/.env&quot; or &quot;/config*&quot;) and
 source.ip: *</code></pre>
 <h3 id="취약점-관리-경로-탐색-후보">취약점/관리 경로 탐색 후보</h3>
-<pre><code>url.path: (&quot;*/cli*&quot; or &quot;*/script*&quot; or &quot;*/actuator*&quot; or &quot;*/debug*&quot; or &quot;*/api/v1*&quot; or &quot;*/validate*&quot; or &quot;*/upload*&quot; or &quot;*/config*&quot;)</code></pre>
+<pre><code>url.path: (&quot;*/cli*&quot; or &quot;*/script*&quot; or &quot;*/actuator*&quot; or &quot;*/debug*&quot; or &quot;*/api/v1*&quot; or &quot;*/validate*&quot; or &quot;*/upload*&quot; or &quot;*/config*&quot; or &quot;*/jmx-console*&quot; or &quot;*/invoker*&quot;)</code></pre>
 <h3 id="비정상-user-agent-또는-자동화-도구-후보">비정상 User-Agent 또는 자동화 도구 후보</h3>
-<pre><code>user_agent.original: (&quot;*curl*&quot; or &quot;*wget*&quot; or &quot;*python-requests*&quot; or &quot;*Go-http-client*&quot; or &quot;*nmap*&quot; or &quot;*masscan*&quot; or &quot;*sqlmap*&quot;)</code></pre>
+<pre><code>user_agent.original: (&quot;*curl*&quot; or &quot;*wget*&quot; or &quot;*python-requests*&quot; or &quot;*Go-http-client*&quot; or &quot;*nmap*&quot; or &quot;*masscan*&quot; or &quot;*sqlmap*&quot; or &quot;*nikto*&quot; or &quot;*dirbuster*&quot; or &quot;*ffuf*&quot; or &quot;*gobuster*&quot;)</code></pre>
 <h3 id="짧은-시간-다수-경로-요청-후보">짧은 시간 다수 경로 요청 후보</h3>
-<pre><code>source.ip: * and http.response.status_code: (200 or 301 or 302 or 401 or 403 or 404 or 500)</code></pre>
-<p>이 쿼리는 후보를 넓게 잡는 용도다. 실제 분석에서는 같은 <code>source.ip</code>가 접근한 고유 <code>url.path</code> 수, 대상 host 수, status code 분포, 요청 간격을 집계해서 판단한다.</p>
+<pre><code>source.ip: * and
+http.response.status_code: (401 or 403 or 404 or 500) and
+url.path: *</code></pre>
+<h3 id="쿼리-결과-확인-지표">쿼리 결과 확인 지표</h3>
+<div class="table-wrap wide-table">
+<table>
+<thead><tr><th>기준</th><th>의심도</th><th>해석</th></tr></thead>
+<tbody>
+<tr><td>같은 <code>source.ip</code>가 5분 내 고유 <code>url.path</code> 20개 이상 요청</td><td>높음</td><td>자동화된 경로 탐색 또는 디렉터리 브루트포싱 가능성이 높다.</td></tr>
+<tr><td>401/403/404/500 비율이 높고 정상 페이지 접근이 적음</td><td>높음</td><td>존재하지 않거나 제한된 경로를 반복 확인하는 스캔성 요청일 수 있다.</td></tr>
+<tr><td><code>/.env</code>, <code>/debug</code>, <code>/config</code>, <code>/actuator</code>, <code>/admin</code> 접근 포함</td><td>높음</td><td>민감 파일, 디버그 경로, 관리 페이지 탐색 가능성이 높다.</td></tr>
+<tr><td>User-Agent가 <code>curl</code>, <code>python-requests</code>, <code>nmap</code>, <code>sqlmap</code>, <code>ffuf</code>, <code>gobuster</code> 등</td><td>높음</td><td>브라우저가 아닌 자동화 도구 또는 공격 도구 기반 요청일 수 있다.</td></tr>
+<tr><td>승인된 취약점 스캐너, 모니터링, 검색엔진 크롤러와 일치</td><td>낮음 또는 정상 후보</td><td>승인된 점검 활동일 수 있으므로 스캐너 자산 목록과 점검 일정으로 교차 확인한다.</td></tr>
+</tbody></table></div>
 <h2 id="5-분석자가-할-일">5. 분석자가 할 일</h2>
 <ol>
 <li>의심 source IP, user agent, 대상 host, 시간 범위를 고정한다.</li>
