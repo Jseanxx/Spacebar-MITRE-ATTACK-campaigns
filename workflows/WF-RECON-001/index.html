@@ -82,27 +82,30 @@ url.path: *</code></pre>
 </tbody></table></div>
 <h2 id="5-분석자가-할-일">5. 분석자가 할 일</h2>
 <ol>
-<li>의심 source IP, user agent, 대상 host, 시간 범위를 고정한다.</li>
-<li>같은 출발지에서 접근한 URL 경로, 포트, host 수를 집계한다.</li>
+<li>의심 <code>source.ip</code>, <code>user_agent.original</code>, 대상 host, 시간 범위를 고정한다.</li>
+<li>같은 출발지에서 접근한 URL 경로 수, 대상 host 수, 대상 포트 수, 요청 간격을 집계한다.</li>
 <li>단순 방문인지, 배너/버전/관리 UI/취약점 경로를 확인한 것인지 구분한다.</li>
-<li>승인된 취약점 점검, ASM, WAF 헬스체크, 모니터링, 검색엔진 크롤러 가능성을 확인한다.</li>
+<li>승인된 취약점 점검, ASM, WAF 헬스체크, 모니터링, 검색엔진 크롤러 가능성을 정상 baseline과 비교한다.</li>
 <li>정찰 직후 인증 시도, 취약점 악용 요청, 파일 접근, credential 접근, 원격 명령 실행이 이어졌는지 Pivot한다.</li>
+<li>확인된 정찰 지표와 후속 행위를 타임라인으로 정리하고, 관련 ATT&amp;CK Technique에 매핑한다.</li>
 </ol>
 <h2 id="6-판단-기준">6. 판단 기준</h2>
+<p>본 판단 기준은 MITRE ATT&amp;CK Reconnaissance 기법과 CISA Incident Response Playbook의 Detection &amp; Analysis 절차를 기반으로 한다. CISA는 사고 분석 단계에서 관련 로그를 수집·보존하고, 이벤트를 상관분석하여 타임라인을 작성하며, 정상 baseline과 비교해 이상행위를 식별하고, 확인된 행위를 ATT&amp;CK TTP에 매핑하도록 권고한다. 따라서 아래 기준은 단일 이벤트를 확정 근거로 사용하는 것이 아니라, 여러 로그와 정상 활동 여부를 교차 확인하기 위한 분석 기준이다.</p>
 <div class="table-wrap wide-table">
 <table>
-<thead><tr><th>구분</th><th>확인 기준</th></tr></thead>
+<thead><tr><th>구분</th><th>확인 기준</th><th>근거</th></tr></thead>
 <tbody>
-<tr><td>의심</td><td>같은 source IP가 짧은 시간 동안 다수 경로, 다수 host, 다수 포트로 반복 요청</td></tr>
-<tr><td>의심</td><td>Jenkins CLI, Langflow API, JBoss 관리 경로, K8s Ingress, <code>.env</code>, <code>/config</code>, <code>/debug</code> 등 민감 경로 확인</td></tr>
-<tr><td>의심</td><td>서비스 버전, 응답 헤더, 에러 메시지, framework fingerprint를 유도하는 요청 패턴</td></tr>
-<tr><td>의심</td><td>정찰 직후 RCE, 인증 우회, credential 접근, 원격 접속, 데이터 접근이 이어짐</td></tr>
-<tr><td>정상 가능성</td><td>승인된 취약점 점검, 외부 공격표면 관리(ASM), 모니터링, WAF 점검, 검색엔진 크롤러와 일치</td></tr>
+<tr><td>의심</td><td>같은 <code>source.ip</code>가 짧은 시간 동안 다수 경로, 다수 host, 다수 포트로 반복 요청</td><td>MITRE ATT&amp;CK <code>T1595 Active Scanning</code>, CISA 이벤트 상관분석/타임라인 작성</td></tr>
+<tr><td>의심</td><td>외부 노출된 Jenkins CLI, Langflow API, JBoss 관리 경로, K8s Ingress, <code>.env</code>, <code>/config</code>, <code>/debug</code>, <code>/actuator</code>, <code>/admin</code> 등 민감 경로 확인</td><td>MITRE ATT&amp;CK <code>T1595.002 Vulnerability Scanning</code>, <code>T1592 Gather Victim Host Information</code></td></tr>
+<tr><td>의심</td><td>서비스 버전, 응답 헤더, 에러 메시지, framework fingerprint를 유도하는 요청 패턴</td><td>MITRE ATT&amp;CK <code>T1592 Gather Victim Host Information</code>, <code>T1590 Gather Victim Network Information</code></td></tr>
+<tr><td>의심</td><td>정찰 직후 RCE, 인증 우회, credential 접근, 원격 접속, 데이터 접근 등 후속 침투 행위가 이어짐</td><td>CISA 조사 범위 갱신 및 ATT&amp;CK TTP 분석</td></tr>
+<tr><td>정상 가능성</td><td>승인된 취약점 점검, 외부 공격표면 관리(ASM), 모니터링, WAF 점검, 검색엔진 크롤러와 일치</td><td>CISA authorized activity deconfliction, 조직 baseline 비교</td></tr>
 </tbody></table></div>
 <h2 id="7-llm-prompt-template">7. LLM Prompt Template</h2>
 <pre><code>너는 ELK, Splunk 등 SIEM에 연결된 침해사고 분석 보조자다.
 다음 조건으로 &quot;외부 노출 서비스 및 취약 표면 정찰&quot; 의심 정황을 조사하라.
 반드시 조회한 로그 근거를 기반으로 판단하고, 확인되지 않은 내용은 추정이라고 표시하라.
+분석은 CISA Incident Response Playbook의 Detection &amp; Analysis 절차에 맞춰 로그 보존, 이벤트 상관분석, 타임라인 작성, 정상 baseline 비교, ATT&amp;CK TTP 매핑 관점으로 수행하라.
 
 입력:
 - 시간 범위:
@@ -115,32 +118,36 @@ url.path: *</code></pre>
 1. 관련 외부 접근 로그를 조회하라.
    - Web/reverse proxy access log
    - ALB/WAF/CDN log
-   - Jenkins 또는 애플리케이션 access/audit log
-   - Kubernetes ingress log
+   - Application access/error log
+   - 외부 노출된 경우에 한해 Jenkins access/audit log 또는 Kubernetes ingress log
    - Firewall 또는 EDR network log
-2. 같은 source IP가 접근한 대상 host, URL path, port, status code 분포를 요약하라.
-3. 배너/버전/관리 UI/취약점 경로 확인 정황을 구분하라.
-4. 승인된 점검, 모니터링, 검색엔진 크롤러 가능성과 공격 정찰 가능성을 구분하라.
-5. 정찰 이후 취약점 악용, 인증 시도, credential 접근, 원격 명령 실행으로 이어진 로그가 있는지 Pivot하라.
-6. 초동 대응 조치를 작성하라.
+2. 같은 source IP 또는 user agent가 접근한 대상 host, URL path, port, status code 분포와 요청 간격을 요약하라.
+3. 배너/버전/관리 UI/취약점 경로 확인 정황을 MITRE ATT&amp;CK T1595, T1595.002, T1592, T1590, T1593 관점으로 분류하라.
+4. 승인된 취약점 점검, ASM, WAF 헬스체크, 모니터링, 검색엔진 크롤러 가능성을 정상 baseline과 비교해 구분하라.
+5. 정찰 이후 취약점 악용, 인증 시도, credential 접근, 원격 명령 실행, 데이터 접근으로 이어진 로그가 있는지 Pivot하라.
+6. 확인된 사실을 시간순 타임라인으로 정리하고, 조사 범위를 갱신해야 할 대상 host, 계정, 서비스, 로그 소스를 제안하라.
+7. 증거 보존과 초동 대응 조치를 작성하라.
 
 출력 형식:
 - 관측된 사실
 - 타임라인
-- 정찰 주체 후보
+- 정찰 주체 후보와 정상 가능성
 - 대상 서비스와 노출 표면
-- 의심 근거
-- 정상 가능성
+- ATT&amp;CK 매핑
+- 의심 근거와 한계
 - 추가 Pivot
+- 보존해야 할 증거
 - 대응 조치</code></pre>
 <h2 id="8-대응-요약">8. 대응 요약</h2>
+<p><code>LLM Prompt Template</code>을 통해 도출된 분석 결과를 바탕으로 분석자가 수행해야 할 증거 보존, 정상 여부 검증, 확장 검색, 예방 조치, 후속 Workflow Pivot을 정리한 실행 항목이다.</p>
 <ul>
-<li>원본 access log, WAF/ALB/CDN 로그, 애플리케이션 에러 로그를 보존한다.</li>
-<li>의심 source IP, user agent, 대상 host, URL 경로 목록을 고정한다.</li>
-<li>승인된 점검 또는 모니터링이 아니라면 WAF 룰, rate limit, 접근 제어, 관리 UI 차단 상태를 확인한다.</li>
-<li>정찰된 서비스의 버전, 취약점 노출 여부, 불필요한 헤더/에러 정보 노출 여부를 점검한다.</li>
-<li>동일 source IP, 동일 user agent, 동일 URL 패턴으로 전체 캠페인 로그를 확장 검색한다.</li>
-<li>정찰 이후 발생한 RCE, 인증 시도, credential 접근, 원격 접속 로그를 우선 확인한다.</li>
+<li>원본 access log, WAF/ALB/CDN 로그, 애플리케이션 access/error 로그, Firewall/EDR 네트워크 로그를 보존한다.</li>
+<li>의심 <code>source.ip</code>, <code>user_agent.original</code>, 대상 host, URL 경로, 상태 코드, 요청 시각을 고정하고 타임라인으로 정리한다.</li>
+<li>승인된 취약점 점검, ASM, WAF 헬스체크, 모니터링, 검색엔진 크롤러와 일치하는지 정상 baseline으로 먼저 교차 확인한다.</li>
+<li>승인된 활동이 아니라면 동일 <code>source.ip</code>, 동일 <code>user_agent.original</code>, 동일 URL 패턴으로 전체 로그를 확장 검색한다.</li>
+<li>정찰된 서비스의 외부 노출 범위, 버전, 관리 UI, 민감 경로, 불필요한 응답 헤더/에러 정보 노출 여부를 점검한다.</li>
+<li>후속 침투 정황이 없으면 WAF 룰, rate limit, 접근 제어, 노출 정보 최소화 등 예방 조치를 우선 검토한다.</li>
+<li>정찰 이후 RCE, 인증 우회, credential 접근, 원격 명령 실행, 데이터 접근이 확인되면 <code>WF-INITIAL-001</code>, <code>WF-CRED-001</code>, <code>WF-REMOTE-001</code>, <code>WF-DATA-001</code>로 Pivot한다.</li>
 </ul>
     <footer class="footer">
       Spacebar Project. This workflow is an educational blue team playbook artifact.
