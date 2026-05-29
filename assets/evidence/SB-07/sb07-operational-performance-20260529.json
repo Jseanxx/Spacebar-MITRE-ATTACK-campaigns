@@ -1,0 +1,135 @@
+{
+  "measured_at": "2026-05-29T02:17:15.850Z",
+  "evidence_type": "sb07_operational_performance_measurement",
+  "full_run_id": "SB07-PERF-FULL-20260529-021618",
+  "full_event_count": 48,
+  "full_post_seconds": 0.748,
+  "full_post_eps": 64.17,
+  "source_indexed_count": 48,
+  "source_visible_after_post_seconds": 0.616,
+  "alert_count": 20,
+  "first_alert_after_post_seconds": 9.858,
+  "alert_complete_after_post_seconds": 10.885,
+  "alert_rule_ids": [
+    "sb07-pms-patch-discovery-001",
+    "sb07-credential-dc-access-002",
+    "sb07-pms-credential-chain-003",
+    "sb07-dc-access-lsass-004",
+    "sb07-loader-lsass-005",
+    "sb07-defender-bypass-inferred-009",
+    "sb07-dump-bypass-inference-010",
+    "sb07-dump-after-defender-block-011",
+    "sb07-loader-forensic-triad-012",
+    "sb07-loader-file-lifecycle-013",
+    "sb07-manual-mapping-inferred-014",
+    "sb07-defender-lsass-block-007",
+    "sb07-dc-loader-task-008",
+    "sb07-bastion-ssh-entry-015",
+    "sb07-scan-to-jboss-surface-016",
+    "sb07-jboss-rce-shell-017",
+    "sb07-jboss-webshell-018",
+    "sb07-pms-path-masquerade-019",
+    "sb07-pms-masquerade-execution-020",
+    "sb07-pass-the-hash-simulated-021"
+  ],
+  "replay_results": [
+    {
+      "run_id": "SB07-PERF-REPLAY-480-20260529-021618",
+      "events": 480,
+      "indexed": 480,
+      "post_seconds": 7.705,
+      "post_eps": 62.3,
+      "visible_after_post_seconds": 0.724,
+      "end_to_end_seconds": 8.429,
+      "end_to_end_eps": 56.95,
+      "store_bytes_before": 3118939,
+      "store_bytes_after": 3401678,
+      "store_bytes_delta": 282739,
+      "avg_store_bytes_per_event_delta": 589.04
+    },
+    {
+      "run_id": "SB07-PERF-REPLAY-4800-20260529-021618",
+      "events": 4800,
+      "indexed": 4800,
+      "post_seconds": 36.312,
+      "post_eps": 132.19,
+      "visible_after_post_seconds": 0.58,
+      "end_to_end_seconds": 36.893,
+      "end_to_end_eps": 130.11,
+      "store_bytes_before": 3401678,
+      "store_bytes_after": 3932055,
+      "store_bytes_delta": 530377,
+      "avg_store_bytes_per_event_delta": 110.5
+    }
+  ],
+  "store_baseline": {
+    "docs": 1516,
+    "store_bytes": 3072905
+  },
+  "store_after": {
+    "docs": 6844,
+    "store_bytes": 3932055
+  },
+  "cloudwatch_host_cpu_context": [
+    {
+      "instance": "hanguel-dc01",
+      "instance_id": "i-011c31de8fc606045",
+      "datapoints": 8,
+      "avg_cpu_percent": 1.68,
+      "max_cpu_percent": 21.24,
+      "first": "2026-05-29T10:42:00+09:00",
+      "last": "2026-05-29T11:17:00+09:00"
+    },
+    {
+      "instance": "hanguel-win01",
+      "instance_id": "i-0725dcaec8e1bfc64",
+      "datapoints": 8,
+      "avg_cpu_percent": 1.8,
+      "max_cpu_percent": 30.94,
+      "first": "2026-05-29T10:42:00+09:00",
+      "last": "2026-05-29T11:17:00+09:00"
+    },
+    {
+      "instance": "hanguel-soc01",
+      "instance_id": "i-0138fcf4e894871bc",
+      "datapoints": 7,
+      "avg_cpu_percent": 12.61,
+      "max_cpu_percent": 97.64,
+      "first": "2026-05-29T10:47:00+09:00",
+      "last": "2026-05-29T11:17:00+09:00"
+    }
+  ],
+  "soc_process_snapshot": [
+    {
+      "process": "hanguel_ad_correlator.py",
+      "cpu_percent": 0.0,
+      "mem_percent": 0.2,
+      "rss_kb": 20168
+    },
+    {
+      "process": "kibana node",
+      "cpu_percent": 13.3,
+      "mem_percent": 6.7,
+      "rss_kb": 542152
+    },
+    {
+      "process": "logstash java",
+      "cpu_percent": 10.4,
+      "mem_percent": 10.5,
+      "rss_kb": 844696
+    },
+    {
+      "process": "elasticsearch java",
+      "cpu_percent": 10.5,
+      "mem_percent": 18.5,
+      "rss_kb": 1483680
+    }
+  ],
+  "caveats": [
+    "Measurements are from the SB-07 AWS lab, not a production enterprise deployment.",
+    "Replay EPS uses safe performance_replay_probe events that do not trigger SB-07 correlation rules.",
+    "Alert latency includes Logstash and Elasticsearch visibility, correlator polling interval, and custom rule write time.",
+    "CloudWatch host CPU is useful context, but it does not isolate Windows agent process CPU, memory, or I/O overhead.",
+    "Elasticsearch store deltas are approximate because Lucene compression and segment merge behavior can change byte growth."
+  ]
+}
