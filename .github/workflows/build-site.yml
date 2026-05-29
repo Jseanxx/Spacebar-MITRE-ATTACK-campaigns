@@ -7,6 +7,7 @@ on:
       - "content/**"
       - "campaigns/**"
       - "logs/**"
+      - "workflows/**"
       - "tools/**"
       - "assets/**"
       - "package.json"
@@ -18,6 +19,7 @@ on:
       - "content/**"
       - "campaigns/**"
       - "logs/**"
+      - "workflows/**"
       - "tools/**"
       - "assets/**"
       - "package.json"
@@ -49,10 +51,10 @@ jobs:
       - name: Commit generated site
         if: github.event_name == 'push'
         run: |
-          if [ -n "$(git status --porcelain campaigns logs)" ]; then
+          if [ -n "$(git status --porcelain campaigns logs workflows)" ]; then
             git config user.name "spacebar-bot"
             git config user.email "spacebar-bot@users.noreply.github.com"
-            git add campaigns/ logs/
+            git add campaigns/ logs/ workflows/
             git commit -m "Build site"
             git push
           else
@@ -62,9 +64,9 @@ jobs:
       - name: Check generated site is current
         if: github.event_name == 'pull_request'
         run: |
-          if [ -n "$(git status --porcelain campaigns logs)" ]; then
+          if [ -n "$(git status --porcelain campaigns logs workflows)" ]; then
             echo "Generated site changed after npm run build."
             echo "Run npm run build locally or merge to main and let GitHub Actions generate it."
-            git status --short campaigns logs
+            git status --short campaigns logs workflows
             exit 1
           fi

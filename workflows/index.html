@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Blue Team Playbooks | Spacebar Campaigns</title>
+  <title>Spacebar Blue Team Playbooks</title>
   <link rel="stylesheet" href="/assets/campaign.css">
 </head>
 <body>
@@ -22,15 +22,13 @@
     <div class="breadcrumbs"><a href="/campaigns/">Home</a> / <span>Blue Team Playbooks</span></div>
     <h1>Blue Team Playbooks</h1>
     <p class="summary">
-      침해사고 분석 중 반복적으로 마주치는 공격 행위를 기준으로, 확인할 로그와 분석 순서, ELK 검색 예시,
-      AI 분석 보조자에게 줄 질문을 정리한 플레이북이다.
+      Technique 하나가 아니라, 실제 관제와 침해사고 대응에서 반복적으로 마주치는 행위 단위로 분석 흐름을 정리한다.
+      각 Workflow는 먼저 볼 로그, 빠른 쿼리, 분석 순서, LLM Prompt Template, 대응 요약을 포함한다.
     </p>
-
-    <h2>Workflow List</h2>
     <div class="cards">
       <article class="card">
         <h3><a href="/workflows/WF-REMOTE-001/">WF-REMOTE-001 내부망 원격 실행 분석</a></h3>
-        <p>SSH, WinRM, PowerShell 원격 실행처럼 내부 서버로 이동하거나 명령을 실행한 흔적을 분석한다.</p>
+        <p>SSH, WinRM, PowerShell 등으로 내부 서버에 접속하거나 원격 명령을 실행한 정황을 분석한다.</p>
         <div class="tag-row">
           <span class="tag">T1021.004</span>
           <span class="tag">T1021.006</span>
@@ -45,27 +43,10 @@
           <span class="tag">T1046</span>
           <span class="tag">T1018</span>
           <span class="tag">T1592</span>
-        </div>
-      </article>
-      <article class="card">
-        <h3>WF-00</h3>
-        <p>설명.</p>
-        <div class="tag-row">
-          <span class="tag">Technique</span>
-        </div>
-      </article>
-      <article class="card">
-        <h3>WF-00</h3>
-        <p>설명.</p>
-        <div class="tag-row">
-          <span class="tag">Technique</span>
+          <span class="tag">T1059</span>
         </div>
       </article>
     </div>
-
-    <footer class="footer">
-      Spacebar Project. Blue Team Playbooks are educational IR workflow artifacts.
-    </footer>
   </main>
 </body>
 </html>

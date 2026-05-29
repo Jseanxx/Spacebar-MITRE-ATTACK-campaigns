@@ -63,6 +63,11 @@ spacebar-mitre-attack-campaigns/
 |   |-- log-catalog/                 # 공통 Log Catalog 원본
 |   |   `-- LL-001.md
 |   |
+|   |-- workflows/                   # Blue Team Workflow 원본
+|   |   |-- TEMPLATE.md
+|   |   |-- WF-REMOTE-001.md
+|   |   `-- WF-SCAN-001.md
+|   |
 |   `-- detections/                  # 선택 사항: Campaign Detection Map 원본
 |       `-- SB-XX.md
 |
@@ -84,6 +89,11 @@ spacebar-mitre-attack-campaigns/
 |   `-- LL-001/
 |       `-- index.html
 |
+|-- workflows/                       # 빌드 결과물: Blue Team Workflow 페이지
+|   |-- index.html
+|   `-- WF-REMOTE-001/
+|       `-- index.html
+|
 |-- assets/                          # 공통 CSS, 이미지
 |-- tools/                           # Markdown을 HTML로 변환하는 빌드 스크립트
 |-- README.md
@@ -95,6 +105,7 @@ spacebar-mitre-attack-campaigns/
 - 팀원은 기본적으로 `content/` 아래 원본 Markdown만 수정합니다. `content/`가 원본(source of truth)입니다.
 - `campaigns/`, `logs/`는 GitHub Actions가 생성하는 빌드 결과물입니다. 직접 수정하지 않습니다.
 - 직접 만든 HTML 디자인을 쓰고 싶어도 `campaigns/`에 HTML을 바로 올리지 말고, `content/campaigns/SB-XX.md` 안에 `format: html` 방식으로 넣습니다.
+- Blue Team Workflow는 `workflows/`에 HTML을 바로 올리지 말고 `content/workflows/WF-XXX.md`에 작성합니다.
 - 캠페인 로그 상세 페이지는 파일을 만드는 것과 캠페인에 연결하는 것이 별도입니다. `content/campaign-logs/SB-XX/LOG-ID.md`를 만든 뒤, `content/campaigns/SB-XX.md`에서 `[[LOG-ID]]`로 참조해야 공개 페이지에 생성됩니다.
 - `main` 브랜치에 push하면 GitHub Actions가 HTML을 생성해 커밋하고, Vercel은 생성된 정적 파일을 배포합니다.
 - 팀원별 로그 상세 페이지는 `content/campaign-logs/SB-XX/LOG-ID.md`에 작성합니다.
@@ -108,9 +119,11 @@ spacebar-mitre-attack-campaigns/
 | Campaign 원본 | `content/campaigns/SB-XX.md` | 수정함 | 팀원이 작성하는 Campaign Page 1 원본 |
 | Campaign Log 원본 | `content/campaign-logs/SB-XX/LOG-ID.md` | 수정함 | 캠페인별 로그 상세 원본 |
 | Global Log Catalog 원본 | `content/log-catalog/LOG-ID.md` | 수정함 | 전체 공통 로그 카탈로그 원본 |
+| Blue Team Workflow 원본 | `content/workflows/WF-XXX.md` | 수정함 | 행위 기반 IR Workflow 원본 |
 | Detection Map 원본 | `content/detections/SB-XX.md` | 필요할 때 수정함 | 캠페인별 탐지 매핑 페이지 원본 |
 | Campaign HTML | `campaigns/**/index.html` | 수정하지 않음 | `npm run build` 또는 GitHub Actions가 생성 |
 | Log HTML | `logs/**/index.html` | 수정하지 않음 | `npm run build` 또는 GitHub Actions가 생성 |
+| Workflow HTML | `workflows/**/index.html` | 수정하지 않음 | `npm run build` 또는 GitHub Actions가 생성 |
 
 즉, 팀원이 손으로 고치는 파일은 거의 항상 `content/` 아래 파일입니다.
 
@@ -131,6 +144,35 @@ spacebar-mitre-attack-campaigns/
 /campaigns/SB-01/logs/LL-001/     # SB-01 기준 로그 상세
 /logs/                            # Log Catalog 목록
 /logs/LL-001/                     # 로그 상세 페이지
+/workflows/                       # Blue Team Workflow 목록
+/workflows/WF-REMOTE-001/         # Workflow 상세 페이지
+```
+
+## Blue Team Workflow 작성
+
+행위 기반 IR Workflow는 아래 위치에 Markdown으로 작성합니다.
+
+```text
+content/workflows/WF-XXX.md
+```
+
+새 Workflow를 만들 때는 `content/workflows/TEMPLATE.md`를 복사해서 사용합니다.
+파일 맨 위에는 아래 frontmatter가 필요합니다.
+
+```markdown
+---
+id: WF-REMOTE-001
+name: "내부망 원격 실행 분석"
+description: "SSH, WinRM, PowerShell 등으로 내부 서버에 접속하거나 원격 명령을 실행한 정황을 분석한다."
+techniques: "T1021.004, T1021.006, T1059.001, T1078"
+---
+```
+
+빌드하면 아래 URL로 생성됩니다.
+
+```text
+/workflows/
+/workflows/WF-REMOTE-001/
 ```
 
 ## 캠페인별 로그 상세 페이지 작성

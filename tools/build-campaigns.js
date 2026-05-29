@@ -7,8 +7,10 @@ const detectionDir = path.join(root, "content", "detections");
 const evidenceDir = path.join(root, "content", "evidence");
 const logCatalogDir = path.join(root, "content", "log-catalog");
 const campaignLogDir = path.join(root, "content", "campaign-logs");
+const workflowDir = path.join(root, "content", "workflows");
 const outDir = path.join(root, "campaigns");
 const logsOutDir = path.join(root, "logs");
+const workflowsOutDir = path.join(root, "workflows");
 const assetHref = "/assets/campaign.css";
 const logoSrc = "/assets/spacebarLogo.png";
 
@@ -875,7 +877,84 @@ ${logs
 `;
 }
 
-function renderIndex(campaigns, detectionByCampaign = new Map(), logs = []) {
+function renderWorkflowPage(workflow) {
+  const { data, body } = workflow;
+  const bodyHtml = normalizeInternalLinks(data.format === "html" ? body : markdownToHtml(body));
+  return `${renderHeader(`${data.id} ${data.name} | Spacebar Blue Team Playbooks`)}
+
+  <main class="page">
+    <div class="breadcrumbs"><a href="/campaigns/">Home</a> / <a href="/workflows/">Blue Team Playbooks</a> / <span>${escapeHtml(data.id)}</span></div>
+${bodyHtml}
+    <footer class="footer">
+      Spacebar Project. This workflow is an educational blue team playbook artifact.
+    </footer>
+  </main>
+</body>
+</html>
+`;
+}
+
+function renderWorkflowIndex(workflows) {
+  return `${renderHeader("Spacebar Blue Team Playbooks")}
+
+  <main class="page">
+    <div class="breadcrumbs"><a href="/campaigns/">Home</a> / <span>Blue Team Playbooks</span></div>
+    <h1>Blue Team Playbooks</h1>
+    <p class="summary">
+      Technique 하나가 아니라, 실제 관제와 침해사고 대응에서 반복적으로 마주치는 행위 단위로 분석 흐름을 정리한다.
+      각 Workflow는 먼저 볼 로그, 빠른 쿼리, 분석 순서, LLM Prompt Template, 대응 요약을 포함한다.
+    </p>
+    <div class="cards">
+${workflows
+  .map(
+    (workflow) => `      <article class="card">
+        <h3><a href="/workflows/${workflow.slug}">${escapeHtml(workflow.data.id)} ${escapeHtml(workflow.data.name)}</a></h3>
+        <p>${escapeHtml(workflow.data.description || "")}</p>
+        <div class="tag-row">
+          ${(workflow.data.techniques || "")
+            .split(",")
+            .map((item) => item.trim())
+            .filter(Boolean)
+            .map((item) => `<span class="tag">${escapeHtml(item)}</span>`)
+            .join("\n          ")}
+        </div>
+      </article>`
+  )
+  .join("\n")}
+    </div>
+  </main>
+</body>
+</html>
+`;
+}
+
+function renderWorkflowCards(workflows) {
+  if (!workflows.length) {
+    return `        <article class="card">
+          <h3>작성된 Workflow 없음</h3>
+          <p><code>content/workflows/</code> 아래에 Markdown 파일을 추가하면 자동으로 표시된다.</p>
+        </article>`;
+  }
+
+  return workflows
+    .map(
+      (workflow) => `        <article class="card">
+          <h3><a href="/workflows/${workflow.slug}">${escapeHtml(workflow.data.id)} ${escapeHtml(workflow.data.name)}</a></h3>
+          <p>${escapeHtml(workflow.data.description || "")}</p>
+          <div class="tag-row">
+            ${(workflow.data.techniques || "")
+              .split(",")
+              .map((item) => item.trim())
+              .filter(Boolean)
+              .map((item) => `<span class="tag">${escapeHtml(item)}</span>`)
+              .join("\n            ")}
+          </div>
+        </article>`
+    )
+    .join("\n");
+}
+
+function renderIndex(campaigns, detectionByCampaign = new Map(), logs = [], workflows = []) {
   return `${renderHeader("Spacebar Campaigns")}
 
   <main class="page">
@@ -927,40 +1006,7 @@ ${campaigns
         반복 공격 행위별 IR Workflow를 정리한다.
       </p>
       <div class="cards">
-        <article class="card">
-          <h3><a href="/workflows/WF-REMOTE-001/">WF-REMOTE-001 내부망 원격 실행 분석</a></h3>
-          <p>SSH, WinRM, PowerShell 원격 실행처럼 내부 서버로 이동하거나 명령을 실행한 흔적을 분석한다.</p>
-          <div class="tag-row">
-            <span class="tag">T1021.004</span>
-            <span class="tag">T1021.006</span>
-            <span class="tag">T1059.001</span>
-            <span class="tag">T1078</span>
-          </div>
-        </article>
-        <article class="card">
-          <h3><a href="/workflows/WF-SCAN-001/">WF-SCAN-001 내부망 스캔 의심 대응</a></h3>
-          <p>짧은 시간 동안 여러 내부 IP 또는 여러 포트로 연결을 시도한 정찰 행위를 분석한다.</p>
-          <div class="tag-row">
-            <span class="tag">T1046</span>
-            <span class="tag">T1018</span>
-            <span class="tag">T1592</span>
-            <span class="tag">T1059</span>
-          </div>
-        </article>
-        <article class="card">
-          <h3>WF-00</h3>
-          <p>설명.</p>
-          <div class="tag-row">
-            <span class="tag">Technique</span>
-          </div>
-        </article>
-        <article class="card">
-          <h3>WF-00</h3>
-          <p>설명.</p>
-          <div class="tag-row">
-            <span class="tag">Technique</span>
-          </div>
-        </article>
+${renderWorkflowCards(workflows)}
       </div>
     </section>
 
@@ -1024,6 +1070,9 @@ function main() {
   const logs = readContentCollection(logCatalogDir, /^[A-Z]+-\d+\.md$/, (file) =>
     file.replace(/\.md$/, "/")
   );
+  const workflows = readContentCollection(workflowDir, /^WF-[A-Z0-9-]+\.md$/, (file) =>
+    file.replace(/\.md$/, "/")
+  );
   const allCampaignLogsByCampaign = readCampaignLogCollections(campaigns);
   const campaignLogsByCampaign = new Map(
     campaigns.map((campaign) => {
@@ -1038,6 +1087,7 @@ function main() {
   );
   cleanGeneratedDir(outDir);
   cleanGeneratedDir(logsOutDir);
+  cleanGeneratedDir(workflowsOutDir);
 
   campaigns.forEach((campaign) => {
     writeSitePage(outDir, campaign.slug, renderCampaignPage(campaigns, campaign, campaignLogsByCampaign));
@@ -1055,6 +1105,10 @@ function main() {
     writeSitePage(logsOutDir, log.slug, renderLogPage(logs, log, detections));
   });
 
+  workflows.forEach((workflow) => {
+    writeSitePage(workflowsOutDir, workflow.slug, renderWorkflowPage(workflow));
+  });
+
   campaigns.forEach((campaign) => {
     const campaignLogs = campaignLogsByCampaign.get(campaign.data.id) || [];
     if (!campaignLogs.length) return;
@@ -1067,8 +1121,9 @@ function main() {
     });
   });
 
-  fs.writeFileSync(path.join(outDir, "index.html"), renderIndex(campaigns, detectionByCampaign, logs));
+  fs.writeFileSync(path.join(outDir, "index.html"), renderIndex(campaigns, detectionByCampaign, logs, workflows));
   fs.writeFileSync(path.join(logsOutDir, "index.html"), renderLogIndex(logs));
+  fs.writeFileSync(path.join(workflowsOutDir, "index.html"), renderWorkflowIndex(workflows));
 }
 
 main();
