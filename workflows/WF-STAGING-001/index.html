@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>WF-STAGING-001 유출 전 데이터 스테이징 및 압축 | Spacebar Blue Team Playbooks</title>
+  <link rel="stylesheet" href="/assets/campaign.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="/campaigns/"><img class="brand-logo" src="/assets/spacebarLogo.png" alt="Spacebar"><span>Spacebar Campaigns</span></a>
+      <nav class="nav" aria-label="Primary navigation">
+        <a href="/campaigns/">Campaigns</a>
+        <a href="/workflows/">Blue Team Playbooks</a>
+        <a href="/logs/">Log Catalog</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="page">
+    <div class="breadcrumbs"><a href="/campaigns/">Home</a> / <a href="/workflows/">Blue Team Playbooks</a> / <span>WF-STAGING-001</span></div>
+<h1>WF-STAGING-001 유출 전 데이터 스테이징 및 압축</h1>
+<p>공격자가 여러 위치에서 수집한 자료를 한 경로에 모으고 archive로 묶어 외부 전송을 준비한 정황을 분석하는 Workflow다. 데이터 접근 이후 파일 생성, 복사, 압축, 암호화, 파일명 위장을 시간순으로 확인한다.</p>
+<div class="meta-grid" aria-label="Campaign metadata">
+<div class="meta-label">분석 대상 행위:</div>
+<div class="meta-value">임시 디렉터리 staging, 공유 폴더 경유, zip/tar 압축, 암호화, 파일명 위장</div>
+<div class="meta-label">관련 캠페인:</div>
+<div class="meta-value">SB-01, SB-03, SB-05</div>
+<div class="meta-label">분석 결과물:</div>
+<div class="meta-value">staging 경로, 포함 파일, archive 이름, 생성 주체, 유출 준비 여부</div>
+</div>
+<h2 id="1-행위-정의">1. 행위 정의</h2>
+<p>공격자가 유출을 쉽게 하기 위해 고객 데이터, dump, secret, 로그를 임시 경로 또는 공유 폴더에 모으고 압축 파일로 만드는 행위다. archive 생성만 보지 말고 직전 파일 복사와 직후 외부 전송을 함께 확인해야 한다.</p>
+<h2 id="2-관련-technique">2. 관련 Technique</h2>
+<div class="table-wrap wide-table">
+<table>
+<thead><tr><th>Technique</th><th>Name</th><th>확인 관점</th></tr></thead>
+<tbody>
+<tr><td>T1074.001</td><td>Local Data Staging</td><td>로컬 임시 경로에 자료 수집 확인</td></tr>
+<tr><td>T1560</td><td>Archive Collected Data</td><td>archive 생성 여부 확인</td></tr>
+<tr><td>T1560.001</td><td>Archive via Utility</td><td>zip, tar, 7z, Compress-Archive 사용 확인</td></tr>
+<tr><td>T1036</td><td>Masquerading</td><td>정상 파일명/확장자 위장 확인</td></tr>
+<tr><td>T1005</td><td>Data from Local System</td><td>로컬 수집 자료의 원천 확인</td></tr>
+</tbody></table></div>
+<h2 id="3-먼저-확인할-로그">3. 먼저 확인할 로그</h2>
+<div class="table-wrap wide-table">
+<table>
+<thead><tr><th>환경</th><th>대표 로그</th><th>핵심 필드</th></tr></thead>
+<tbody>
+<tr><td>Windows</td><td>Sysmon 1/11, PowerShell 4104</td><td>command_line, file.path, file.name, user</td></tr>
+<tr><td>Linux</td><td>auditd, syslog, process/file logs</td><td>command, path, user, cwd</td></tr>
+<tr><td>File Server</td><td>SMB/file access logs</td><td>source, user, share, file path</td></tr>
+<tr><td>EDR</td><td>archive creation alert, file events</td><td>process, target file, size, hash</td></tr>
+<tr><td>Network</td><td>이후 전송 로그</td><td>source, destination, bytes, URL</td></tr>
+</tbody></table></div>
+<h2 id="4-빠른-kql">4. 빠른 KQL</h2>
+<h3 id="압축-도구-실행">압축 도구 실행</h3>
+<pre><code>process.command_line: (&quot;*zip*&quot; or &quot;*tar *&quot; or &quot;*7z*&quot; or &quot;*Compress-Archive*&quot; or &quot;*rar*&quot;)</code></pre>
+<h3 id="임시-staging-경로-파일-생성">임시/staging 경로 파일 생성</h3>
+<pre><code>file.path: (&quot;*/tmp/*&quot; or &quot;*\\Temp\\*&quot; or &quot;*staging*&quot; or &quot;*archive*&quot; or &quot;*.zip&quot; or &quot;*.tar&quot; or &quot;*.7z&quot;)</code></pre>
+<h3 id="정상-파일명-위장-후보">정상 파일명 위장 후보</h3>
+<pre><code>file.name: (&quot;*.log&quot; or &quot;*.bak&quot; or &quot;*.tmp&quot; or &quot;*.dat&quot;) and file.size: &gt;1000000</code></pre>
+<h2 id="5-분석자가-할-일">5. 분석자가 할 일</h2>
+<ol>
+<li>staging 경로와 archive 파일명을 고정한다.</li>
+<li>archive 생성 전 복사된 원본 파일 목록을 확인한다.</li>
+<li>생성 주체, 압축 명령, 암호화 옵션, 파일 크기를 확인한다.</li>
+<li>정상 백업/리포트/배포 산출물 가능성을 확인한다.</li>
+<li>archive 생성 직후 외부 전송, S3 업로드, HTTP POST를 Pivot한다.</li>
+</ol>
+<h2 id="6-판단-기준">6. 판단 기준</h2>
+<div class="table-wrap wide-table">
+<table>
+<thead><tr><th>구분</th><th>확인 기준</th></tr></thead>
+<tbody>
+<tr><td>의심</td><td>여러 민감 파일이 임시 경로에 단시간 집중 복사</td></tr>
+<tr><td>의심</td><td>zip/tar/7z/Compress-Archive 후 외부 네트워크 연결</td></tr>
+<tr><td>의심</td><td>파일명이 정상 로그/백업처럼 위장됐지만 내용/크기가 비정상</td></tr>
+<tr><td>정상 가능성</td><td>승인된 백업, 정기 리포트, 배포 artifact 생성과 일치</td></tr>
+</tbody></table></div>
+<h2 id="7-llm-prompt-template">7. LLM Prompt Template</h2>
+<pre><code>너는 SIEM에 연결된 침해사고 분석 보조자다.
+다음 조건으로 &quot;유출 전 데이터 스테이징 및 압축&quot; 정황을 조사하라.
+
+입력:
+- 시간 범위:
+- 의심 호스트:
+- 의심 계정:
+- 의심 경로/archive:
+- 관측된 단서:
+
+요청:
+1. 파일 생성, 프로세스, PowerShell/Linux, 파일 서버, 네트워크 로그를 조회하라.
+2. staging 경로, 원본 파일, archive 생성 명령을 요약하라.
+3. 정상 백업/리포트 가능성과 유출 준비 가능성을 구분하라.
+4. archive 생성 이후 외부 전송 Pivot을 확인하라.
+5. 초동 대응 조치를 작성하라.
+
+출력 형식:
+- 관측된 사실
+- staging 경로
+- archive 후보
+- 포함 데이터 후보
+- 추가 Pivot
+- 대응 조치</code></pre>
+<h2 id="8-대응-요약">8. 대응 요약</h2>
+<ul>
+<li>archive 파일, 원본 파일 목록, 생성 명령 로그를 보존한다.</li>
+<li>유출 전송이 진행 중이면 네트워크 차단과 호스트 격리를 검토한다.</li>
+<li>동일 경로, 파일명, hash, 계정으로 확장 검색한다.</li>
+<li>민감 데이터 포함 여부와 개인정보 영향도를 확인한다.</li>
+</ul>
+    <footer class="footer">
+      Spacebar Project. This workflow is an educational blue team playbook artifact.
+    </footer>
+  </main>
+</body>
+</html>

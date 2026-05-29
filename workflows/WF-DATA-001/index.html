@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>WF-DATA-001 민감 데이터 접근 및 수집 | Spacebar Blue Team Playbooks</title>
+  <link rel="stylesheet" href="/assets/campaign.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="/campaigns/"><img class="brand-logo" src="/assets/spacebarLogo.png" alt="Spacebar"><span>Spacebar Campaigns</span></a>
+      <nav class="nav" aria-label="Primary navigation">
+        <a href="/campaigns/">Campaigns</a>
+        <a href="/workflows/">Blue Team Playbooks</a>
+        <a href="/logs/">Log Catalog</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="page">
+    <div class="breadcrumbs"><a href="/campaigns/">Home</a> / <a href="/workflows/">Blue Team Playbooks</a> / <span>WF-DATA-001</span></div>
+<h1>WF-DATA-001 민감 데이터 접근 및 수집</h1>
+<p>공격자가 수집한 credential을 이용해 DB, RDS, 파일 서버, 문서 서버, Secret, 고객 데이터에 접근한 정황을 분석하는 Workflow다. 접근 성공 여부뿐 아니라 조회량, 대상 테이블/파일, 평소 사용 패턴, 이후 staging 여부를 함께 확인한다.</p>
+<div class="meta-grid" aria-label="Campaign metadata">
+<div class="meta-label">분석 대상 행위:</div>
+<div class="meta-value">DB 조회, RDS 접근, 파일 서버 자료 수집, Secret/문서/고객 데이터 접근</div>
+<div class="meta-label">관련 캠페인:</div>
+<div class="meta-value">SB-01, SB-03, SB-04, SB-05, SB-06</div>
+<div class="meta-label">분석 결과물:</div>
+<div class="meta-value">접근 주체, 대상 데이터, 조회량, 민감도, 유출 전 단계 여부</div>
+</div>
+<h2 id="1-행위-정의">1. 행위 정의</h2>
+<p>공격자가 내부 이동 후 가치 있는 데이터를 찾고 수집하는 행위다. 인증 성공만 보지 말고 어떤 테이블, 파일, secret, bucket에 접근했는지와 평소 업무 패턴에서 벗어났는지를 확인해야 한다.</p>
+<h2 id="2-관련-technique">2. 관련 Technique</h2>
+<div class="table-wrap wide-table">
+<table>
+<thead><tr><th>Technique</th><th>Name</th><th>확인 관점</th></tr></thead>
+<tbody>
+<tr><td>T1213</td><td>Data from Information Repositories</td><td>CI/CD, 문서, repository 정보 접근 확인</td></tr>
+<tr><td>T1005</td><td>Data from Local System</td><td>서버 로컬 파일과 임시 경로 자료 수집 확인</td></tr>
+<tr><td>T1530</td><td>Data from Cloud Storage</td><td>S3/object storage 접근 확인</td></tr>
+<tr><td>T1552</td><td>Unsecured Credentials</td><td>데이터 접근을 위한 credential 수집 확인</td></tr>
+<tr><td>T1039</td><td>Data from Network Shared Drive</td><td>파일 서버/공유 폴더 데이터 접근 확인</td></tr>
+</tbody></table></div>
+<h2 id="3-먼저-확인할-로그">3. 먼저 확인할 로그</h2>
+<div class="table-wrap wide-table">
+<table>
+<thead><tr><th>환경</th><th>대표 로그</th><th>핵심 필드</th></tr></thead>
+<tbody>
+<tr><td>DB / RDS</td><td>query audit, connection log</td><td>user, source, database, table, query, row count</td></tr>
+<tr><td>File Server</td><td>Windows file access, SMB logs</td><td>user, path, action, client IP</td></tr>
+<tr><td>Cloud Storage</td><td>S3 data events, object access log</td><td>bucket, key, action, source, bytes</td></tr>
+<tr><td>Application</td><td>app audit log, document server log</td><td>user, object, action, status</td></tr>
+<tr><td>Endpoint/Server</td><td>Sysmon 11, file read/create 후보</td><td>file.path, process, user</td></tr>
+</tbody></table></div>
+<h2 id="4-빠른-kql">4. 빠른 KQL</h2>
+<h3 id="db-접근-후보">DB 접근 후보</h3>
+<pre><code>event.category: &quot;database&quot; and event.action: (&quot;connect&quot; or &quot;select&quot; or &quot;query&quot;) and user.name: *</code></pre>
+<h3 id="민감-파일-접근-후보">민감 파일 접근 후보</h3>
+<pre><code>file.path: (&quot;*customer*&quot; or &quot;*reservation*&quot; or &quot;*payment*&quot; or &quot;*secret*&quot; or &quot;*.csv&quot; or &quot;*.sql&quot; or &quot;*.dump&quot;)</code></pre>
+<h3 id="s3-object-접근">S3/Object 접근</h3>
+<pre><code>event.provider: &quot;s3.amazonaws.com&quot; and event.action: (&quot;GetObject&quot; or &quot;ListBucket&quot;)</code></pre>
+<h2 id="5-분석자가-할-일">5. 분석자가 할 일</h2>
+<ol>
+<li>접근 주체, source, 대상 데이터 저장소를 고정한다.</li>
+<li>조회한 테이블/파일/객체와 데이터 민감도를 분류한다.</li>
+<li>조회량과 시간대가 평소 패턴과 다른지 확인한다.</li>
+<li>데이터 접근 전 credential 수집과 접근 후 staging/압축/유출을 Pivot한다.</li>
+<li>개인정보/고객정보 포함 가능성을 판단해 통지 절차 필요성을 검토한다.</li>
+</ol>
+<h2 id="6-판단-기준">6. 판단 기준</h2>
+<div class="table-wrap wide-table">
+<table>
+<thead><tr><th>구분</th><th>확인 기준</th></tr></thead>
+<tbody>
+<tr><td>의심</td><td>업무 계정이 평소 접근하지 않던 DB/파일/secret 대량 조회</td></tr>
+<tr><td>의심</td><td>credential 접근 직후 민감 데이터 조회</td></tr>
+<tr><td>의심</td><td>조회 직후 임시 경로 staging, archive 생성, 외부 전송</td></tr>
+<tr><td>정상 가능성</td><td>승인된 리포트, 백업, 데이터 이관, 운영 점검과 일치</td></tr>
+</tbody></table></div>
+<h2 id="7-llm-prompt-template">7. LLM Prompt Template</h2>
+<pre><code>너는 SIEM에 연결된 침해사고 분석 보조자다.
+다음 조건으로 &quot;민감 데이터 접근 및 수집&quot; 정황을 조사하라.
+
+입력:
+- 시간 범위:
+- 의심 계정/source:
+- 대상 DB/파일 서버/bucket:
+- 의심 테이블/파일:
+- 관측된 단서:
+
+요청:
+1. DB, 파일 서버, S3, app audit, endpoint 로그를 조회하라.
+2. 접근 주체, 대상 데이터, 조회량, 민감도를 요약하라.
+3. 정상 업무 가능성과 비정상 수집 가능성을 구분하라.
+4. credential 접근 전후와 staging/exfil Pivot을 확인하라.
+5. 초동 대응 조치를 작성하라.
+
+출력 형식:
+- 관측된 사실
+- 접근 데이터
+- 영향 범위
+- 의심 근거
+- 추가 Pivot
+- 대응 조치</code></pre>
+<h2 id="8-대응-요약">8. 대응 요약</h2>
+<ul>
+<li>DB query log, 파일 접근 로그, object access log를 보존한다.</li>
+<li>의심 계정과 credential을 통제하고 접근 권한을 재검토한다.</li>
+<li>조회 데이터의 민감도와 개인정보 포함 여부를 확인한다.</li>
+<li>staging, archive, 외부 전송 로그로 즉시 Pivot한다.</li>
+</ul>
+    <footer class="footer">
+      Spacebar Project. This workflow is an educational blue team playbook artifact.
+    </footer>
+  </main>
+</body>
+</html>

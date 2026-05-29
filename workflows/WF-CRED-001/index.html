@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>WF-CRED-001 설정 파일 및 Secret 기반 자격 증명 수집 | Spacebar Blue Team Playbooks</title>
+  <link rel="stylesheet" href="/assets/campaign.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="/campaigns/"><img class="brand-logo" src="/assets/spacebarLogo.png" alt="Spacebar"><span>Spacebar Campaigns</span></a>
+      <nav class="nav" aria-label="Primary navigation">
+        <a href="/campaigns/">Campaigns</a>
+        <a href="/workflows/">Blue Team Playbooks</a>
+        <a href="/logs/">Log Catalog</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="page">
+    <div class="breadcrumbs"><a href="/campaigns/">Home</a> / <a href="/workflows/">Blue Team Playbooks</a> / <span>WF-CRED-001</span></div>
+<h1>WF-CRED-001 설정 파일 및 Secret 기반 자격 증명 수집</h1>
+<p>공격자가 설정 파일, <code>.env</code>, Kubernetes Secret, Secrets Manager, credential artifact, 메모리 덤프에서 자격 증명 단서를 수집한 정황을 분석하는 Workflow다. 파일 접근 로그와 이후 인증 성공 로그를 함께 보며 실제 악용 여부를 판단한다.</p>
+<div class="meta-grid" aria-label="Campaign metadata">
+<div class="meta-label">분석 대상 행위:</div>
+<div class="meta-value">Secret/credential 파일 접근, 환경변수 조회, 토큰/키/암호 수집</div>
+<div class="meta-label">관련 캠페인:</div>
+<div class="meta-value">SB-01, SB-03, SB-04, SB-05, SB-06, SB-07</div>
+<div class="meta-label">분석 결과물:</div>
+<div class="meta-value">접근 주체, credential 종류, 저장 위치, 악용된 대상, 회전 필요 범위</div>
+</div>
+<h2 id="1-행위-정의">1. 행위 정의</h2>
+<p>공격자가 내부 이동과 데이터 접근을 위해 파일, Secret 객체, 환경변수, 메모리, 클라우드 secret에서 자격 증명을 찾는 행위다. 파일 조회만으로 끝내지 말고, 해당 credential이 SSH, DB, AWS API, K8s API, AD 접근에 사용됐는지 이어서 확인해야 한다.</p>
+<h2 id="2-관련-technique">2. 관련 Technique</h2>
+<div class="table-wrap wide-table">
+<table>
+<thead><tr><th>Technique</th><th>Name</th><th>확인 관점</th></tr></thead>
+<tbody>
+<tr><td>T1552</td><td>Unsecured Credentials</td><td>평문/약한 보호 credential 저장 여부 확인</td></tr>
+<tr><td>T1552.001</td><td>Credentials In Files</td><td><code>.env</code>, config, XML, kubeconfig, script 내 secret 접근 확인</td></tr>
+<tr><td>T1552.004</td><td>Private Keys</td><td>SSH private key, API key, token 접근 확인</td></tr>
+<tr><td>T1555</td><td>Credentials from Password Stores</td><td>Secret Manager, credential store 조회 확인</td></tr>
+<tr><td>T1003</td><td>OS Credential Dumping</td><td>LSASS, NTDS, memory dump 기반 credential 수집 확인</td></tr>
+</tbody></table></div>
+<h2 id="3-먼저-확인할-로그">3. 먼저 확인할 로그</h2>
+<div class="table-wrap wide-table">
+<table>
+<thead><tr><th>환경</th><th>대표 로그</th><th>핵심 필드</th></tr></thead>
+<tbody>
+<tr><td>Linux / App</td><td>auditd, shell history 후보, file access log</td><td>user, process, file.path, command_line</td></tr>
+<tr><td>Kubernetes</td><td>API audit log</td><td>verb, resource, namespace, user, serviceAccount</td></tr>
+<tr><td>Cloud</td><td>CloudTrail, Secrets Manager audit</td><td>eventName, userIdentity, sourceIPAddress, secretId</td></tr>
+<tr><td>Windows</td><td>Sysmon 1/11, Security, PowerShell 4104</td><td>process.command_line, file.path, TargetObject</td></tr>
+<tr><td>DB / IAM</td><td>인증 성공/실패, key 사용 로그</td><td>account, source IP, target, auth result</td></tr>
+</tbody></table></div>
+<h2 id="4-빠른-kql">4. 빠른 KQL</h2>
+<h3 id="secret-파일-접근-후보">Secret 파일 접근 후보</h3>
+<pre><code>file.path: (&quot;*.env&quot; or &quot;*config*&quot; or &quot;*credential*&quot; or &quot;*secret*&quot; or &quot;*.pem&quot; or &quot;*kube/config&quot; or &quot;*dc_cred.xml&quot;)</code></pre>
+<h3 id="kubernetes-secret-조회">Kubernetes Secret 조회</h3>
+<pre><code>kubernetes.audit.verb: (&quot;get&quot; or &quot;list&quot;) and kubernetes.audit.objectRef.resource: &quot;secrets&quot;</code></pre>
+<h3 id="cloud-secret-조회">Cloud Secret 조회</h3>
+<pre><code>event.provider: &quot;secretsmanager.amazonaws.com&quot; and event.action: (&quot;GetSecretValue&quot; or &quot;ListSecrets&quot; or &quot;DescribeSecret&quot;)</code></pre>
+<h2 id="5-분석자가-할-일">5. 분석자가 할 일</h2>
+<ol>
+<li>어떤 주체가 어느 secret 위치에 접근했는지 고정한다.</li>
+<li>조회 방식이 파일 읽기, API 조회, 환경변수 출력, 메모리 덤프인지 구분한다.</li>
+<li>수집 가능한 credential 종류와 권한 범위를 추정한다.</li>
+<li>해당 credential이 이후 인증/접속에 사용됐는지 Pivot한다.</li>
+<li>회전해야 할 key, token, password, certificate 범위를 정리한다.</li>
+</ol>
+<h2 id="6-판단-기준">6. 판단 기준</h2>
+<div class="table-wrap wide-table">
+<table>
+<thead><tr><th>구분</th><th>확인 기준</th></tr></thead>
+<tbody>
+<tr><td>의심</td><td>운영 시간 외 credential 파일/Secret 대량 조회</td></tr>
+<tr><td>의심</td><td>웹/앱/컨테이너 프로세스가 secret 저장소 또는 <code>.env</code>를 비정상 조회</td></tr>
+<tr><td>의심</td><td>조회 직후 SSH, DB, AWS API, K8s API 인증 성공</td></tr>
+<tr><td>정상 가능성</td><td>배포, 백업, secret rotation, 운영 점검 절차와 일치</td></tr>
+</tbody></table></div>
+<h2 id="7-llm-prompt-template">7. LLM Prompt Template</h2>
+<pre><code>너는 SIEM에 연결된 침해사고 분석 보조자다.
+다음 조건으로 &quot;설정 파일 및 Secret 기반 자격 증명 수집&quot; 정황을 조사하라.
+
+입력:
+- 시간 범위:
+- 의심 호스트/파드/계정:
+- 의심 파일 또는 Secret:
+- 관측된 단서:
+
+요청:
+1. 파일 접근, K8s audit, CloudTrail, Windows/Sysmon 로그를 조회하라.
+2. 접근 주체, 대상 secret, 조회 방식, 노출 가능 credential을 요약하라.
+3. credential 악용으로 이어진 인증/접속 로그를 Pivot하라.
+4. 정상 운영 작업 가능성과 의심 근거를 구분하라.
+5. 회전 대상과 초동 대응 조치를 작성하라.
+
+출력 형식:
+- 관측된 사실
+- 노출 후보 credential
+- 악용 여부
+- 타임라인
+- 추가 Pivot
+- 대응 조치</code></pre>
+<h2 id="8-대응-요약">8. 대응 요약</h2>
+<ul>
+<li>secret 접근 원본 로그와 관련 파일 경로를 보존한다.</li>
+<li>노출 가능성이 있는 token, key, password를 우선 회전한다.</li>
+<li>해당 credential의 사용 로그를 전체 기간으로 확장 검색한다.</li>
+<li>secret 저장 위치와 권한, audit 설정, rotation 주기를 개선한다.</li>
+</ul>
+    <footer class="footer">
+      Spacebar Project. This workflow is an educational blue team playbook artifact.
+    </footer>
+  </main>
+</body>
+</html>

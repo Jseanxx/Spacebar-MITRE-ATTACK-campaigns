@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>WF-CLOUD-001 클라우드 메타데이터 및 임시 자격 증명 악용 | Spacebar Blue Team Playbooks</title>
+  <link rel="stylesheet" href="/assets/campaign.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="/campaigns/"><img class="brand-logo" src="/assets/spacebarLogo.png" alt="Spacebar"><span>Spacebar Campaigns</span></a>
+      <nav class="nav" aria-label="Primary navigation">
+        <a href="/campaigns/">Campaigns</a>
+        <a href="/workflows/">Blue Team Playbooks</a>
+        <a href="/logs/">Log Catalog</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="page">
+    <div class="breadcrumbs"><a href="/campaigns/">Home</a> / <a href="/workflows/">Blue Team Playbooks</a> / <span>WF-CLOUD-001</span></div>
+<h1>WF-CLOUD-001 클라우드 메타데이터 및 임시 자격 증명 악용</h1>
+<p>노드, 컨테이너, 서버에서 클라우드 메타데이터 서비스나 임시 자격 증명을 이용해 AWS API, Secret, S3에 접근한 정황을 분석하는 Workflow다. IMDS 접근, STS 검증, Secrets Manager 조회, S3 업로드/다운로드를 하나의 흐름으로 확인한다.</p>
+<div class="meta-grid" aria-label="Campaign metadata">
+<div class="meta-label">분석 대상 행위:</div>
+<div class="meta-value">IMDS 접근, Instance Profile credential 획득, STS 검증, Secrets Manager/S3 접근</div>
+<div class="meta-label">관련 캠페인:</div>
+<div class="meta-value">SB-04, SB-05</div>
+<div class="meta-label">분석 결과물:</div>
+<div class="meta-value">사용된 role, API 호출 주체, 접근 secret/bucket, 데이터 이동 여부</div>
+</div>
+<h2 id="1-행위-정의">1. 행위 정의</h2>
+<p>공격자가 서버나 K8s 노드에서 메타데이터 서비스를 통해 임시 자격 증명을 얻고, 이를 이용해 클라우드 API를 호출하는 행위다. CloudTrail만 보지 않고 credential이 획득된 호스트/파드와 API 호출 source를 연결해야 한다.</p>
+<h2 id="2-관련-technique">2. 관련 Technique</h2>
+<div class="table-wrap wide-table">
+<table>
+<thead><tr><th>Technique</th><th>Name</th><th>확인 관점</th></tr></thead>
+<tbody>
+<tr><td>T1552.005</td><td>Cloud Instance Metadata API</td><td>IMDS 접근과 role credential 획득 여부 확인</td></tr>
+<tr><td>T1078.004</td><td>Cloud Accounts</td><td>임시 cloud credential의 비정상 사용 확인</td></tr>
+<tr><td>T1528</td><td>Steal Application Access Token</td><td>token/temporary credential 수집 확인</td></tr>
+<tr><td>T1530</td><td>Data from Cloud Storage</td><td>S3/object storage 접근 확인</td></tr>
+<tr><td>T1567.002</td><td>Exfiltration to Cloud Storage</td><td>외부/비정상 bucket 업로드 확인</td></tr>
+</tbody></table></div>
+<h2 id="3-먼저-확인할-로그">3. 먼저 확인할 로그</h2>
+<div class="table-wrap wide-table">
+<table>
+<thead><tr><th>환경</th><th>대표 로그</th><th>핵심 필드</th></tr></thead>
+<tbody>
+<tr><td>AWS</td><td>CloudTrail</td><td>eventName, userIdentity, sourceIPAddress, userAgent, requestParameters</td></tr>
+<tr><td>Host / Node</td><td>EDR network, proxy, iptables 후보</td><td>destination, URL, process, command_line</td></tr>
+<tr><td>Kubernetes</td><td>API audit, pod/node mapping</td><td>pod, node, serviceAccount, source IP</td></tr>
+<tr><td>Secrets</td><td>Secrets Manager API log</td><td>secretId, GetSecretValue, caller role</td></tr>
+<tr><td>Storage</td><td>S3 data event, server access log</td><td>bucket, key, PutObject, GetObject, source</td></tr>
+</tbody></table></div>
+<h2 id="4-빠른-kql">4. 빠른 KQL</h2>
+<h3 id="sts-role-확인">STS/Role 확인</h3>
+<pre><code>event.provider: &quot;sts.amazonaws.com&quot; and event.action: (&quot;GetCallerIdentity&quot; or &quot;AssumeRole&quot;)</code></pre>
+<h3 id="secret-조회">Secret 조회</h3>
+<pre><code>event.provider: &quot;secretsmanager.amazonaws.com&quot; and event.action: (&quot;GetSecretValue&quot; or &quot;ListSecrets&quot;)</code></pre>
+<h3 id="s3-업로드-다운로드">S3 업로드/다운로드</h3>
+<pre><code>event.provider: &quot;s3.amazonaws.com&quot; and event.action: (&quot;PutObject&quot; or &quot;GetObject&quot; or &quot;ListBucket&quot;)</code></pre>
+<h2 id="5-분석자가-할-일">5. 분석자가 할 일</h2>
+<ol>
+<li>CloudTrail에서 사용된 role, source IP, userAgent를 고정한다.</li>
+<li>해당 source가 어떤 노드/파드/서버인지 매핑한다.</li>
+<li>STS, Secrets Manager, RDS, S3 접근 순서를 타임라인화한다.</li>
+<li>정상 애플리케이션 호출인지 공격자 수동 호출인지 userAgent와 시간대로 구분한다.</li>
+<li>Secret 조회 이후 DB 접근 또는 S3 업로드가 이어졌는지 Pivot한다.</li>
+</ol>
+<h2 id="6-판단-기준">6. 판단 기준</h2>
+<div class="table-wrap wide-table">
+<table>
+<thead><tr><th>구분</th><th>확인 기준</th></tr></thead>
+<tbody>
+<tr><td>의심</td><td>서버/파드에서 예상치 못한 STS GetCallerIdentity 또는 AWS CLI userAgent</td></tr>
+<tr><td>의심</td><td>애플리케이션 역할이 평소 접근하지 않던 Secret/Bucket 조회</td></tr>
+<tr><td>의심</td><td>Secret 조회 직후 DB 접근 또는 외부 bucket 업로드</td></tr>
+<tr><td>정상 가능성</td><td>애플리케이션 정규 기능, 백업, 배포, 운영 자동화와 일치</td></tr>
+</tbody></table></div>
+<h2 id="7-llm-prompt-template">7. LLM Prompt Template</h2>
+<pre><code>너는 SIEM에 연결된 침해사고 분석 보조자다.
+다음 조건으로 &quot;클라우드 메타데이터 및 임시 자격 증명 악용&quot; 정황을 조사하라.
+
+입력:
+- 시간 범위:
+- 의심 role 또는 access key:
+- 의심 source IP/host/pod:
+- 관측된 API:
+- 관측된 단서:
+
+요청:
+1. CloudTrail, host/network, K8s, S3, Secrets Manager 로그를 조회하라.
+2. 사용된 role, API 호출, source, userAgent를 요약하라.
+3. 정상 애플리케이션 호출과 공격자 호출 가능성을 구분하라.
+4. Secret 조회, DB 접근, S3 업로드 Pivot을 확인하라.
+5. 초동 대응 조치를 작성하라.
+
+출력 형식:
+- 관측된 사실
+- API 타임라인
+- 사용 credential/role
+- 의심 근거
+- 추가 Pivot
+- 대응 조치</code></pre>
+<h2 id="8-대응-요약">8. 대응 요약</h2>
+<ul>
+<li>CloudTrail 원본 이벤트와 관련 host/pod 매핑 정보를 보존한다.</li>
+<li>노출 가능 role의 세션 차단, 권한 축소, secret 회전을 검토한다.</li>
+<li>S3/Secrets/RDS 접근 로그를 전체 기간으로 확장 검색한다.</li>
+<li>IMDSv2 강제, 최소 권한, pod identity 분리를 점검한다.</li>
+</ul>
+    <footer class="footer">
+      Spacebar Project. This workflow is an educational blue team playbook artifact.
+    </footer>
+  </main>
+</body>
+</html>

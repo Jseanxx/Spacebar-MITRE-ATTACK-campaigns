@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>WF-LOLBIN-001 정상 도구/서명된 바이너리 악용 | Spacebar Blue Team Playbooks</title>
+  <link rel="stylesheet" href="/assets/campaign.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="/campaigns/"><img class="brand-logo" src="/assets/spacebarLogo.png" alt="Spacebar"><span>Spacebar Campaigns</span></a>
+      <nav class="nav" aria-label="Primary navigation">
+        <a href="/campaigns/">Campaigns</a>
+        <a href="/workflows/">Blue Team Playbooks</a>
+        <a href="/logs/">Log Catalog</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="page">
+    <div class="breadcrumbs"><a href="/campaigns/">Home</a> / <a href="/workflows/">Blue Team Playbooks</a> / <span>WF-LOLBIN-001</span></div>
+<h1>WF-LOLBIN-001 정상 도구/서명된 바이너리 악용</h1>
+<p>정상 시스템 도구나 서명된 바이너리가 공격 행위의 실행 프록시로 사용된 정황을 분석하는 Workflow다. 파일명만 정상인지 보지 않고 명령줄 인자, 부모 프로세스, 실행 위치, 후속 파일/네트워크 행위를 확인한다.</p>
+<div class="meta-grid" aria-label="Campaign metadata">
+<div class="meta-label">분석 대상 행위:</div>
+<div class="meta-value">rundll32/comsvcs.dll, PowerShell, schtasks, certutil, curl/wget 등 정상 도구 악용</div>
+<div class="meta-label">관련 캠페인:</div>
+<div class="meta-value">SB-03, SB-07</div>
+<div class="meta-label">분석 결과물:</div>
+<div class="meta-value">악용된 도구, 명령줄, 부모 프로세스, 목적 행위, 후속 Pivot</div>
+</div>
+<h2 id="1-행위-정의">1. 행위 정의</h2>
+<p>공격자가 보안 탐지를 우회하거나 신뢰를 얻기 위해 운영체제 기본 도구와 정상 관리 도구를 공격 행위에 사용하는 행위다. 정상 도구 실행 자체가 아니라 비정상 인자, 비정상 부모 프로세스, 비정상 대상 파일을 중심으로 판단한다.</p>
+<h2 id="2-관련-technique">2. 관련 Technique</h2>
+<div class="table-wrap wide-table">
+<table>
+<thead><tr><th>Technique</th><th>Name</th><th>확인 관점</th></tr></thead>
+<tbody>
+<tr><td>T1218</td><td>System Binary Proxy Execution</td><td>정상 바이너리 프록시 실행 확인</td></tr>
+<tr><td>T1218.011</td><td>Rundll32</td><td>rundll32와 DLL 인자 악용 확인</td></tr>
+<tr><td>T1059.001</td><td>PowerShell</td><td>웹 요청, encoded command, 스크립트 실행 확인</td></tr>
+<tr><td>T1003.001</td><td>LSASS Memory</td><td>comsvcs.dll 기반 LSASS dump 확인</td></tr>
+<tr><td>T1053</td><td>Scheduled Task/Job</td><td>schtasks 기반 지속성/원격 실행 확인</td></tr>
+<tr><td>T1105</td><td>Ingress Tool Transfer</td><td>정상 도구를 통한 다운로드 확인</td></tr>
+</tbody></table></div>
+<h2 id="3-먼저-확인할-로그">3. 먼저 확인할 로그</h2>
+<div class="table-wrap wide-table">
+<table>
+<thead><tr><th>환경</th><th>대표 로그</th><th>핵심 필드</th></tr></thead>
+<tbody>
+<tr><td>Windows</td><td>Sysmon 1/7/10/11, Security 4688</td><td>process, command_line, parent, image_loaded</td></tr>
+<tr><td>PowerShell</td><td>Event ID 4104</td><td>ScriptBlockText, user, host</td></tr>
+<tr><td>EDR</td><td>process tree, LOLBin alert</td><td>parent, child, hash, detection</td></tr>
+<tr><td>Network</td><td>Proxy, firewall, Sysmon 3</td><td>destination, URL, user agent, process</td></tr>
+<tr><td>File</td><td>Sysmon 11, file creation</td><td>file.path, hash, process</td></tr>
+</tbody></table></div>
+<h2 id="4-빠른-kql">4. 빠른 KQL</h2>
+<h3 id="rundll32-comsvcs-lsass-dump">rundll32/comsvcs LSASS dump</h3>
+<pre><code>process.name: &quot;rundll32.exe&quot; and process.command_line: (&quot;*comsvcs.dll*&quot; and &quot;*MiniDump*&quot; and &quot;*lsass*&quot;)</code></pre>
+<h3 id="powershell-다운로드-난독화">PowerShell 다운로드/난독화</h3>
+<pre><code>process.name: (&quot;powershell.exe&quot; or &quot;pwsh.exe&quot;) and process.command_line: (&quot;*-enc*&quot; or &quot;*Invoke-WebRequest*&quot; or &quot;*DownloadString*&quot;)</code></pre>
+<h3 id="schtasks-등록">schtasks 등록</h3>
+<pre><code>process.command_line: (&quot;*schtasks /create*&quot; or &quot;*Register-ScheduledTask*&quot;)</code></pre>
+<h2 id="5-분석자가-할-일">5. 분석자가 할 일</h2>
+<ol>
+<li>실행된 정상 도구와 전체 command line을 고정한다.</li>
+<li>부모 프로세스, 실행 계정, 실행 위치가 정상인지 확인한다.</li>
+<li>도구 사용 목적이 dump, 다운로드, 지속성, 원격 실행 중 무엇인지 분류한다.</li>
+<li>같은 command line 또는 hash로 확장 검색한다.</li>
+<li>후속 credential 접근, 파일 생성, 네트워크 연결을 Pivot한다.</li>
+</ol>
+<h2 id="6-판단-기준">6. 판단 기준</h2>
+<div class="table-wrap wide-table">
+<table>
+<thead><tr><th>구분</th><th>확인 기준</th></tr></thead>
+<tbody>
+<tr><td>의심</td><td>rundll32/comsvcs로 LSASS 접근 또는 dump 생성</td></tr>
+<tr><td>의심</td><td>PowerShell encoded command, 외부 다운로드, 비정상 parent</td></tr>
+<tr><td>의심</td><td>schtasks로 SYSTEM 권한 payload 실행</td></tr>
+<tr><td>정상 가능성</td><td>승인된 관리 도구, 백업, 패치, EDR/관리 솔루션 작업과 일치</td></tr>
+</tbody></table></div>
+<h2 id="7-llm-prompt-template">7. LLM Prompt Template</h2>
+<pre><code>너는 SIEM에 연결된 침해사고 분석 보조자다.
+다음 조건으로 &quot;정상 도구/서명된 바이너리 악용&quot; 정황을 조사하라.
+
+입력:
+- 시간 범위:
+- 의심 호스트:
+- 의심 프로세스:
+- 의심 계정:
+- 관측된 command line:
+
+요청:
+1. Sysmon, Security, PowerShell, EDR, 네트워크 로그를 조회하라.
+2. 프로세스 트리와 명령줄을 분석해 목적 행위를 분류하라.
+3. 정상 관리 가능성과 공격 악용 가능성을 구분하라.
+4. 후속 파일 생성, 네트워크 연결, credential 접근 Pivot을 확인하라.
+5. 초동 대응 조치를 작성하라.
+
+출력 형식:
+- 관측된 사실
+- 악용 도구
+- 목적 행위
+- 의심 근거
+- 추가 Pivot
+- 대응 조치</code></pre>
+<h2 id="8-대응-요약">8. 대응 요약</h2>
+<ul>
+<li>프로세스 트리, command line, 관련 파일을 보존한다.</li>
+<li>비정상 도구 사용이면 호스트 격리와 credential 회전을 검토한다.</li>
+<li>동일 command line, parent, destination으로 확장 검색한다.</li>
+<li>LOLBin 탐지 룰과 허용된 관리 도구 기준을 정비한다.</li>
+</ul>
+    <footer class="footer">
+      Spacebar Project. This workflow is an educational blue team playbook artifact.
+    </footer>
+  </main>
+</body>
+</html>

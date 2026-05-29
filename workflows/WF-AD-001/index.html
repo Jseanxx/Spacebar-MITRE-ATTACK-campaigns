@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>WF-AD-001 AD 장악 및 도메인 권한 확대 | Spacebar Blue Team Playbooks</title>
+  <link rel="stylesheet" href="/assets/campaign.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="/campaigns/"><img class="brand-logo" src="/assets/spacebarLogo.png" alt="Spacebar"><span>Spacebar Campaigns</span></a>
+      <nav class="nav" aria-label="Primary navigation">
+        <a href="/campaigns/">Campaigns</a>
+        <a href="/workflows/">Blue Team Playbooks</a>
+        <a href="/logs/">Log Catalog</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="page">
+    <div class="breadcrumbs"><a href="/campaigns/">Home</a> / <a href="/workflows/">Blue Team Playbooks</a> / <span>WF-AD-001</span></div>
+<h1>WF-AD-001 AD 장악 및 도메인 권한 확대</h1>
+<p>도메인 계정 정찰 이후 Kerberoasting, LSASS dump, DCSync, Golden Ticket, NTDS 탈취로 이어지는 AD 장악 흐름을 분석하는 Workflow다. 각 이벤트를 따로 보지 않고 계정 정찰, credential 수집, DC 접근, 도메인 권한 행사 순서로 연결한다.</p>
+<div class="meta-grid" aria-label="Campaign metadata">
+<div class="meta-label">분석 대상 행위:</div>
+<div class="meta-value">Kerberoasting, LSASS dump, DCSync, Golden Ticket, NTDS 탈취, DC 원격 접속</div>
+<div class="meta-label">관련 캠페인:</div>
+<div class="meta-value">SB-03, SB-07</div>
+<div class="meta-label">분석 결과물:</div>
+<div class="meta-value">탈취 계정, 도메인 권한 범위, DC 접근 경로, 장기 지속성 여부</div>
+</div>
+<h2 id="1-행위-정의">1. 행위 정의</h2>
+<p>공격자가 AD 환경에서 서비스 계정이나 관리자 credential을 탈취하고, 도메인 컨트롤러 접근과 전체 계정 데이터베이스 탈취를 시도하는 행위다. Windows 이벤트, Sysmon, PowerShell, DC 보안 로그, 네트워크 접속 로그를 함께 확인해야 한다.</p>
+<h2 id="2-관련-technique">2. 관련 Technique</h2>
+<div class="table-wrap wide-table">
+<table>
+<thead><tr><th>Technique</th><th>Name</th><th>확인 관점</th></tr></thead>
+<tbody>
+<tr><td>T1558.003</td><td>Kerberoasting</td><td>서비스 티켓 요청과 오프라인 크래킹 후보 확인</td></tr>
+<tr><td>T1003.001</td><td>LSASS Memory</td><td>LSASS 덤프 프로세스와 파일 생성 확인</td></tr>
+<tr><td>T1003.006</td><td>DCSync</td><td>Directory Replication 권한 오용 확인</td></tr>
+<tr><td>T1003.003</td><td>NTDS</td><td>NTDS.dit 또는 secretsdump 기반 계정 DB 탈취 확인</td></tr>
+<tr><td>T1558.001</td><td>Golden Ticket</td><td>krbtgt 키 악용과 위조 TGT 사용 확인</td></tr>
+<tr><td>T1021.006</td><td>WinRM</td><td>DC 원격 명령 실행 여부 확인</td></tr>
+</tbody></table></div>
+<h2 id="3-먼저-확인할-로그">3. 먼저 확인할 로그</h2>
+<div class="table-wrap wide-table">
+<table>
+<thead><tr><th>환경</th><th>대표 로그</th><th>핵심 필드</th></tr></thead>
+<tbody>
+<tr><td>Domain Controller</td><td>Security 4768/4769/4771/4662/4624</td><td>account, serviceName, source IP, object, access mask</td></tr>
+<tr><td>Windows Host</td><td>Sysmon 1/10/11, Security 4688</td><td>process.command_line, target process, file path</td></tr>
+<tr><td>PowerShell</td><td>Event ID 4104</td><td>ScriptBlockText, user, host</td></tr>
+<tr><td>Network</td><td>SMB/WinRM/RPC/DCERPC logs</td><td>source, destination, port, account</td></tr>
+<tr><td>EDR</td><td>credential dumping alert</td><td>process tree, dump file, detection name</td></tr>
+</tbody></table></div>
+<h2 id="4-빠른-kql">4. 빠른 KQL</h2>
+<h3 id="kerberoasting-후보">Kerberoasting 후보</h3>
+<pre><code>winlog.event_id: 4769 and winlog.event_data.TicketEncryptionType: (&quot;0x17&quot; or &quot;0x18&quot;)</code></pre>
+<h3 id="lsass-dump-후보">LSASS dump 후보</h3>
+<pre><code>process.command_line: (&quot;*lsass*&quot; or &quot;*comsvcs.dll*&quot; or &quot;*MiniDump*&quot; or &quot;*procdump*&quot;)</code></pre>
+<h3 id="dcsync-후보">DCSync 후보</h3>
+<pre><code>winlog.event_id: 4662 and winlog.event_data.Properties: (&quot;*DS-Replication-Get-Changes*&quot; or &quot;*DS-Replication-Get-Changes-All*&quot;)</code></pre>
+<h2 id="5-분석자가-할-일">5. 분석자가 할 일</h2>
+<ol>
+<li>AD 정찰과 credential 수집의 시작점을 찾는다.</li>
+<li>Kerberoasting, LSASS dump, DCSync, NTDS 접근 이벤트를 시간순으로 연결한다.</li>
+<li>DC 접근 계정, source host, 인증 방식, 원격 실행 도구를 확인한다.</li>
+<li>Golden Ticket 또는 krbtgt 관련 이상 징후를 확인한다.</li>
+<li>도메인 전체 영향 범위와 credential 회전 범위를 산정한다.</li>
+</ol>
+<h2 id="6-판단-기준">6. 판단 기준</h2>
+<div class="table-wrap wide-table">
+<table>
+<thead><tr><th>구분</th><th>확인 기준</th></tr></thead>
+<tbody>
+<tr><td>의심</td><td>일반 사용자/감염 호스트에서 대량 TGS 요청 또는 Rubeus 실행</td></tr>
+<tr><td>의심</td><td>LSASS dump 파일 생성, comsvcs.dll/rundll32 악용</td></tr>
+<tr><td>의심</td><td>비정상 계정의 DCSync/NTDS 접근 또는 DC 원격 실행</td></tr>
+<tr><td>정상 가능성</td><td>승인된 백업, AD 점검, 보안 도구 스캔과 일치</td></tr>
+</tbody></table></div>
+<h2 id="7-llm-prompt-template">7. LLM Prompt Template</h2>
+<pre><code>너는 SIEM에 연결된 침해사고 분석 보조자다.
+다음 조건으로 &quot;AD 장악 및 도메인 권한 확대&quot; 정황을 조사하라.
+
+입력:
+- 시간 범위:
+- 의심 계정:
+- 의심 호스트:
+- 대상 DC:
+- 관측된 단서:
+
+요청:
+1. DC Security, Sysmon, PowerShell, 네트워크, EDR 로그를 조회하라.
+2. Kerberoasting, LSASS dump, DCSync, Golden Ticket, NTDS 관련 이벤트를 분류하라.
+3. DC 접근 경로와 사용 credential을 타임라인으로 정리하라.
+4. 정상 관리 가능성과 도메인 장악 가능성을 구분하라.
+5. containment와 credential 회전 조치를 작성하라.
+
+출력 형식:
+- 관측된 사실
+- AD 공격 단계
+- 영향 계정/호스트
+- 의심 근거
+- 추가 Pivot
+- 대응 조치</code></pre>
+<h2 id="8-대응-요약">8. 대응 요약</h2>
+<ul>
+<li>DC 로그, dump 파일 흔적, 원격 실행 로그를 보존한다.</li>
+<li>의심 계정 비활성화, 관리자 credential 회전, krbtgt 회전 필요성을 검토한다.</li>
+<li>DC 접근 source host를 격리하고 전체 도메인 인증 로그를 확장 검색한다.</li>
+<li>AD Tiering, 최소 권한, credential 보호 설정을 점검한다.</li>
+</ul>
+    <footer class="footer">
+      Spacebar Project. This workflow is an educational blue team playbook artifact.
+    </footer>
+  </main>
+</body>
+</html>

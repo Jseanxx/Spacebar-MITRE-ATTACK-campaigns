@@ -106,6 +106,49 @@
       </p>
       <div class="cards">
         <article class="card">
+          <h3><a href="/workflows/WF-RECON-001/">WF-RECON-001 외부 노출 서비스 및 취약 표면 정찰</a></h3>
+          <p>공개 노출된 웹/API/CI-CD/Ingress 서비스의 배너, URL, 포트, 취약 버전 식별 정황을 분석한다.</p>
+          <div class="tag-row">
+            <span class="tag">T1595</span>
+            <span class="tag">T1595.002</span>
+            <span class="tag">T1592</span>
+            <span class="tag">T1590</span>
+            <span class="tag">T1593</span>
+          </div>
+        </article>
+        <article class="card">
+          <h3><a href="/workflows/WF-INITIAL-001/">WF-INITIAL-001 취약 서비스 악용 기반 초기 침투</a></h3>
+          <p>외부 노출 서비스의 취약점, 비인증 API, 웹 요청 기반 RCE를 통해 초기 실행 권한을 얻은 정황을 분석한다.</p>
+          <div class="tag-row">
+            <span class="tag">T1190</span>
+            <span class="tag">T1059</span>
+            <span class="tag">T1203</span>
+            <span class="tag">T1105</span>
+          </div>
+        </article>
+        <article class="card">
+          <h3><a href="/workflows/WF-CICD-001/">WF-CICD-001 CI/CD 서버 정찰 및 Credential 악용</a></h3>
+          <p>Jenkins 등 CI/CD 서버에서 Job, workspace, credential metadata, API token을 정찰하거나 악용한 정황을 분석한다.</p>
+          <div class="tag-row">
+            <span class="tag">T1592</span>
+            <span class="tag">T1552</span>
+            <span class="tag">T1078</span>
+            <span class="tag">T1213</span>
+            <span class="tag">T1021.004</span>
+          </div>
+        </article>
+        <article class="card">
+          <h3><a href="/workflows/WF-CRED-001/">WF-CRED-001 설정 파일 및 Secret 기반 자격 증명 수집</a></h3>
+          <p>설정 파일, 환경변수, Kubernetes Secret, 클라우드 Secret, credential artifact에서 자격 증명을 수집한 정황을 분석한다.</p>
+          <div class="tag-row">
+            <span class="tag">T1552</span>
+            <span class="tag">T1552.001</span>
+            <span class="tag">T1552.004</span>
+            <span class="tag">T1555</span>
+            <span class="tag">T1003</span>
+          </div>
+        </article>
+        <article class="card">
           <h3><a href="/workflows/WF-REMOTE-001/">WF-REMOTE-001 내부망 원격 실행 분석</a></h3>
           <p>SSH, WinRM, PowerShell 등으로 내부 서버에 접속하거나 원격 명령을 실행한 정황을 분석한다.</p>
           <div class="tag-row">
@@ -113,6 +156,146 @@
             <span class="tag">T1021.006</span>
             <span class="tag">T1059.001</span>
             <span class="tag">T1078</span>
+          </div>
+        </article>
+        <article class="card">
+          <h3><a href="/workflows/WF-CMD-001/">WF-CMD-001 스크립트/인터프리터 기반 명령 실행</a></h3>
+          <p>PowerShell, Python, shell, curl/wget, kubectl exec 등 스크립트와 인터프리터를 이용한 명령 실행 정황을 분석한다.</p>
+          <div class="tag-row">
+            <span class="tag">T1059</span>
+            <span class="tag">T1059.001</span>
+            <span class="tag">T1059.004</span>
+            <span class="tag">T1059.006</span>
+            <span class="tag">T1609</span>
+            <span class="tag">T1105</span>
+          </div>
+        </article>
+        <article class="card">
+          <h3><a href="/workflows/WF-DISCOVERY-001/">WF-DISCOVERY-001 시스템·계정·네트워크 정보 수집</a></h3>
+          <p>침투 이후 계정, 권한, 호스트명, 도메인, 네트워크, 서비스, 공유 자원을 수집한 정황을 분석한다.</p>
+          <div class="tag-row">
+            <span class="tag">T1082</span>
+            <span class="tag">T1033</span>
+            <span class="tag">T1087</span>
+            <span class="tag">T1016</span>
+            <span class="tag">T1018</span>
+            <span class="tag">T1135</span>
+            <span class="tag">T1046</span>
+          </div>
+        </article>
+        <article class="card">
+          <h3><a href="/workflows/WF-K8S-001/">WF-K8S-001 Kubernetes API 정찰 및 권한 오용</a></h3>
+          <p>Kubernetes API를 통한 리소스 정찰, Secret 조회, exec, Pod 배포, RBAC 변경 정황을 분석한다.</p>
+          <div class="tag-row">
+            <span class="tag">T1613</span>
+            <span class="tag">T1552.007</span>
+            <span class="tag">T1609</span>
+            <span class="tag">T1611</span>
+            <span class="tag">T1610</span>
+            <span class="tag">T1098</span>
+          </div>
+        </article>
+        <article class="card">
+          <h3><a href="/workflows/WF-CLOUD-001/">WF-CLOUD-001 클라우드 메타데이터 및 임시 자격 증명 악용</a></h3>
+          <p>IMDS, STS, Instance Profile, AWS CLI, Secrets Manager, S3 등 클라우드 임시 자격 증명 악용 정황을 분석한다.</p>
+          <div class="tag-row">
+            <span class="tag">T1552.005</span>
+            <span class="tag">T1078.004</span>
+            <span class="tag">T1528</span>
+            <span class="tag">T1530</span>
+            <span class="tag">T1567.002</span>
+          </div>
+        </article>
+        <article class="card">
+          <h3><a href="/workflows/WF-PRIVESC-001/">WF-PRIVESC-001 권한 상승 및 경계 탈출</a></h3>
+          <p>컨테이너 탈출, privileged pod, SYSTEM/root 권한 획득, 관리자 권한 전환 정황을 분석한다.</p>
+          <div class="tag-row">
+            <span class="tag">T1068</span>
+            <span class="tag">T1611</span>
+            <span class="tag">T1610</span>
+            <span class="tag">T1134</span>
+            <span class="tag">T1548</span>
+            <span class="tag">T1053</span>
+          </div>
+        </article>
+        <article class="card">
+          <h3><a href="/workflows/WF-PERSIST-001/">WF-PERSIST-001 지속성 확보 및 정상 흐름 위장</a></h3>
+          <p>웹쉘, Scheduled Task, Golden Ticket, 정상 업데이트 흐름 위장 등 지속 접근 구조를 분석한다.</p>
+          <div class="tag-row">
+            <span class="tag">T1505.003</span>
+            <span class="tag">T1053</span>
+            <span class="tag">T1558.001</span>
+            <span class="tag">T1098</span>
+            <span class="tag">T1036</span>
+          </div>
+        </article>
+        <article class="card">
+          <h3><a href="/workflows/WF-SUPPLY-001/">WF-SUPPLY-001 신뢰된 배포/업데이트 체인 변조</a></h3>
+          <p>CI/CD 배포, 패치 파일, manifest, 업데이트 서버 등 신뢰된 배포 흐름에 공격 코드를 삽입한 정황을 분석한다.</p>
+          <div class="tag-row">
+            <span class="tag">T1195</span>
+            <span class="tag">T1195.002</span>
+            <span class="tag">T1036</span>
+            <span class="tag">T1105</span>
+            <span class="tag">T1053</span>
+            <span class="tag">T1021</span>
+          </div>
+        </article>
+        <article class="card">
+          <h3><a href="/workflows/WF-AD-001/">WF-AD-001 AD 장악 및 도메인 권한 확대</a></h3>
+          <p>Kerberoasting, LSASS dump, DCSync, Golden Ticket, NTDS 탈취 등 AD 장악 흐름을 분석한다.</p>
+          <div class="tag-row">
+            <span class="tag">T1558.003</span>
+            <span class="tag">T1003.001</span>
+            <span class="tag">T1003.006</span>
+            <span class="tag">T1003.003</span>
+            <span class="tag">T1558.001</span>
+            <span class="tag">T1021.006</span>
+          </div>
+        </article>
+        <article class="card">
+          <h3><a href="/workflows/WF-LOLBIN-001/">WF-LOLBIN-001 정상 도구/서명된 바이너리 악용</a></h3>
+          <p>rundll32, comsvcs.dll, PowerShell, schtasks 등 정상 도구를 프록시로 악용한 정황을 분석한다.</p>
+          <div class="tag-row">
+            <span class="tag">T1218</span>
+            <span class="tag">T1218.011</span>
+            <span class="tag">T1059.001</span>
+            <span class="tag">T1003.001</span>
+            <span class="tag">T1053</span>
+            <span class="tag">T1105</span>
+          </div>
+        </article>
+        <article class="card">
+          <h3><a href="/workflows/WF-DATA-001/">WF-DATA-001 민감 데이터 접근 및 수집</a></h3>
+          <p>DB, RDS, 파일 서버, SaaS/문서 서버, Kubernetes Secret 등 민감 데이터에 접근하고 수집한 정황을 분석한다.</p>
+          <div class="tag-row">
+            <span class="tag">T1213</span>
+            <span class="tag">T1005</span>
+            <span class="tag">T1530</span>
+            <span class="tag">T1552</span>
+            <span class="tag">T1039</span>
+          </div>
+        </article>
+        <article class="card">
+          <h3><a href="/workflows/WF-STAGING-001/">WF-STAGING-001 유출 전 데이터 스테이징 및 압축</a></h3>
+          <p>수집 자료를 임시 경로, 공유 폴더, 로컬 staging 디렉터리에 모으고 압축/암호화한 정황을 분석한다.</p>
+          <div class="tag-row">
+            <span class="tag">T1074.001</span>
+            <span class="tag">T1560</span>
+            <span class="tag">T1560.001</span>
+            <span class="tag">T1036</span>
+            <span class="tag">T1005</span>
+          </div>
+        </article>
+        <article class="card">
+          <h3><a href="/workflows/WF-EXFIL-001/">WF-EXFIL-001 외부 전송 및 클라우드 저장소 유출</a></h3>
+          <p>HTTPS POST, SSH 채널, S3 업로드, 외부 웹 수신지 등으로 데이터가 유출된 정황을 분석한다.</p>
+          <div class="tag-row">
+            <span class="tag">T1041</span>
+            <span class="tag">T1048</span>
+            <span class="tag">T1048.002</span>
+            <span class="tag">T1567.002</span>
+            <span class="tag">T1105</span>
           </div>
         </article>
         <article class="card">

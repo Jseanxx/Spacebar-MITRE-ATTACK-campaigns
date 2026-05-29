@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>WF-INITIAL-001 취약 서비스 악용 기반 초기 침투 | Spacebar Blue Team Playbooks</title>
+  <link rel="stylesheet" href="/assets/campaign.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="/campaigns/"><img class="brand-logo" src="/assets/spacebarLogo.png" alt="Spacebar"><span>Spacebar Campaigns</span></a>
+      <nav class="nav" aria-label="Primary navigation">
+        <a href="/campaigns/">Campaigns</a>
+        <a href="/workflows/">Blue Team Playbooks</a>
+        <a href="/logs/">Log Catalog</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="page">
+    <div class="breadcrumbs"><a href="/campaigns/">Home</a> / <a href="/workflows/">Blue Team Playbooks</a> / <span>WF-INITIAL-001</span></div>
+<h1>WF-INITIAL-001 취약 서비스 악용 기반 초기 침투</h1>
+<p>공개 서비스에 대한 취약점 악용 요청 이후 애플리케이션, 컨테이너, 서버 내부에서 비정상 명령 실행이 관측됐을 때 사용하는 행위 기반 IR Workflow다. 정찰 로그와 실행 로그를 이어서 보며, 단순 스캐닝인지 실제 침투로 전환됐는지 판단한다.</p>
+<div class="meta-grid" aria-label="Campaign metadata">
+<div class="meta-label">분석 대상 행위:</div>
+<div class="meta-value">RCE, 비인증 API 악용, 취약 웹/애플리케이션 서비스 악용</div>
+<div class="meta-label">관련 캠페인:</div>
+<div class="meta-value">SB-04, SB-06, SB-07, 외부 서비스 침투 캠페인 공통</div>
+<div class="meta-label">분석 결과물:</div>
+<div class="meta-value">악용 요청, 최초 실행 위치, 실행 계정, 후속 다운로드/명령 실행 여부</div>
+</div>
+<h2 id="1-행위-정의">1. 행위 정의</h2>
+<p>공격자가 Jenkins, Langflow, JBoss, 프론트엔드 파드 같은 외부 노출 서비스를 통해 서버 측 코드 실행 또는 명령 실행 권한을 확보하는 행위다. HTTP 요청만 보지 않고 요청 직후 생성된 프로세스, 애플리케이션 에러, 다운로드, outbound 연결을 함께 확인해야 한다.</p>
+<h2 id="2-관련-technique">2. 관련 Technique</h2>
+<div class="table-wrap wide-table">
+<table>
+<thead><tr><th>Technique</th><th>Name</th><th>확인 관점</th></tr></thead>
+<tbody>
+<tr><td>T1190</td><td>Exploit Public-Facing Application</td><td>외부 노출 서비스 취약점 악용 여부 확인</td></tr>
+<tr><td>T1059</td><td>Command and Scripting Interpreter</td><td>취약점 악용 이후 쉘, Python, PowerShell 실행 여부 확인</td></tr>
+<tr><td>T1203</td><td>Exploitation for Client Execution</td><td>취약 입력이 런타임 실행으로 이어졌는지 확인</td></tr>
+<tr><td>T1105</td><td>Ingress Tool Transfer</td><td>초기 침투 직후 후속 도구 다운로드 여부 확인</td></tr>
+</tbody></table></div>
+<h2 id="3-먼저-확인할-로그">3. 먼저 확인할 로그</h2>
+<div class="table-wrap wide-table">
+<table>
+<thead><tr><th>환경</th><th>대표 로그</th><th>핵심 필드</th></tr></thead>
+<tbody>
+<tr><td>Web / App</td><td>access log, error log, framework log</td><td><code>source.ip</code>, <code>url.path</code>, <code>http.request.method</code>, <code>status</code>, <code>exception</code>, <code>trace_id</code></td></tr>
+<tr><td>Cloud / Edge</td><td>ALB, WAF, CDN log</td><td><code>client_ip</code>, <code>request_url</code>, <code>target_status_code</code>, <code>waf.action</code>, <code>rule_id</code></td></tr>
+<tr><td>Linux / Container</td><td>auditd, syslog, container stdout/stderr</td><td><code>process.name</code>, <code>process.command_line</code>, <code>user.name</code>, <code>container.id</code></td></tr>
+<tr><td>Windows</td><td>Sysmon 1/3, PowerShell 4104</td><td><code>process.command_line</code>, <code>parent.process.name</code>, <code>destination.ip</code>, <code>ScriptBlockText</code></td></tr>
+<tr><td>EDR</td><td>process/network alert</td><td>process tree, command line, parent process, network destination</td></tr>
+</tbody></table></div>
+<h2 id="4-빠른-kql">4. 빠른 KQL</h2>
+<h3 id="취약-api-rce-요청-후보">취약 API/RCE 요청 후보</h3>
+<pre><code>url.path: (&quot;*/validate*&quot; or &quot;*/api*&quot; or &quot;*/upload*&quot; or &quot;*/debug*&quot; or &quot;*/actuator*&quot; or &quot;*/invoker*&quot; or &quot;*/jmx-console*&quot;)</code></pre>
+<h3 id="웹-프로세스-하위-명령-실행">웹 프로세스 하위 명령 실행</h3>
+<pre><code>process.parent.name: (&quot;nginx&quot; or &quot;apache2&quot; or &quot;java&quot; or &quot;node&quot; or &quot;python&quot;) and
+process.name: (&quot;sh&quot; or &quot;bash&quot; or &quot;cmd.exe&quot; or &quot;powershell.exe&quot; or &quot;python&quot; or &quot;curl&quot; or &quot;wget&quot;)</code></pre>
+<h3 id="침투-직후-outbound-연결">침투 직후 outbound 연결</h3>
+<pre><code>event.category: &quot;network&quot; and process.name: (&quot;curl&quot; or &quot;wget&quot; or &quot;python&quot; or &quot;powershell.exe&quot; or &quot;java&quot;)</code></pre>
+<h2 id="5-분석자가-할-일">5. 분석자가 할 일</h2>
+<ol>
+<li>의심 HTTP 요청의 source IP, URL, request body 후보, status code를 고정한다.</li>
+<li>같은 시간대 애플리케이션 에러와 프로세스 생성 로그를 확인한다.</li>
+<li>웹/앱 프로세스 하위에 쉘, 스크립트, 다운로드 도구가 실행됐는지 본다.</li>
+<li>취약점 악용 이후 credential 접근, 내부 정찰, 도구 반입으로 이어졌는지 Pivot한다.</li>
+<li>영향 서비스의 버전, 패치 상태, 노출 범위를 확인한다.</li>
+</ol>
+<h2 id="6-판단-기준">6. 판단 기준</h2>
+<div class="table-wrap wide-table">
+<table>
+<thead><tr><th>구분</th><th>확인 기준</th></tr></thead>
+<tbody>
+<tr><td>의심</td><td>취약 경로 요청 직후 웹/앱 프로세스 하위 명령 실행</td></tr>
+<tr><td>의심</td><td>정상 기능과 무관한 <code>curl</code>, <code>wget</code>, <code>sh</code>, <code>python</code>, <code>powershell</code> 실행</td></tr>
+<tr><td>의심</td><td>에러 로그에 역직렬화, 템플릿, 코드 검증, JBoss/Jenkins 취약 경로 흔적</td></tr>
+<tr><td>정상 가능성</td><td>승인된 보안 점검, 헬스체크, QA 테스트와 일치</td></tr>
+</tbody></table></div>
+<h2 id="7-llm-prompt-template">7. LLM Prompt Template</h2>
+<pre><code>너는 SIEM에 연결된 침해사고 분석 보조자다.
+다음 조건으로 &quot;취약 서비스 악용 기반 초기 침투&quot; 정황을 조사하라.
+반드시 조회한 로그 근거를 기반으로 판단하고, 확인되지 않은 내용은 추정이라고 표시하라.
+
+입력:
+- 시간 범위:
+- 대상 서비스/도메인:
+- 의심 source IP:
+- 관측된 URL/취약점:
+- 관측된 단서:
+
+요청:
+1. Web/ALB/WAF/App/EDR 로그를 조회하라.
+2. 악용 요청과 직후 프로세스/네트워크 이벤트를 시간순으로 연결하라.
+3. 최초 실행 계정, 프로세스, 컨테이너/호스트를 요약하라.
+4. 정상 점검 가능성과 침투 가능성을 구분하라.
+5. 후속 Pivot과 초동 대응 조치를 작성하라.
+
+출력 형식:
+- 관측된 사실
+- 타임라인
+- 최초 침투 후보
+- 의심 근거
+- 추가 Pivot
+- 대응 조치</code></pre>
+<h2 id="8-대응-요약">8. 대응 요약</h2>
+<ul>
+<li>원본 HTTP 요청 로그, 애플리케이션 로그, 프로세스 트리를 보존한다.</li>
+<li>취약 서비스의 외부 노출을 임시 제한하고 WAF/접근 제어를 강화한다.</li>
+<li>동일 source IP와 동일 URL 패턴으로 과거 로그를 확장 검색한다.</li>
+<li>침투 성공 가능성이 있으면 호스트/파드 격리, 토큰 회전, 취약 버전 패치를 수행한다.</li>
+</ul>
+    <footer class="footer">
+      Spacebar Project. This workflow is an educational blue team playbook artifact.
+    </footer>
+  </main>
+</body>
+</html>

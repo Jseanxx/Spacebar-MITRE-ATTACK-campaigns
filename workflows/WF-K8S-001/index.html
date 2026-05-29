@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>WF-K8S-001 Kubernetes API 정찰 및 권한 오용 | Spacebar Blue Team Playbooks</title>
+  <link rel="stylesheet" href="/assets/campaign.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="/campaigns/"><img class="brand-logo" src="/assets/spacebarLogo.png" alt="Spacebar"><span>Spacebar Campaigns</span></a>
+      <nav class="nav" aria-label="Primary navigation">
+        <a href="/campaigns/">Campaigns</a>
+        <a href="/workflows/">Blue Team Playbooks</a>
+        <a href="/logs/">Log Catalog</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="page">
+    <div class="breadcrumbs"><a href="/campaigns/">Home</a> / <a href="/workflows/">Blue Team Playbooks</a> / <span>WF-K8S-001</span></div>
+<h1>WF-K8S-001 Kubernetes API 정찰 및 권한 오용</h1>
+<p>Kubernetes API에서 namespace, pod, service, ingress, secret, RBAC, exec, pod 생성 행위가 관측됐을 때 사용하는 행위 기반 IR Workflow다. ServiceAccount 토큰 악용, 과도한 RBAC 권한, privileged pod 생성, 컨테이너 경계 탈출 가능성을 함께 확인한다.</p>
+<div class="meta-grid" aria-label="Campaign metadata">
+<div class="meta-label">분석 대상 행위:</div>
+<div class="meta-value">K8s 리소스 조회, Secret 조회, exec, Pod 생성, RBAC 추가, privileged Pod</div>
+<div class="meta-label">관련 캠페인:</div>
+<div class="meta-value">SB-04, SB-05</div>
+<div class="meta-label">분석 결과물:</div>
+<div class="meta-value">API 호출 주체, 권한 범위, 조회/변경 리소스, 경계 탈출 가능성</div>
+</div>
+<h2 id="1-행위-정의">1. 행위 정의</h2>
+<p>공격자가 탈취한 ServiceAccount 토큰 또는 관리자 kubeconfig를 이용해 Kubernetes API와 통신하며 클러스터 구조를 파악하고, Secret 조회, exec, Pod 배포, RBAC 변경을 수행하는 행위다. <code>get/list</code> 조회와 <code>create/patch/delete</code> 변경 행위를 구분하고, 동일 주체의 권한 상승 흐름을 시간순으로 연결해야 한다.</p>
+<h2 id="2-관련-technique">2. 관련 Technique</h2>
+<div class="table-wrap wide-table">
+<table>
+<thead><tr><th>Technique</th><th>Name</th><th>확인 관점</th></tr></thead>
+<tbody>
+<tr><td>T1613</td><td>Container and Resource Discovery</td><td>namespace, pod, service, ingress, deployment 조회 확인</td></tr>
+<tr><td>T1552.007</td><td>Container and Cloud Credentials</td><td>ServiceAccount token, kubeconfig, Secret 접근 확인</td></tr>
+<tr><td>T1609</td><td>Container and Resource Discovery</td><td>exec를 통한 컨테이너 내부 명령 확인</td></tr>
+<tr><td>T1611</td><td>Escape to Host</td><td>privileged pod, hostPath, node 접근 여부 확인</td></tr>
+<tr><td>T1610</td><td>Deploy Container</td><td>수집/악성 목적 Pod 생성 여부 확인</td></tr>
+<tr><td>T1098</td><td>Account Manipulation</td><td>Role/RoleBinding/ServiceAccount 생성 또는 변경 확인</td></tr>
+</tbody></table></div>
+<h2 id="3-먼저-확인할-로그">3. 먼저 확인할 로그</h2>
+<div class="table-wrap wide-table">
+<table>
+<thead><tr><th>환경</th><th>대표 로그</th><th>핵심 필드</th></tr></thead>
+<tbody>
+<tr><td>Kubernetes</td><td>API server audit log</td><td>verb, user, groups, sourceIPs, namespace, resource, subresource</td></tr>
+<tr><td>Container Runtime</td><td>container logs, runtime events</td><td>container id, image, command, mount, privileged</td></tr>
+<tr><td>Cloud / Node</td><td>CloudTrail, instance log, IMDS access 후보</td><td>role, source, eventName, metadata access</td></tr>
+<tr><td>Network</td><td>CNI, firewall, VPC Flow Logs</td><td>pod IP, node IP, destination, port</td></tr>
+<tr><td>EDR</td><td>node process/network telemetry</td><td>process, command, file path, network destination</td></tr>
+</tbody></table></div>
+<h2 id="4-빠른-kql">4. 빠른 KQL</h2>
+<h3 id="secret-조회">Secret 조회</h3>
+<pre><code>kubernetes.audit.verb: (&quot;get&quot; or &quot;list&quot;) and kubernetes.audit.objectRef.resource: &quot;secrets&quot;</code></pre>
+<h3 id="exec-사용">exec 사용</h3>
+<pre><code>kubernetes.audit.verb: &quot;create&quot; and kubernetes.audit.objectRef.subresource: &quot;exec&quot;</code></pre>
+<h3 id="rbac-변경">RBAC 변경</h3>
+<pre><code>kubernetes.audit.verb: (&quot;create&quot; or &quot;patch&quot; or &quot;update&quot;) and kubernetes.audit.objectRef.resource: (&quot;roles&quot; or &quot;rolebindings&quot; or &quot;clusterroles&quot; or &quot;clusterrolebindings&quot; or &quot;serviceaccounts&quot;)</code></pre>
+<h3 id="privileged-pod-후보">privileged pod 후보</h3>
+<pre><code>kubernetes.audit.verb: &quot;create&quot; and kubernetes.audit.objectRef.resource: &quot;pods&quot; and requestObject.spec.containers.securityContext.privileged: true</code></pre>
+<h2 id="5-분석자가-할-일">5. 분석자가 할 일</h2>
+<ol>
+<li>API 호출 주체, ServiceAccount, source IP, namespace를 고정한다.</li>
+<li>조회와 변경 행위를 구분해 타임라인을 만든다.</li>
+<li>Secret, exec, RBAC, Pod 생성이 같은 주체로 이어졌는지 확인한다.</li>
+<li>privileged, hostPath, hostNetwork, node credential 접근 여부를 확인한다.</li>
+<li>K8s 이후 CloudTrail, IMDS, Secrets Manager, S3 접근으로 Pivot한다.</li>
+</ol>
+<h2 id="6-판단-기준">6. 판단 기준</h2>
+<div class="table-wrap wide-table">
+<table>
+<thead><tr><th>구분</th><th>확인 기준</th></tr></thead>
+<tbody>
+<tr><td>의심</td><td>일반 앱 ServiceAccount가 Secret, RBAC, exec, Pod 생성 권한 사용</td></tr>
+<tr><td>의심</td><td>kube-system 또는 운영 namespace에 예외적 Pod 생성</td></tr>
+<tr><td>의심</td><td>privileged pod, hostPath mount, node credential 접근</td></tr>
+<tr><td>정상 가능성</td><td>승인된 배포, 운영 자동화, GitOps/CI/CD 서비스 계정과 일치</td></tr>
+</tbody></table></div>
+<h2 id="7-llm-prompt-template">7. LLM Prompt Template</h2>
+<pre><code>너는 SIEM에 연결된 침해사고 분석 보조자다.
+다음 조건으로 &quot;Kubernetes API 정찰 및 권한 오용&quot; 정황을 조사하라.
+
+입력:
+- 시간 범위:
+- 의심 namespace:
+- 의심 ServiceAccount 또는 user:
+- 의심 Pod/Node:
+- 관측된 단서:
+
+요청:
+1. Kubernetes API audit, container runtime, node, cloud 로그를 조회하라.
+2. API 호출 주체와 리소스 조회/변경 타임라인을 작성하라.
+3. Secret 조회, exec, RBAC 변경, privileged pod 생성 여부를 확인하라.
+4. 정상 배포 가능성과 권한 오용 가능성을 구분하라.
+5. Cloud/Node/Secret 접근 Pivot과 대응 조치를 작성하라.
+
+출력 형식:
+- 관측된 사실
+- API 호출 타임라인
+- 권한 오용 근거
+- 영향 namespace/리소스
+- 추가 Pivot
+- 대응 조치</code></pre>
+<h2 id="8-대응-요약">8. 대응 요약</h2>
+<ul>
+<li>API audit 로그와 관련 Pod manifest, RBAC 객체를 보존한다.</li>
+<li>의심 ServiceAccount token을 회전하고 불필요한 RoleBinding을 제거한다.</li>
+<li>privileged pod와 비정상 Pod를 격리/삭제 전 증적화한다.</li>
+<li>node와 cloud credential 사용 로그를 확장 확인한다.</li>
+</ul>
+    <footer class="footer">
+      Spacebar Project. This workflow is an educational blue team playbook artifact.
+    </footer>
+  </main>
+</body>
+</html>
