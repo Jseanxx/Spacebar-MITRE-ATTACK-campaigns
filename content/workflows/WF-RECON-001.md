@@ -13,7 +13,7 @@ techniques: "T1595, T1595.002, T1592, T1590, T1593"
 | Field | Value |
 | --- | --- |
 | 분석 대상 행위 | 외부 노출 서비스 식별, 배너/버전 수집, URL/API 구조 탐색, 취약 표면 확인 |
-| 관련 캠페인 | SB-01, SB-04, SB-06, SB-07, 외부 노출 서비스 기반 침투 캠페인 공통 |
+| 관련 캠페인 | SB-04, SB-06, 외부 노출 서비스 기반 침투 캠페인 공통 |
 | 분석 결과물 | 정찰 주체, 대상 서비스, 수집된 표면 정보, 취약점 악용 가능성, 후속 Pivot |
 
 ## 1. 행위 정의
@@ -36,45 +36,58 @@ techniques: "T1595, T1595.002, T1592, T1590, T1593"
 
 ## 3. 먼저 확인할 로그
 
+> 본 표의 핵심 필드는 원본 로그 필드명이 아니라, ELK/ECS 등 SIEM에서 정규화했을 때 우선 확인할 분석 필드 기준이다. 실제 원본 필드명은 Nginx, ALB, WAF, CDN, EDR 제품에 따라 다를 수 있다.
+
 | 환경 | 대표 로그 | 핵심 필드 |
 | --- | --- | --- |
-| Web / Reverse Proxy | Nginx, Apache, reverse proxy access log | `@timestamp`, `source.ip`, `http.request.method`, `url.path`, `http.response.status_code`, `user_agent.original` |
-| Cloud / Edge | ALB access log, WAF log, CDN log | `client_ip`, `target_group`, `request_url`, `elb_status_code`, `target_status_code`, `rule_id`, `terminatingRuleId` |
-| CI/CD | Jenkins access log, controller log, audit log | user, source IP, request path, CLI jar request, plugin/version page access |
-| Kubernetes / Ingress | Ingress controller log, API server audit 후보 | namespace, ingress host, path, status, user agent, source IP |
-| Application | App access log, framework error log | route, handler, exception, stack trace, version/banner exposure |
-| Firewall / EDR | 외부 접속 허용/차단, 스캔 탐지 | source, destination, port, verdict, rule name |
+| Web / Reverse Proxy | Nginx/Apache 등 웹 서버 access log, reverse proxy access log | `@timestamp`, `source.ip`, `http.request.method`, `url.path`, `http.response.status_code`, `user_agent.original` |
+| Cloud / Edge | ALB access log, WAF log, CDN log | `source.ip` 또는 `client.ip`, `url.original`, `url.path`, `http.request.method`, `http.response.status_code`, `user_agent.original`, `target_group_arn`, `event.action`, `rule.id`, `terminatingRuleId` |
+| Application | App access log, framework error log | `route` 또는 `url.path`, `handler`, `error.type`, `error.message`, `stack_trace`, `trace.id`, `response.header.*` |
+| Firewall / EDR | 외부 접속 허용/차단, 스캔 탐지 | `source.ip`, `destination.ip`, `destination.port`, `network.transport`, `event.action`, `event.outcome`, `rule.name` |
 
 ## 4. 빠른 KQL
+
+이 쿼리는 차단용 탐지 룰이 아니라, 정찰 후보를 넓게 찾기 위한 헌팅 쿼리다.  
+실제 판단은 같은 `source.ip`의 요청 수, 고유 `url.path` 수, 상태 코드 분포, User-Agent, 요청 간격, 승인된 스캐너 여부를 함께 확인한다.
 
 ### 외부 HTTP 스캔 후보
 
 ```text
 http.request.method: ("GET" or "HEAD" or "OPTIONS") and
-url.path: ("/" or "/api*" or "/admin*" or "/login*" or "/version*" or "/debug*" or "/.env") and
+url.path: ("/" or "/api*" or "/admin*" or "/login*" or "/version*" or "/debug*" or "/.env" or "/config*") and
 source.ip: *
 ```
 
 ### 취약점/관리 경로 탐색 후보
 
 ```text
-url.path: ("*/cli*" or "*/script*" or "*/actuator*" or "*/debug*" or "*/api/v1*" or "*/validate*" or "*/upload*" or "*/config*")
+url.path: ("*/cli*" or "*/script*" or "*/actuator*" or "*/debug*" or "*/api/v1*" or "*/validate*" or "*/upload*" or "*/config*" or "*/jmx-console*" or "*/invoker*")
 ```
 
 ### 비정상 User-Agent 또는 자동화 도구 후보
 
 ```text
-user_agent.original: ("*curl*" or "*wget*" or "*python-requests*" or "*Go-http-client*" or "*nmap*" or "*masscan*" or "*sqlmap*")
+user_agent.original: ("*curl*" or "*wget*" or "*python-requests*" or "*Go-http-client*" or "*nmap*" or "*masscan*" or "*sqlmap*" or "*nikto*" or "*dirbuster*" or "*ffuf*" or "*gobuster*")
 ```
 
 ### 짧은 시간 다수 경로 요청 후보
 
 ```text
-source.ip: * and http.response.status_code: (200 or 301 or 302 or 401 or 403 or 404 or 500)
+source.ip: * and
+http.response.status_code: (401 or 403 or 404 or 500) and
+url.path: *
 ```
 
-이 쿼리는 후보를 넓게 잡는 용도다.
-실제 분석에서는 같은 `source.ip`가 접근한 고유 `url.path` 수, 대상 host 수, status code 분포, 요청 간격을 집계해서 판단한다.
+### 쿼리 결과 확인 지표
+
+| 기준 | 의심도 | 해석 |
+| --- | --- | --- |
+| 같은 `source.ip`가 5분 내 고유 `url.path` 20개 이상 요청 | 높음 | 자동화된 경로 탐색 또는 디렉터리 브루트포싱 가능성이 높다. |
+| 401/403/404/500 비율이 높고 정상 페이지 접근이 적음 | 높음 | 존재하지 않거나 제한된 경로를 반복 확인하는 스캔성 요청일 수 있다. |
+| `/.env`, `/debug`, `/config`, `/actuator`, `/admin` 접근 포함 | 높음 | 민감 파일, 디버그 경로, 관리 페이지 탐색 가능성이 높다. |
+| User-Agent가 `curl`, `python-requests`, `nmap`, `sqlmap`, `ffuf`, `gobuster` 등 | 높음 | 브라우저가 아닌 자동화 도구 또는 공격 도구 기반 요청일 수 있다. |
+| 승인된 취약점 스캐너, 모니터링, 검색엔진 크롤러와 일치 | 낮음 또는 정상 후보 | 승인된 점검 활동일 수 있으므로 스캐너 자산 목록과 점검 일정으로 교차 확인한다. |
+
 
 ## 5. 분석자가 할 일
 
