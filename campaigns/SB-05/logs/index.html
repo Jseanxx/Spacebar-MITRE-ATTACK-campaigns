@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SB-05 Logs | Spacebar Campaigns</title>
+  <link rel="stylesheet" href="/assets/campaign.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="/campaigns/"><img class="brand-logo" src="/assets/spacebarLogo.png" alt="Spacebar"><span>Spacebar Campaigns</span></a>
+      <nav class="nav" aria-label="Primary navigation">
+        <a href="/campaigns/">Campaigns</a>
+        <a href="/workflows/">Blue Team Playbooks</a>
+        <a href="/logs/">Log Catalog</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="page-shell">
+
+    <aside class="campaign-sidebar" aria-label="Campaign log navigation">
+      <div class="sidebar-block">
+        <div class="sidebar-title">SB-05 Logs</div>
+        <nav class="sidebar-links">
+          <a class="sidebar-link" href="/campaigns/SB-05/">Campaign Page</a>
+          <a class="sidebar-link active" href="/campaigns/SB-05/logs/">Campaign Logs</a>
+          <a class="sidebar-link" href="/campaigns/SB-05/logs/KB-001/"><span>KB-001</span>Kubernetes API Audit Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-05/logs/LX-001/"><span>LX-001</span>Deploy Host Auditd Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-05/logs/AWS-001/"><span>AWS-001</span>CloudTrail S3 Data Event</a>
+        </nav>
+      </div>
+      <div class="sidebar-block">
+        <div class="sidebar-title">Global Catalog</div>
+        <nav class="sidebar-links">
+          <a class="sidebar-link" href="/logs/">All Logs</a>
+        </nav>
+      </div>
+    </aside>
+    <main class="page campaign-content">
+      <div class="breadcrumbs"><a href="/campaigns/">Home</a> / <a href="/campaigns/SB-05/">ClusterDrain</a> / <span>Campaign Logs</span></div>
+      <h1>SB-05 Campaign Logs</h1>
+      <p class="summary">
+        이 페이지는 ClusterDrain에서 실제로 참조하는 로그만 모아 보여준다.
+        전체 팀 공통 로그 목록은 Global Log Catalog에서 확인한다.
+      </p>
+      <div class="cards">
+        <article class="card">
+          <h3><a href="/campaigns/SB-05/logs/KB-001/">KB-001 Kubernetes API Audit Log</a></h3>
+          <p>Kubernetes API Server audit log로 ClusterDrain의 리소스 조회, Secret 접근, Pod exec, Pod 생성, RBAC 변경을 수동 탐지한다.</p>
+          <div class="tag-row">
+            <span class="tag">T1613</span>
+            <span class="tag">T1552.007</span>
+            <span class="tag">T1609</span>
+            <span class="tag">T1610</span>
+            <span class="tag">T1098.006</span>
+          </div>
+        </article>
+        <article class="card">
+          <h3><a href="/campaigns/SB-05/logs/LX-001/">LX-001 Deploy Host Auditd Log</a></h3>
+          <p>침해된 배포/운영 지점의 Linux auditd 로그로 staging, archive 생성, AWS CLI 업로드 준비 행위를 수동 탐지한다.</p>
+          <div class="tag-row">
+            <span class="tag">T1074.001</span>
+            <span class="tag">T1560.001</span>
+            <span class="tag">T1567.002</span>
+          </div>
+        </article>
+        <article class="card">
+          <h3><a href="/campaigns/SB-05/logs/AWS-001/">AWS-001 CloudTrail S3 Data Event</a></h3>
+          <p>AWS CloudTrail S3 Data Event로 ClusterDrain의 private S3 bucket 업로드를 수동 탐지한다.</p>
+          <div class="tag-row">
+            <span class="tag">T1567.002</span>
+          </div>
+        </article>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

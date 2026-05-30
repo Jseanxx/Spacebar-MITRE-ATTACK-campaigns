@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SB-05 LX-001 Deploy Host Auditd Log | Spacebar Campaign Logs</title>
+  <link rel="stylesheet" href="/assets/campaign.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="/campaigns/"><img class="brand-logo" src="/assets/spacebarLogo.png" alt="Spacebar"><span>Spacebar Campaigns</span></a>
+      <nav class="nav" aria-label="Primary navigation">
+        <a href="/campaigns/">Campaigns</a>
+        <a href="/workflows/">Blue Team Playbooks</a>
+        <a href="/logs/">Log Catalog</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="page-shell">
+
+    <aside class="campaign-sidebar" aria-label="Campaign log navigation">
+      <div class="sidebar-block">
+        <div class="sidebar-title">SB-05 Logs</div>
+        <nav class="sidebar-links">
+          <a class="sidebar-link" href="/campaigns/SB-05/">Campaign Page</a>
+          <a class="sidebar-link" href="/campaigns/SB-05/logs/">Campaign Logs</a>
+          <a class="sidebar-link" href="/campaigns/SB-05/logs/KB-001/"><span>KB-001</span>Kubernetes API Audit Log</a>
+          <a class="sidebar-link active" href="/campaigns/SB-05/logs/LX-001/"><span>LX-001</span>Deploy Host Auditd Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-05/logs/AWS-001/"><span>AWS-001</span>CloudTrail S3 Data Event</a>
+        </nav>
+      </div>
+      <div class="sidebar-block">
+        <div class="sidebar-title">Global Catalog</div>
+        <nav class="sidebar-links">
+          <a class="sidebar-link" href="/logs/">All Logs</a>
+        </nav>
+      </div>
+    </aside>
+    <main class="page campaign-content">
+      <div class="breadcrumbs"><a href="/campaigns/">Home</a> / <a href="/campaigns/SB-05/">ClusterDrain</a> / <a href="/campaigns/SB-05/logs/">Campaign Logs</a> / <span>LX-001</span></div>
+<h1>LX-001 Deploy Host Auditd Log</h1>
+<div class="meta-grid" aria-label="Campaign metadata">
+<div class="meta-label">Log ID:</div>
+<div class="meta-value">LX-001</div>
+<div class="meta-label">Source:</div>
+<div class="meta-value">Linux auditd</div>
+<div class="meta-label">Representative Path:</div>
+<div class="meta-value"><code>/var/log/audit/audit.log</code></div>
+<div class="meta-label">Dataset:</div>
+<div class="meta-value"><code>sb05.attacker_audit</code></div>
+<div class="meta-label">Kibana Data View:</div>
+<div class="meta-value"><code>logs-*</code></div>
+<div class="meta-label">Format:</div>
+<div class="meta-value">Linux auditd text record</div>
+<div class="meta-label">Primary Use:</div>
+<div class="meta-value">로컬 staging 디렉터리 접근, <code>zip</code> 실행, archive 파일 생성, S3 업로드 전후 호스트 행위 확인</div>
+</div>
+<h2 id="공격-행위-요약">공격 행위 요약</h2>
+<p>공격자는 Kubernetes API로 수집한 리소스 정보, Secret 조회 결과, Pod exec 결과, RBAC 변경 결과를 침해된 배포/운영 지점의 로컬 staging 디렉터리에 저장했다. 이후 <code>zip</code> 유틸리티로 archive 파일을 만들고 AWS CLI를 통해 S3 업로드 단계로 연결했다.</p>
+<h2 id="로그-발생-위치">로그 발생 위치</h2>
+<p>staging, archive 생성, <code>zip</code> 실행은 Kubernetes API 요청이 아니라 로컬 운영체제의 파일 시스템 및 프로세스 실행 행위다. 따라서 침해된 배포/운영 지점의 <code>/var/log/audit/audit.log</code>에서 확인한다.</p>
+<h2 id="수집-방식">수집 방식</h2>
+<p>Linux auditd에서 staging 디렉터리, archive 디렉터리, <code>/usr/bin/zip</code> 실행 파일에 대한 감시 규칙을 설정한다. 생성된 auditd 로그는 Elastic Agent custom log input으로 <code>logs-*</code> 인덱스에 적재한다.</p>
+<h2 id="주요-auditd-레코드">주요 auditd 레코드</h2>
+<div class="table-wrap wide-table">
+<table>
+<thead><tr><th>Record</th><th>의미</th></tr></thead>
+<tbody>
+<tr><td><code>SYSCALL</code></td><td>파일 생성/수정 또는 프로세스 실행과 관련된 시스템 호출 정보</td></tr>
+<tr><td><code>EXECVE</code></td><td>실행된 명령어와 인자</td></tr>
+<tr><td><code>PATH</code></td><td>생성되거나 접근된 파일 또는 디렉터리 경로</td></tr>
+<tr><td><code>CWD</code></td><td>명령 실행 당시 작업 디렉터리</td></tr>
+<tr><td><code>PROCTITLE</code></td><td>실행 명령을 hex 형태로 기록한 값</td></tr>
+<tr><td><code>CONFIG_CHANGE</code></td><td>audit rule 추가 또는 변경 기록</td></tr>
+</tbody></table></div>
+<h2 id="주요-탐지-포인트">주요 탐지 포인트</h2>
+<div class="table-wrap wide-table">
+<table>
+<thead><tr><th>Technique</th><th>탐지 기준</th><th>KQL</th></tr></thead>
+<tbody>
+<tr><td>T1074.001 Data Staged: Local Data Staging</td><td>staging 디렉터리에 파일 생성, 수정, 속성 변경 이벤트가 발생한다. Kubernetes 수집 행위 이후 여러 결과 파일이 같은 위치에 모이면 고신뢰 이벤트로 본다.</td><td><code>data_stream.dataset:&quot;sb05.attacker_audit&quot; and message:*sb05_staging*</code></td></tr>
+<tr><td>T1560.001 Archive Collected Data: Archive via Utility</td><td><code>zip</code> 실행 또는 archive 디렉터리 내 압축 파일 생성이 확인된다.</td><td><code>data_stream.dataset:&quot;sb05.attacker_audit&quot; and message:(*sb05_zip_exec* or *sb05_archive*)</code></td></tr>
+<tr><td>T1567.002 Exfiltration Over Web Service</td><td>archive 생성 이후 AWS CLI 실행 또는 S3 업로드와 연결되는 파일 접근이 확인된다.</td><td><code>data_stream.dataset:&quot;sb05.attacker_audit&quot; and message:(*aws* or *s3* or *sb05_archive*)</code></td></tr>
+</tbody></table></div>
+<h2 id="추가-kql">추가 KQL</h2>
+<pre><code>data_stream.dataset:&quot;sb05.attacker_audit&quot; and message:*sb05_staging* and message:*PATH*</code></pre>
+<pre><code>data_stream.dataset:&quot;sb05.attacker_audit&quot; and message:*comm=\&quot;zip\&quot;*</code></pre>
+<pre><code>data_stream.dataset:&quot;sb05.attacker_audit&quot; and message:*sb05_archive* and message:*nametype=CREATE*</code></pre>
+<pre><code>data_stream.dataset:&quot;sb05.attacker_audit&quot; and message:(*sb05_staging* or *sb05_zip_exec* or *sb05_archive*)</code></pre>
+<h2 id="investigation-pivot">Investigation Pivot</h2>
+<ul>
+<li><code>PATH</code> record의 <code>name</code> 값을 확인해 Kubernetes 리소스 목록, Secret export, Pod exec 결과, RBAC 변경 결과와 관련된 파일인지 확인한다.</li>
+<li><code>EXECVE</code>, <code>comm</code>, <code>exe</code>를 확인해 실제 <code>zip</code> 유틸리티가 실행되었는지 확인한다.</li>
+<li><code>auid</code>, <code>uid</code>, <code>euid</code>를 확인해 어떤 사용자 세션에서 staging과 압축 행위가 수행되었는지 확인한다.</li>
+<li>staging 이전에 <code>KB-001</code>에서 리소스 조회, Secret 조회, Pod exec, RBAC 변경이 선행되었는지 확인한다.</li>
+<li>archive 생성 이후 <code>AWS-001</code>에서 CloudTrail <code>PutObject</code> 이벤트가 이어졌는지 타임라인으로 연결한다.</li>
+<li>정상 백업, 배포 산출물 생성, 장애 대응 자료 수집과 같은 승인된 작업 기록이 있는지 확인한다.</li>
+</ul>
+      <footer class="footer">
+        Spacebar Project. This campaign log page is scoped to SB-05.
+      </footer>
+    </main>
+  </div>
+</body>
+</html>

@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SB-05 AWS-001 CloudTrail S3 Data Event | Spacebar Campaign Logs</title>
+  <link rel="stylesheet" href="/assets/campaign.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="/campaigns/"><img class="brand-logo" src="/assets/spacebarLogo.png" alt="Spacebar"><span>Spacebar Campaigns</span></a>
+      <nav class="nav" aria-label="Primary navigation">
+        <a href="/campaigns/">Campaigns</a>
+        <a href="/workflows/">Blue Team Playbooks</a>
+        <a href="/logs/">Log Catalog</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="page-shell">
+
+    <aside class="campaign-sidebar" aria-label="Campaign log navigation">
+      <div class="sidebar-block">
+        <div class="sidebar-title">SB-05 Logs</div>
+        <nav class="sidebar-links">
+          <a class="sidebar-link" href="/campaigns/SB-05/">Campaign Page</a>
+          <a class="sidebar-link" href="/campaigns/SB-05/logs/">Campaign Logs</a>
+          <a class="sidebar-link" href="/campaigns/SB-05/logs/KB-001/"><span>KB-001</span>Kubernetes API Audit Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-05/logs/LX-001/"><span>LX-001</span>Deploy Host Auditd Log</a>
+          <a class="sidebar-link active" href="/campaigns/SB-05/logs/AWS-001/"><span>AWS-001</span>CloudTrail S3 Data Event</a>
+        </nav>
+      </div>
+      <div class="sidebar-block">
+        <div class="sidebar-title">Global Catalog</div>
+        <nav class="sidebar-links">
+          <a class="sidebar-link" href="/logs/">All Logs</a>
+        </nav>
+      </div>
+    </aside>
+    <main class="page campaign-content">
+      <div class="breadcrumbs"><a href="/campaigns/">Home</a> / <a href="/campaigns/SB-05/">ClusterDrain</a> / <a href="/campaigns/SB-05/logs/">Campaign Logs</a> / <span>AWS-001</span></div>
+<h1>AWS-001 CloudTrail S3 Data Event</h1>
+<div class="meta-grid" aria-label="Campaign metadata">
+<div class="meta-label">Log ID:</div>
+<div class="meta-value">AWS-001</div>
+<div class="meta-label">Source:</div>
+<div class="meta-value">AWS CloudTrail</div>
+<div class="meta-label">Representative Path:</div>
+<div class="meta-value"><code>s3://aws-cloudtrail-logs-028523748408-23e2bb3d/AWSLogs/028523748408/CloudTrail/</code></div>
+<div class="meta-label">Dataset:</div>
+<div class="meta-value"><code>aws.cloudtrail</code></div>
+<div class="meta-label">Kibana Data View:</div>
+<div class="meta-value"><code>logs-*</code></div>
+<div class="meta-label">Format:</div>
+<div class="meta-value">JSON, CloudTrail event version 1.11, ECS-normalized in ELK</div>
+<div class="meta-label">Primary Use:</div>
+<div class="meta-value">S3 <code>PutObject</code> 기반 archive 업로드 확인</div>
+</div>
+<h2 id="공격-행위-요약">공격 행위 요약</h2>
+<p>공격자는 침해된 배포/운영 지점에서 수집 자료를 archive 파일로 압축한 뒤, AWS CLI를 이용해 private S3 bucket으로 업로드했다. CloudTrail S3 Data Event에서는 이 행위가 <code>s3.amazonaws.com</code>의 <code>PutObject</code> 이벤트로 기록된다.</p>
+<h2 id="로그-발생-위치">로그 발생 위치</h2>
+<p>S3 object-level API 호출은 CloudTrail Data Event 설정이 활성화되어 있을 때 기록된다. CloudTrail 로그 파일은 S3 로그 버킷에 <code>.json.gz</code> 형태로 저장되고, Elastic Agent AWS integration이 SQS 알림을 기준으로 로그 파일을 읽어 ELK에 적재한다.</p>
+<h2 id="주요-필드">주요 필드</h2>
+<div class="table-wrap wide-table">
+<table>
+<thead><tr><th>Field</th><th>의미</th></tr></thead>
+<tbody>
+<tr><td><code>@timestamp</code></td><td>S3 업로드 API 호출 시간</td></tr>
+<tr><td><code>event.action</code></td><td>AWS API action, S3 업로드는 <code>PutObject</code></td></tr>
+<tr><td><code>event.provider</code></td><td>이벤트 발생 서비스, S3는 <code>s3.amazonaws.com</code></td></tr>
+<tr><td><code>event.outcome</code></td><td>API 호출 성공 여부</td></tr>
+<tr><td><code>user.name</code></td><td>API를 호출한 IAM 사용자</td></tr>
+<tr><td><code>aws.cloudtrail.user_identity.arn</code></td><td>API 호출 주체의 IAM ARN</td></tr>
+<tr><td><code>source.ip</code></td><td>API 요청 출발지 IP</td></tr>
+<tr><td><code>user_agent.name</code></td><td>API 요청 클라이언트, AWS CLI는 <code>aws-cli</code></td></tr>
+<tr><td><code>aws.cloudtrail.event_category</code></td><td>CloudTrail 이벤트 범주, S3 Data Event는 <code>Data</code></td></tr>
+<tr><td><code>aws.cloudtrail.read_only</code></td><td>읽기 전용 여부, <code>PutObject</code>는 <code>false</code></td></tr>
+<tr><td><code>aws.cloudtrail.resources.arn</code></td><td>대상 S3 bucket 또는 object ARN</td></tr>
+<tr><td><code>aws.cloudtrail.flattened.request_parameters.key</code></td><td>업로드된 object key</td></tr>
+</tbody></table></div>
+<h2 id="탐지-포인트">탐지 포인트</h2>
+<p>T1567.002는 클라우드 저장소로 파일을 업로드하는 행위가 핵심이다. 다음 조건을 중심으로 확인한다.</p>
+<ul>
+<li><code>event.action</code>이 <code>PutObject</code>인지 확인한다.</li>
+<li><code>event.provider</code>가 <code>s3.amazonaws.com</code>인지 확인한다.</li>
+<li><code>aws.cloudtrail.event_category</code>가 <code>Data</code>인지 확인한다.</li>
+<li><code>event.outcome</code>이 <code>success</code>인지 확인한다.</li>
+<li><code>aws.cloudtrail.read_only</code>가 <code>false</code>인지 확인한다.</li>
+<li>업로드 대상 bucket 또는 object ARN이 유출 목적 저장소인지 확인한다.</li>
+<li><code>user_agent.name</code>이 <code>aws-cli</code>인지 확인한다.</li>
+<li>업로드 직전에 <code>LX-001</code>에서 staging 또는 archive 생성이 있었는지 확인한다.</li>
+</ul>
+<h2 id="kql-또는-탐지-쿼리">KQL 또는 탐지 쿼리</h2>
+<pre><code>data_stream.dataset:&quot;aws.cloudtrail&quot; and event.action:&quot;PutObject&quot;</code></pre>
+<pre><code>data_stream.dataset:&quot;aws.cloudtrail&quot; and event.action:&quot;PutObject&quot; and aws.cloudtrail.resources.arn:*sb05-k8s-drain-20260504*</code></pre>
+<pre><code>data_stream.dataset:&quot;aws.cloudtrail&quot; and event.action:&quot;PutObject&quot; and user_agent.name:&quot;aws-cli&quot;</code></pre>
+<pre><code>data_stream.dataset:&quot;aws.cloudtrail&quot; and event.action:&quot;PutObject&quot; and user.name:&quot;sb05-s3-uploader&quot;</code></pre>
+<h2 id="investigation-pivot">Investigation Pivot</h2>
+<ul>
+<li><code>event.action</code>이 <code>PutObject</code>이고 <code>event.outcome</code>이 <code>success</code>인지 확인한다.</li>
+<li><code>aws.cloudtrail.resources.arn</code>과 <code>aws.cloudtrail.flattened.request_parameters.key</code>로 업로드 대상 bucket과 object key를 확인한다.</li>
+<li><code>user.name</code>과 <code>aws.cloudtrail.user_identity.arn</code>으로 어떤 IAM 주체가 업로드를 수행했는지 확인한다.</li>
+<li><code>source.ip</code>가 침해된 배포/운영 지점과 연결되는지 확인한다.</li>
+<li><code>user_agent.name</code>, <code>user_agent.original</code>로 AWS CLI 기반 업로드인지 확인한다.</li>
+<li>같은 시간대의 <code>LX-001</code>에서 <code>aws</code> 실행 흔적과 archive 파일 접근 흔적을 확인한다.</li>
+<li>업로드 이전에 staging, archive 생성, Kubernetes Secret 조회, Pod exec, RBAC 변경이 있었는지 타임라인으로 연결한다.</li>
+</ul>
+      <footer class="footer">
+        Spacebar Project. This campaign log page is scoped to SB-05.
+      </footer>
+    </main>
+  </div>
+</body>
+</html>

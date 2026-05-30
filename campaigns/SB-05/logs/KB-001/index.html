@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SB-05 KB-001 Kubernetes API Audit Log | Spacebar Campaign Logs</title>
+  <link rel="stylesheet" href="/assets/campaign.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="/campaigns/"><img class="brand-logo" src="/assets/spacebarLogo.png" alt="Spacebar"><span>Spacebar Campaigns</span></a>
+      <nav class="nav" aria-label="Primary navigation">
+        <a href="/campaigns/">Campaigns</a>
+        <a href="/workflows/">Blue Team Playbooks</a>
+        <a href="/logs/">Log Catalog</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="page-shell">
+
+    <aside class="campaign-sidebar" aria-label="Campaign log navigation">
+      <div class="sidebar-block">
+        <div class="sidebar-title">SB-05 Logs</div>
+        <nav class="sidebar-links">
+          <a class="sidebar-link" href="/campaigns/SB-05/">Campaign Page</a>
+          <a class="sidebar-link" href="/campaigns/SB-05/logs/">Campaign Logs</a>
+          <a class="sidebar-link active" href="/campaigns/SB-05/logs/KB-001/"><span>KB-001</span>Kubernetes API Audit Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-05/logs/LX-001/"><span>LX-001</span>Deploy Host Auditd Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-05/logs/AWS-001/"><span>AWS-001</span>CloudTrail S3 Data Event</a>
+        </nav>
+      </div>
+      <div class="sidebar-block">
+        <div class="sidebar-title">Global Catalog</div>
+        <nav class="sidebar-links">
+          <a class="sidebar-link" href="/logs/">All Logs</a>
+        </nav>
+      </div>
+    </aside>
+    <main class="page campaign-content">
+      <div class="breadcrumbs"><a href="/campaigns/">Home</a> / <a href="/campaigns/SB-05/">ClusterDrain</a> / <a href="/campaigns/SB-05/logs/">Campaign Logs</a> / <span>KB-001</span></div>
+<h1>KB-001 Kubernetes API Audit Log</h1>
+<div class="meta-grid" aria-label="Campaign metadata">
+<div class="meta-label">Log ID:</div>
+<div class="meta-value">KB-001</div>
+<div class="meta-label">Source:</div>
+<div class="meta-value">Kubernetes API Server</div>
+<div class="meta-label">Representative Path:</div>
+<div class="meta-value"><code>/var/lib/rancher/k3s/server/logs/audit.log</code></div>
+<div class="meta-label">Dataset:</div>
+<div class="meta-value"><code>sb05.kubernetes_audit</code></div>
+<div class="meta-label">Kibana Data View:</div>
+<div class="meta-value"><code>logs-*</code></div>
+<div class="meta-label">Format:</div>
+<div class="meta-value">JSON, <code>audit.k8s.io/v1</code>, Metadata level</div>
+<div class="meta-label">Primary Use:</div>
+<div class="meta-value">Kubernetes API 기반 Discovery, Secret 조회, Pod exec, Pod 생성, RBAC 변경 여부 확인</div>
+</div>
+<h2 id="공격-행위-요약">공격 행위 요약</h2>
+<p>ClusterDrain에서 공격자는 침해된 배포/운영 지점에서 확보한 <code>kubeconfig</code>로 Kubernetes API Server에 인증한 뒤, <code>prod-platform</code> namespace를 중심으로 리소스 조회, Secret 접근, Pod 내부 명령 실행, 수집 Pod 생성, RBAC 리소스 생성을 수행했다.</p>
+<p>Metadata level audit log는 요청 본문과 응답 본문 전체를 남기지는 않지만, 요청 주체, 동작, 대상 리소스, namespace, <code>requestURI</code>, 응답 코드, 인가 결과를 확인할 수 있다.</p>
+<h2 id="로그-발생-위치">로그 발생 위치</h2>
+<p><code>kubectl get</code>, <code>kubectl describe</code>, <code>kubectl exec</code>, <code>kubectl run</code>, <code>kubectl apply</code>, <code>kubectl create rolebinding</code> 같은 요청은 Kubernetes API Server로 전달되며 audit event로 기록된다.</p>
+<h2 id="수집-방식">수집 방식</h2>
+<p>k3s API Server audit log를 파일로 생성하도록 설정하고, Elastic Agent custom log input으로 <code>logs-*</code> 인덱스에 적재한다. Kibana Discover에서는 <code>data_stream.dataset:&quot;sb05.kubernetes_audit&quot;</code> 조건으로 Kubernetes audit log만 필터링한다.</p>
+<h2 id="주요-탐지-포인트">주요 탐지 포인트</h2>
+<div class="table-wrap wide-table">
+<table>
+<thead><tr><th>Technique</th><th>탐지 기준</th><th>KQL</th></tr></thead>
+<tbody>
+<tr><td>T1613 Container and Resource Discovery</td><td><code>get</code> 또는 <code>list</code> 요청이 여러 Kubernetes 리소스에 반복적으로 발생한다. Secret, ConfigMap, Ingress 같은 민감/구조성 리소스가 포함되면 우선 확인한다.</td><td><code>data_stream.dataset:&quot;sb05.kubernetes_audit&quot; and verb:(&quot;get&quot; or &quot;list&quot;) and responseStatus.code:200 and objectRef.resource:(&quot;namespaces&quot; or &quot;pods&quot; or &quot;deployments&quot; or &quot;services&quot; or &quot;ingresses&quot; or &quot;configmaps&quot; or &quot;secrets&quot; or &quot;endpoints&quot; or &quot;serviceaccounts&quot; or &quot;roles&quot; or &quot;rolebindings&quot;)</code></td></tr>
+<tr><td>T1552.007 Unsecured Credentials: Container API</td><td>업무 namespace에서 <code>secrets</code> 리소스에 대한 <code>get</code> 또는 <code>list</code> 요청이 성공한다.</td><td><code>data_stream.dataset:&quot;sb05.kubernetes_audit&quot; and objectRef.resource:&quot;secrets&quot; and objectRef.namespace:&quot;prod-platform&quot; and verb:(&quot;get&quot; or &quot;list&quot;) and responseStatus.code:200</code></td></tr>
+<tr><td>T1609 Container Administration Command</td><td><code>requestURI</code>에 <code>exec</code>가 포함되고 업무 namespace의 Pod에 대한 요청이 성공한다.</td><td><code>data_stream.dataset:&quot;sb05.kubernetes_audit&quot; and requestURI:*exec* and objectRef.namespace:&quot;prod-platform&quot; and responseStatus.code:200</code></td></tr>
+<tr><td>T1610 Deploy Container</td><td>업무 namespace에서 <code>pods</code> 리소스에 대한 <code>create</code> 요청이 성공한다.</td><td><code>data_stream.dataset:&quot;sb05.kubernetes_audit&quot; and objectRef.resource:&quot;pods&quot; and objectRef.namespace:&quot;prod-platform&quot; and verb:&quot;create&quot; and responseStatus.code:(200 or 201)</code></td></tr>
+<tr><td>T1098.006 Additional Container Cluster Roles</td><td>업무 namespace에서 <code>serviceaccounts</code>, <code>roles</code>, <code>rolebindings</code> 생성/수정 요청이 성공한다.</td><td><code>data_stream.dataset:&quot;sb05.kubernetes_audit&quot; and objectRef.resource:(&quot;serviceaccounts&quot; or &quot;roles&quot; or &quot;rolebindings&quot;) and objectRef.namespace:&quot;prod-platform&quot; and verb:(&quot;create&quot; or &quot;patch&quot; or &quot;update&quot;) and responseStatus.code:(200 or 201)</code></td></tr>
+</tbody></table></div>
+<h2 id="추가-kql">추가 KQL</h2>
+<pre><code>data_stream.dataset:&quot;sb05.kubernetes_audit&quot; and verb:(&quot;get&quot; or &quot;list&quot;) and responseStatus.code:200 and objectRef.namespace:&quot;prod-platform&quot; and objectRef.resource:(&quot;pods&quot; or &quot;deployments&quot; or &quot;services&quot; or &quot;ingresses&quot; or &quot;configmaps&quot; or &quot;secrets&quot; or &quot;endpoints&quot; or &quot;serviceaccounts&quot; or &quot;roles&quot; or &quot;rolebindings&quot;)</code></pre>
+<pre><code>data_stream.dataset:&quot;sb05.kubernetes_audit&quot; and objectRef.resource:&quot;pods&quot; and objectRef.subresource:&quot;exec&quot; and objectRef.namespace:&quot;prod-platform&quot; and responseStatus.code:200</code></pre>
+<pre><code>data_stream.dataset:&quot;sb05.kubernetes_audit&quot; and objectRef.resource:&quot;rolebindings&quot; and objectRef.namespace:&quot;prod-platform&quot; and verb:&quot;create&quot; and responseStatus.code:(200 or 201)</code></pre>
+<h2 id="investigation-pivot">Investigation Pivot</h2>
+<ul>
+<li><code>objectRef.resource</code>, <code>objectRef.name</code>, <code>objectRef.namespace</code>를 확인해 어떤 리소스가 조회되거나 변경되었는지 확인한다.</li>
+<li><code>user.username</code>, <code>userAgent</code>, <code>sourceIPs</code>를 확인해 정상 운영자, 배포 자동화 계정, 침해된 운영 지점을 구분한다.</li>
+<li>Secret 조회 이후 Pod exec, Pod 생성, RBAC 변경이 동일 주체 또는 동일 출발지에서 이어졌는지 확인한다.</li>
+<li>Pod 생성 또는 RBAC 변경이 승인된 배포 이력, 권한 변경 요청, 장애 대응 티켓과 일치하는지 확인한다.</li>
+<li>RBAC 변경이 Secret 조회, Pod 조회, ConfigMap 조회, Pod exec 권한 확장으로 이어졌는지 확인한다.</li>
+</ul>
+      <footer class="footer">
+        Spacebar Project. This campaign log page is scoped to SB-05.
+      </footer>
+    </main>
+  </div>
+</body>
+</html>
