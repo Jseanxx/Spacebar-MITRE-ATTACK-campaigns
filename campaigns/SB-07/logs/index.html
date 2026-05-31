@@ -34,6 +34,7 @@
           <a class="sidebar-link" href="/campaigns/SB-07/logs/HAW-003/"><span>HAW-003</span>Windows Task Scheduler Operational Log</a>
           <a class="sidebar-link" href="/campaigns/SB-07/logs/HTE-002/"><span>HTE-002</span>SB-07 Attack Traffic Emulation Event</a>
           <a class="sidebar-link" href="/campaigns/SB-07/logs/HAW-002/"><span>HAW-002</span>Win01 PowerShell Operational Log</a>
+          <a class="sidebar-link" href="/campaigns/SB-07/logs/HAC-002/"><span>HAC-002</span>AWS Control-Plane Local Admin Bridge Verification</a>
           <a class="sidebar-link" href="/campaigns/SB-07/logs/HAW-004/"><span>HAW-004</span>Windows Security Process Creation Log</a>
           <a class="sidebar-link" href="/campaigns/SB-07/logs/HAD-002/"><span>HAD-002</span>DC Loader and Dump Artifact Evidence</a>
           <a class="sidebar-link" href="/campaigns/SB-07/logs/HAD-004/"><span>HAD-004</span>DC Loader Run Log</a>
@@ -146,6 +147,18 @@
             <span class="tag">T1021.002</span>
             <span class="tag">T1003.001</span>
             <span class="tag">T1620</span>
+          </div>
+        </article>
+        <article class="card">
+          <h3><a href="/campaigns/SB-07/logs/HAC-002/">HAC-002 AWS Control-Plane Local Admin Bridge Verification</a></h3>
+          <p>AWS GetPasswordData로 win01 EC2 local Administrator 컨텍스트를 확인하고, dc_cred.xml Import-Clixml 및 DC WinRM/C$ 접근을 비밀 출력 없이 검증하는 수동/선택적 collector 로그.</p>
+          <div class="tag-row">
+            <span class="tag">T1078.004</span>
+            <span class="tag">T1078.003</span>
+            <span class="tag">T1021.001</span>
+            <span class="tag">T1552</span>
+            <span class="tag">T1021.006</span>
+            <span class="tag">T1021.002</span>
           </div>
         </article>
         <article class="card">

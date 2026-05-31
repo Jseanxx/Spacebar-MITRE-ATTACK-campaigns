@@ -54,7 +54,7 @@
 
 <div class="concept-banner">
   <b>문서화 원칙</b>
-  <span>Technique 하나를 바로 탐지한다고 쓰지 않고, 실제 행위 단위인 "PMS patch 실행", "credential artifact 발견", "DC WinRM/C$ 접근", "loader forensic artifact"를 Log ID와 연결한다.</span>
+  <span>Technique 하나를 바로 탐지한다고 쓰지 않고, 실제 행위 단위인 "PMS patch 실행", "credential artifact 발견", "AWS control-plane local admin bridge", "DC WinRM/C$ 접근", "loader forensic artifact"를 Log ID와 연결한다.</span>
 </div>
 
 <div class="concept-banner">
@@ -104,12 +104,15 @@
       <tr><td>6</td><td class="id-cell">T1082</td><td>System Information Discovery</td><td>관측 가능</td><td><a href="/campaigns/SB-07/logs/HAW-001/">HAW-001</a>, <a href="/campaigns/SB-07/logs/HTE-002/">HTE-002</a></td><td><code>system_user_context</code>, <code>system_ipconfig</code></td></tr>
       <tr><td>7</td><td class="id-cell">T1482</td><td>Domain Trust Discovery</td><td>관측 가능</td><td><a href="/campaigns/SB-07/logs/HAW-001/">HAW-001</a>, <a href="/campaigns/SB-07/logs/HTE-002/">HTE-002</a></td><td><code>domain_controller_discovery</code>, <code>dc_srv_dns_lookup</code></td></tr>
       <tr><td>8</td><td class="id-cell">T1018</td><td>Remote System Discovery</td><td>관측 가능</td><td><a href="/campaigns/SB-07/logs/HAW-001/">HAW-001</a>, <a href="/campaigns/SB-07/logs/HTE-002/">HTE-002</a></td><td><code>dc_port_probe_445</code>, <code>dc_port_probe_5985</code></td></tr>
-      <tr><td>9</td><td class="id-cell">T1552</td><td>Unsecured Credentials</td><td>핵심 Technique</td><td><a href="/campaigns/SB-07/logs/HAW-001/">HAW-001</a>, <a href="/campaigns/SB-07/logs/HAW-002/">HAW-002</a>, <a href="/campaigns/SB-07/logs/HTE-002/">HTE-002</a></td><td><code>dc_cred_xml_discovered</code>, <code>dc_cred_xml_imported</code></td></tr>
-      <tr><td>10</td><td class="id-cell">T1021.002</td><td>SMB / Windows Admin Shares</td><td>관측 가능</td><td><a href="/campaigns/SB-07/logs/HAW-002/">HAW-002</a>, <a href="/campaigns/SB-07/logs/HTE-002/">HTE-002</a></td><td><code>dc_c_admin_share_access</code></td></tr>
-      <tr><td>11</td><td class="id-cell">T1021.006</td><td>Windows Remote Management</td><td>관측 가능</td><td><a href="/campaigns/SB-07/logs/HAW-002/">HAW-002</a>, <a href="/campaigns/SB-07/logs/HAW-003/">HAW-003</a>, <a href="/campaigns/SB-07/logs/HTE-002/">HTE-002</a></td><td><code>dc_winrm_whoami</code>, <code>dc_winrm_command_observed</code></td></tr>
-      <tr><td>12</td><td class="id-cell">T1027</td><td>Obfuscated Files or Information</td><td>관측 가능</td><td><a href="/campaigns/SB-07/logs/HAD-002/">HAD-002</a>, <a href="/campaigns/SB-07/logs/HAD-004/">HAD-004</a>, <a href="/campaigns/SB-07/logs/HAD-009/">HAD-009</a></td><td><code>encrypted_payload_artifact_found</code>, <code>loader_execution_log_found</code></td></tr>
-      <tr><td>13</td><td class="id-cell">T1620</td><td>Reflective Code Loading</td><td>추론 포함</td><td><a href="/campaigns/SB-07/logs/HAD-003/">HAD-003</a>, <a href="/campaigns/SB-07/logs/HAD-004/">HAD-004</a>, <a href="/campaigns/SB-07/logs/HAD-005/">HAD-005</a>, <a href="/campaigns/SB-07/logs/HAD-006/">HAD-006</a>, <a href="/campaigns/SB-07/logs/HAD-007/">HAD-007</a>, <a href="/campaigns/SB-07/logs/HAD-008/">HAD-008</a>, <a href="/campaigns/SB-07/logs/HAC-001/">HAC-001</a></td><td><code>loader_execution_log_found</code>, <code>manual_mapping_inferred_from_artifacts</code></td></tr>
-      <tr><td>14</td><td class="id-cell">T1003.001</td><td>OS Credential Dumping: LSASS Memory</td><td>조건부 관측</td><td><a href="/campaigns/SB-07/logs/HAD-002/">HAD-002</a>, <a href="/campaigns/SB-07/logs/HAD-003/">HAD-003</a>, <a href="/campaigns/SB-07/logs/HAD-004/">HAD-004</a>, <a href="/campaigns/SB-07/logs/HAD-005/">HAD-005</a>, <a href="/campaigns/SB-07/logs/HAC-001/">HAC-001</a></td><td><code>sysmon_lsass_process_access</code>, <code>loader_execution_log_found</code></td></tr>
+      <tr><td>9</td><td class="id-cell">T1552</td><td>Unsecured Credentials</td><td>핵심 Technique</td><td><a href="/campaigns/SB-07/logs/HAW-001/">HAW-001</a>, <a href="/campaigns/SB-07/logs/HAW-002/">HAW-002</a>, <a href="/campaigns/SB-07/logs/HTE-002/">HTE-002</a>, <a href="/campaigns/SB-07/logs/HAC-002/">HAC-002</a></td><td><code>dc_cred_xml_discovered</code>, <code>dc_cred_xml_imported</code></td></tr>
+      <tr><td>10</td><td class="id-cell">T1078.004</td><td>Valid Accounts: Cloud Accounts</td><td>핵심 Technique</td><td><a href="/campaigns/SB-07/logs/HAC-002/">HAC-002</a></td><td><code>aws_get_password_data_win01_local_admin_verified</code></td></tr>
+      <tr><td>11</td><td class="id-cell">T1078.003</td><td>Valid Accounts: Local Accounts</td><td>핵심 Technique</td><td><a href="/campaigns/SB-07/logs/HAC-002/">HAC-002</a>, <a href="/campaigns/SB-07/logs/HAW-002/">HAW-002</a></td><td><code>win01_local_admin_context</code>, <code>dc_cred_xml_imported</code></td></tr>
+      <tr><td>12</td><td class="id-cell">T1021.001</td><td>Remote Desktop Protocol</td><td>관측 가능</td><td><a href="/campaigns/SB-07/logs/HAC-002/">HAC-002</a></td><td><code>win01_rdp_local_admin_context</code></td></tr>
+      <tr><td>13</td><td class="id-cell">T1021.002</td><td>SMB / Windows Admin Shares</td><td>관측 가능</td><td><a href="/campaigns/SB-07/logs/HAW-002/">HAW-002</a>, <a href="/campaigns/SB-07/logs/HTE-002/">HTE-002</a>, <a href="/campaigns/SB-07/logs/HAC-002/">HAC-002</a></td><td><code>dc_c_admin_share_access</code></td></tr>
+      <tr><td>14</td><td class="id-cell">T1021.006</td><td>Windows Remote Management</td><td>관측 가능</td><td><a href="/campaigns/SB-07/logs/HAW-002/">HAW-002</a>, <a href="/campaigns/SB-07/logs/HAW-003/">HAW-003</a>, <a href="/campaigns/SB-07/logs/HTE-002/">HTE-002</a>, <a href="/campaigns/SB-07/logs/HAC-002/">HAC-002</a></td><td><code>dc_winrm_whoami</code>, <code>dc_winrm_command_observed</code></td></tr>
+      <tr><td>15</td><td class="id-cell">T1027</td><td>Obfuscated Files or Information</td><td>관측 가능</td><td><a href="/campaigns/SB-07/logs/HAD-002/">HAD-002</a>, <a href="/campaigns/SB-07/logs/HAD-004/">HAD-004</a>, <a href="/campaigns/SB-07/logs/HAD-009/">HAD-009</a></td><td><code>encrypted_payload_artifact_found</code>, <code>loader_execution_log_found</code></td></tr>
+      <tr><td>16</td><td class="id-cell">T1620</td><td>Reflective Code Loading</td><td>추론 포함</td><td><a href="/campaigns/SB-07/logs/HAD-003/">HAD-003</a>, <a href="/campaigns/SB-07/logs/HAD-004/">HAD-004</a>, <a href="/campaigns/SB-07/logs/HAD-005/">HAD-005</a>, <a href="/campaigns/SB-07/logs/HAD-006/">HAD-006</a>, <a href="/campaigns/SB-07/logs/HAD-007/">HAD-007</a>, <a href="/campaigns/SB-07/logs/HAD-008/">HAD-008</a>, <a href="/campaigns/SB-07/logs/HAC-001/">HAC-001</a></td><td><code>loader_execution_log_found</code>, <code>manual_mapping_inferred_from_artifacts</code></td></tr>
+      <tr><td>17</td><td class="id-cell">T1003.001</td><td>OS Credential Dumping: LSASS Memory</td><td>조건부 관측</td><td><a href="/campaigns/SB-07/logs/HAD-002/">HAD-002</a>, <a href="/campaigns/SB-07/logs/HAD-003/">HAD-003</a>, <a href="/campaigns/SB-07/logs/HAD-004/">HAD-004</a>, <a href="/campaigns/SB-07/logs/HAD-005/">HAD-005</a>, <a href="/campaigns/SB-07/logs/HAC-001/">HAC-001</a></td><td><code>sysmon_lsass_process_access</code>, <code>loader_execution_log_found</code></td></tr>
     </tbody>
   </table>
 </div>
@@ -133,8 +136,9 @@
     <tbody>
       <tr><td>PMS patch execution</td><td>PMS update path의 <code>patch.ps1</code>이 win01 PMS Agent에 의해 SYSTEM으로 실행됨</td><td>HAP-002, HAW-001, HAW-003, HAC-001</td><td><code>event.action:("pms_patch_executed" or "pms_patch_changed_emulated")</code></td><td>확인됨</td></tr>
       <tr><td>AD/DC discovery</td><td>win01에서 DC DNS/SRV, 445/5985 reachability, domain context를 확인함</td><td>HAW-001, HTE-002</td><td><code>event.action:("domain_controller_discovery" or "dc_port_probe_445" or "dc_port_probe_5985")</code></td><td>확인됨</td></tr>
-      <tr><td>Credential artifact access</td><td><code>dc_cred.xml</code> 발견 및 복호화 가능한 컨텍스트에서 credential object 사용 가능성 확인</td><td>HAW-001, HAW-002, HTE-002</td><td><code>event.action:("dc_cred_xml_discovered" or "dc_cred_xml_imported")</code></td><td>확인됨</td></tr>
-      <tr><td>DC remote access</td><td>WinRM/C$ 기반 DC 접근 및 원격 task 등록 흐름 확인</td><td>HAW-002, HAW-003, HAW-004, HTE-002, HAC-001</td><td><code>event.action:("dc_winrm_whoami" or "dc_c_admin_share_access" or "dc_scheduled_task_registered")</code></td><td>확인됨</td></tr>
+      <tr><td>Credential artifact access</td><td><code>dc_cred.xml</code> 발견, SYSTEM <code>Import-Clixml</code> 실패, local Administrator 컨텍스트에서 <code>Import-Clixml</code> 성공을 분리해 확인함</td><td>HAW-001, HAW-002, HTE-002, HAC-002</td><td><code>event.action:("dc_cred_xml_discovered" or "dc_cred_xml_imported")</code></td><td>확인됨</td></tr>
+      <tr><td>AWS control-plane local admin bridge</td><td>AWS <code>ec2:GetPasswordData</code>와 EC2 private key로 win01 local Administrator password를 획득하고, 비밀 출력 없이 WinRM/RDP 컨텍스트를 확인함</td><td>HAC-002</td><td><code>event.action:"aws_get_password_data_win01_local_admin_verified"</code></td><td>확인됨</td></tr>
+      <tr><td>DC remote access</td><td>local Administrator 컨텍스트에서 복호화된 <code>HANGUEL\Administrator</code> credential object로 DC WinRM/C$ 접근 및 원격 task 등록 흐름 확인</td><td>HAW-002, HAW-003, HAW-004, HTE-002, HAC-001, HAC-002</td><td><code>event.action:("dc_winrm_whoami" or "dc_c_admin_share_access" or "dc_scheduled_task_registered")</code></td><td>확인됨</td></tr>
       <tr><td>Loader artifact reconstruction</td><td>Task XML, Application Error, Amcache, ShimCache, USN Journal, loader run log로 loader 실행 흐름 재구성</td><td>HAD-004, HAD-005, HAD-006, HAD-007, HAD-008, HAD-009, HAC-001</td><td><code>log.id:("HAD-005" or "HAD-006" or "HAD-007" or "HAD-008" or "HAD-009")</code></td><td>확인됨 + 일부 추론</td></tr>
       <tr><td>LSASS access direct proof</td><td>Sysmon Event ID 10으로 <code>hgl_loader.exe -> lsass.exe</code>를 직접 증명하는 단계</td><td>HAD-003</td><td><code>event.action:"sysmon_lsass_process_access" and not hanguel.test_runner:true</code></td><td>미확인</td></tr>
     </tbody>
@@ -167,7 +171,8 @@
       <tr><td>HAD-007</td><td><code>HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\AppCompatCache</code></td><td>ShimCache/AppCompatCache에 executable path reference가 남을 때</td><td><code>registry.path</code>, <code>file.path</code>, <code>artifact.source</code></td><td>registry collector summary</td><td><code>event.action:"shimcache_loader_artifact_found"</code></td></tr>
       <tr><td>HAD-008</td><td>TaskCache registry + <code>C:\Windows\System32\Tasks\*</code></td><td>DC loader scheduled task 등록/실행 action 확인</td><td><code>task.name</code>, <code>task.action</code>, <code>process.command_line</code></td><td>task collector summary</td><td><code>event.action:("taskcache_loader_task_found" or "task_xml_loader_action_found")</code></td></tr>
       <tr><td>HAD-009</td><td><code>fsutil usn readjournal C: csv</code></td><td>loader/payload/run script 파일 생성/수정/close lifecycle 확인</td><td><code>file.name</code>, <code>file.path</code>, <code>usn.reason</code></td><td>USN collector summary</td><td><code>event.action:"usn_loader_file_lifecycle_observed"</code></td></tr>
-      <tr><td>HAC-001</td><td><code>hanguel-alerts-*</code></td><td>custom sequential correlator가 여러 event.action을 시간창 내에서 연결</td><td><code>rule.id</code>, <code>correlation.key</code>, <code>correlation.actions</code></td><td>Hanguel AD correlator -> ES</td><td><code>correlation.key:"run:SB07-FULL-BAS-20260528-111840"</code></td></tr>
+      <tr><td>HAC-001</td><td><code>hanguel-alerts-*</code></td><td>custom sequential correlator가 여러 event.action을 시간창 내에서 연결</td><td><code>rule.id</code>, <code>correlation.key</code>, <code>correlation.actions</code></td><td>Hanguel AD correlator reads <code>hanguel-ad-agent-*</code> + <code>langflow-agent-*</code> -> ES</td><td><code>correlation.key:"run:SB07-FULL-BAS-20260528-111840"</code></td></tr>
+      <tr><td>HAC-002</td><td><code>AD-JBOSS\verify_aws_control_plane_win01_admin.py</code> redacted JSON output</td><td>AWS GetPasswordData, win01 local Administrator WinRM, <code>dc_cred.xml</code> Import-Clixml, DC WinRM/C$ 확인</td><td><code>password_data_present</code>, <code>plaintext_printed:false</code>, <code>dc_winrm_succeeded</code>, <code>dc_c_admin_share_succeeded</code></td><td>Manual verification script, optional HTTP collector -> current index <code>langflow-agent-*</code></td><td><code>event.action:"aws_get_password_data_win01_local_admin_verified"</code></td></tr>
     </tbody>
   </table>
 </div>
@@ -232,9 +237,9 @@
 <details class="technique-panel">
   <summary><span class="id-cell">T1552</span> Credential Artifact</summary>
   <div class="technique-body">
-    <p><code>C:\ProgramData\HanguelPMS\dc_cred.xml</code>을 발견하고, 복호화 가능한 사용자 컨텍스트에서 credential object를 사용할 수 있는지 확인하는 단계다.</p>
+    <p><code>C:\ProgramData\HanguelPMS\dc_cred.xml</code>을 발견하고, SYSTEM 컨텍스트의 <code>Import-Clixml</code> 실패와 win01 local Administrator 컨텍스트의 <code>Import-Clixml</code> 성공을 분리해 확인하는 단계다.</p>
     <div class="mapping-grid">
-      <div><h3>Log IDs</h3><p><a href="/campaigns/SB-07/logs/HAW-001/">HAW-001</a>, <a href="/campaigns/SB-07/logs/HAW-002/">HAW-002</a>, <a href="/campaigns/SB-07/logs/HTE-002/">HTE-002</a></p></div>
+      <div><h3>Log IDs</h3><p><a href="/campaigns/SB-07/logs/HAW-001/">HAW-001</a>, <a href="/campaigns/SB-07/logs/HAW-002/">HAW-002</a>, <a href="/campaigns/SB-07/logs/HTE-002/">HTE-002</a>, <a href="/campaigns/SB-07/logs/HAC-002/">HAC-002</a></p></div>
       <div><h3>Detection Point</h3><p><code>dc_cred_xml_discovered</code>, <code>dc_cred_xml_imported</code>, password redaction 여부</p></div>
       <div><h3>KQL Draft</h3><p><code>event.action : ("dc_cred_xml_discovered" or "dc_cred_xml_imported")</code></p></div>
     </div>
@@ -242,11 +247,23 @@
 </details>
 
 <details class="technique-panel">
+  <summary><span class="id-cell">T1078.004 / T1078.003 / T1021.001</span> AWS Control-Plane Local Admin Bridge</summary>
+  <div class="technique-body">
+    <p>AWS control-plane credential과 EC2 private key로 <code>hanguel-win01</code> local Administrator password를 얻고, WinRM/RDP로 local Administrator 컨텍스트를 확보하는 단계다. 이 단계는 DPAPI 우회가 아니라, 올바른 사용자 컨텍스트를 획득해 <code>Export-Clixml</code> 보호 범위 안에서 복호화한 것으로 표현한다.</p>
+    <div class="mapping-grid">
+      <div><h3>Log IDs</h3><p><a href="/campaigns/SB-07/logs/HAC-002/">HAC-002</a>, <a href="/campaigns/SB-07/logs/HAW-002/">HAW-002</a></p></div>
+      <div><h3>Detection Point</h3><p><code>aws_get_password_data_win01_local_admin_verified</code>, <code>plaintext_printed:false</code>, <code>win01_local_admin_context</code></p></div>
+      <div><h3>KQL Draft</h3><p><code>event.action : ("aws_get_password_data_win01_local_admin_verified" or "win01_local_admin_context")</code></p></div>
+    </div>
+  </div>
+</details>
+
+<details class="technique-panel">
   <summary><span class="id-cell">T1021.002 / T1021.006</span> DC WinRM and C$ Access</summary>
   <div class="technique-body">
-    <p>확보한 도메인 관리자 credential로 win01에서 DC WinRM command와 C$ admin share 접근을 수행하는 단계다.</p>
+    <p>win01 local Administrator 컨텍스트에서 <code>dc_cred.xml</code>로 복호화한 도메인 관리자 credential object를 사용해 DC WinRM command와 C$ admin share 접근을 수행하는 단계다.</p>
     <div class="mapping-grid">
-      <div><h3>Log IDs</h3><p><a href="/campaigns/SB-07/logs/HAW-002/">HAW-002</a>, <a href="/campaigns/SB-07/logs/HAW-003/">HAW-003</a>, <a href="/campaigns/SB-07/logs/HTE-002/">HTE-002</a>, <a href="/campaigns/SB-07/logs/HAC-001/">HAC-001</a></p></div>
+      <div><h3>Log IDs</h3><p><a href="/campaigns/SB-07/logs/HAW-002/">HAW-002</a>, <a href="/campaigns/SB-07/logs/HAW-003/">HAW-003</a>, <a href="/campaigns/SB-07/logs/HTE-002/">HTE-002</a>, <a href="/campaigns/SB-07/logs/HAC-001/">HAC-001</a>, <a href="/campaigns/SB-07/logs/HAC-002/">HAC-002</a></p></div>
       <div><h3>Detection Point</h3><p><code>dc_winrm_whoami</code>, <code>dc_c_admin_share_access</code>, <code>dc_scheduled_task_registered</code></p></div>
       <div><h3>KQL Draft</h3><p><code>event.action : ("dc_winrm_whoami" or "dc_c_admin_share_access" or "dc_scheduled_task_registered")</code></p></div>
     </div>
@@ -270,19 +287,21 @@
   <table>
     <thead>
       <tr>
-        <th>Technique</th><th>HAB-001</th><th>HAP-001</th><th>HAP-002</th><th>HAW-001</th><th>HAW-002</th><th>HAW-003</th><th>HAW-004</th><th>HAD-003</th><th>HAD-004</th><th>HAD-005~009</th><th>HTE-002</th><th>HAC-001</th>
+        <th>Technique</th><th>HAB-001</th><th>HAP-001</th><th>HAP-002</th><th>HAW-001</th><th>HAW-002</th><th>HAW-003</th><th>HAW-004</th><th>HAD-003</th><th>HAD-004</th><th>HAD-005~009</th><th>HTE-002</th><th>HAC-001</th><th>HAC-002</th>
       </tr>
     </thead>
     <tbody>
-      <tr><td>T1133 External Remote Services</td><td>O</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
-      <tr><td>T1046 Network Service Discovery</td><td>O</td><td>O</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
-      <tr><td>T1190 Exploit Public-Facing Application</td><td>-</td><td>O</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>O</td></tr>
-      <tr><td>T1195.002 Supply Chain Compromise</td><td>-</td><td>O</td><td>O</td><td>O</td><td>-</td><td>O</td><td>-</td><td>-</td><td>-</td><td>-</td><td>O</td><td>O</td></tr>
-      <tr><td>T1082/T1482/T1018 Discovery</td><td>-</td><td>-</td><td>-</td><td>O</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>O</td><td>O</td></tr>
-      <tr><td>T1552 Unsecured Credentials</td><td>-</td><td>-</td><td>-</td><td>O</td><td>O</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>O</td><td>O</td></tr>
-      <tr><td>T1021.002/T1021.006 Remote Services</td><td>-</td><td>-</td><td>-</td><td>-</td><td>O</td><td>O</td><td>O</td><td>-</td><td>-</td><td>-</td><td>O</td><td>O</td></tr>
-      <tr><td>T1620 Reflective Code Loading</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>O</td><td>O</td><td>O</td><td>O</td><td>O</td><td>-</td><td>O</td></tr>
-      <tr><td>T1003.001 LSASS Memory</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>O</td><td>확장 필요</td><td>O</td><td>O</td><td>-</td><td>O</td></tr>
+      <tr><td>T1133 External Remote Services</td><td>O</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+      <tr><td>T1046 Network Service Discovery</td><td>O</td><td>O</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+      <tr><td>T1190 Exploit Public-Facing Application</td><td>-</td><td>O</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>O</td><td>-</td></tr>
+      <tr><td>T1195.002 Supply Chain Compromise</td><td>-</td><td>O</td><td>O</td><td>O</td><td>-</td><td>O</td><td>-</td><td>-</td><td>-</td><td>-</td><td>O</td><td>O</td><td>-</td></tr>
+      <tr><td>T1082/T1482/T1018 Discovery</td><td>-</td><td>-</td><td>-</td><td>O</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>O</td><td>O</td><td>-</td></tr>
+      <tr><td>T1552 Unsecured Credentials</td><td>-</td><td>-</td><td>-</td><td>O</td><td>O</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>O</td><td>O</td><td>O</td></tr>
+      <tr><td>T1078.004/T1078.003 Valid Accounts</td><td>-</td><td>-</td><td>-</td><td>-</td><td>O</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>O</td></tr>
+      <tr><td>T1021.001 RDP to win01</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>O</td></tr>
+      <tr><td>T1021.002/T1021.006 Remote Services</td><td>-</td><td>-</td><td>-</td><td>-</td><td>O</td><td>O</td><td>O</td><td>-</td><td>-</td><td>-</td><td>O</td><td>O</td><td>O</td></tr>
+      <tr><td>T1620 Reflective Code Loading</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>O</td><td>O</td><td>O</td><td>O</td><td>O</td><td>-</td><td>O</td><td>-</td></tr>
+      <tr><td>T1003.001 LSASS Memory</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>O</td><td>확장 필요</td><td>O</td><td>O</td><td>-</td><td>O</td><td>-</td></tr>
     </tbody>
   </table>
 </div>
@@ -295,6 +314,7 @@
   <article class="card"><h3><a href="/campaigns/SB-07/logs/HAD-005/">HAD-005 DC Application Error and WER Event</a></h3><p>hgl_loader.exe crash와 unknown module 정황을 Windows 원본 로그로 확인한다.</p></article>
   <article class="card"><h3><a href="/campaigns/SB-07/logs/HAD-006/">HAD-006 DC Amcache Artifact</a></h3><p>Amcache에서 hgl_loader.exe 경로와 PE metadata를 확인한다.</p></article>
   <article class="card"><h3><a href="/campaigns/SB-07/logs/HAC-001/">HAC-001 Hanguel AD Sequential Correlator Alert</a></h3><p>patch, credential, DC access, loader artifact를 시간창 내 incident 후보로 묶는다.</p></article>
+  <article class="card"><h3><a href="/campaigns/SB-07/logs/HAC-002/">HAC-002 AWS Control-Plane Local Admin Bridge</a></h3><p>GetPasswordData, win01 local Administrator 컨텍스트, dc_cred.xml Import-Clixml, DC WinRM/C$ 검증을 비밀 출력 없이 확인한다.</p></article>
 </div>
 
 <h2 id="next-improvements">Current Gaps</h2>
