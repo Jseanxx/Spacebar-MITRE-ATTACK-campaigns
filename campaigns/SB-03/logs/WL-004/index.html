@@ -75,6 +75,7 @@
 <table>
 <thead><tr><th>Technique</th><th>Mapping Reason</th></tr></thead>
 <tbody>
+<tr><td><a href="https://attack.mitre.org/techniques/T1041/">T1041 Exfiltration Over C2 Channel</a></td><td>공격자가 공격 과정에서 추출한 해시 파일, 유출 대상 파일 등을 공격자 서버로 전송하기 위해 이용한 HTTP POST 통신을 탐지한다.</td></tr>
 <tr><td><a href="https://attack.mitre.org/techniques/T1105/">T1105 - Ingress Tool Transfer</a></td><td>공격자가 후속 공격(예: Kerberoasting)에 사용할 악성 도구(Rubeus.exe 등)를 반입하기 위해 외부 C2 서버나 웹 서버로부터 파일 다운로드 함수 및 커맨들릿을 실행하는 과정을 PowerShell 스크립트 감사 로그 수준에서 정확하게 포착하고 매핑한다.</td></tr>
 </tbody></table></div>
 <h2 id="탐지-포인트">탐지 포인트</h2>
@@ -82,9 +83,37 @@
 <table>
 <thead><tr><th>Technique</th><th>관찰할 행위</th><th>주요 필드</th></tr></thead>
 <tbody>
+<tr><td>T1041 Exfiltration Over C2 Channel</td><td>PowerShell을 이용해 외부 서버에 파일을 업로드하는 웹 요청 함수나 유틸리티(Invoke-WebRequest 등)에 대해 POST 메소드가 실행되는 행위 감시</td><td>winlog.event_id, winlog.computer_name, winlog.event_data.ScriptBlockText, winlog.event_data.ScriptBlockId</td></tr>
 <tr><td>T1105 - Ingress Tool Transfer</td><td>파일 서버 및 내부 호스트에서 PowerShell을 이용해 네트워크 너머의 외부 자원을 끌어오는 웹 요청 함수나 유틸리티(Invoke-WebRequest, DownloadFile 등)가 실행되는 행위 감시(특히 분석가나 모니터링의 눈을 피하기 위해 약어인 iwr, curl, wget 등을 사용하여 파일 다운로드를 은밀히 시도하는 패턴 집중 분석)</td><td>winlog.event_id, winlog.computer_name, winlog.event_data.ScriptBlockText, winlog.event_data.ScriptBlockId</td></tr>
 </tbody></table></div>
 <h2 id="elk-query-예시">ELK Query 예시</h2>
+<pre><code>event.code : &quot;4104&quot;
+and (
+  winlog.channel : &quot;Microsoft-Windows-PowerShell/Operational&quot;
+  or winlog.provider_name : &quot;Microsoft-Windows-PowerShell&quot;
+)
+and (
+  message : &quot;*Invoke-WebRequest*&quot;
+  or message : &quot;*iwr*&quot;
+  or message : &quot;*Invoke-RestMethod*&quot;
+  or message : &quot;*irm*&quot;
+)
+and message : &quot;*http*&quot;
+and (
+  message : &quot;*-Method Post*&quot;
+  or message : &quot;*-Method POST*&quot;
+  or message : &quot;*Method=Post*&quot;
+  or message : &quot;*Method POST*&quot;
+)
+and (
+  message : &quot;*-InFile*&quot;
+  or message : &quot;*InFile*&quot;
+)
+and not message : (
+  &quot;*127.0.0.1*&quot;
+  or &quot;*localhost*&quot;
+  or &quot;*169.254.*&quot;
+)</code></pre>
 <pre><code>host.name: &quot;FS01.mycompany.local&quot;
 and event.code: &quot;4104&quot;
 and (
