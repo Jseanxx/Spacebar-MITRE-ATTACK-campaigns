@@ -78,7 +78,6 @@
 <table>
 <thead><tr><th>Technique</th><th>Mapping Reason</th></tr></thead>
 <tbody>
-<tr><td><a href="https://attack.mitre.org/techniques/T1095/">T1095 - Non-Application Layer Protocol</a></td><td>공격자가 표준 애플리케이션 계층 프로토콜(HTTP/HTTPS 등)을 우회하기 위해, 신뢰할 수 없는 프로세스(예: SecurityUpdate.exe)나 코드를 이용하여 외부의 특이 포트(예: 4444)로 TCP 아웃바운드 커넥션을 수립하고 명령 제어(C2) 채널을 확보하려는 행위를 식별한다.</td></tr>
 <tr><td><a href="https://attack.mitre.org/techniques/T1041/">T1041 - Exfiltration Over C2 Channel</a></td><td>공격자가 수집 및 압축한 내부 기밀 자산(예: data.zip)을 탐지 우회 및 효율적 관리를 위해 기 수립된 C2(명령 제어) 통신 채널을 통해 외부 악성 서버로 은밀히 송신(유출)하는 행위를 식별한다.</td></tr>
 </tbody></table></div>
 <h2 id="탐지-포인트">탐지 포인트</h2>
@@ -86,35 +85,9 @@
 <table>
 <thead><tr><th>Technique</th><th>관찰할 행위</th><th>주요 필드</th></tr></thead>
 <tbody>
-<tr><td>T1095 - Non-Application Layer Protocol</td><td>운영체제 필수 프로세스(System, svchost, lsass 등)나 공인된 업무용 프로그램(브라우저, 협업 툴 등)이 아닌 임의의 실행 파일이, 인가된 내부 네트워크 대역을 벗어난 외부 IP를 대상으로 일반적인 웹 포트(80, 443)가 아닌 임의의 포트로 아웃바운드 통신(Initiated: true)을 먼저 시작하는 행위 감시</td><td>winlog.event_id, winlog.computer_name, winlog.event_data.Image, winlog.event_data.Initiated, winlog.event_data.SourceIp, winlog.event_data.DestinationIp, winlog.event_data.DestinationPort</td></tr>
 <tr><td>T1041 - Exfiltration Over C2 Channel</td><td>사내 표준 사설 IP 대역, IPv4/IPv6 루프백 주소, 링크 로컬(fe80*) 대역 및 승인된 사내 외부 인프라 공인 IP 목록에 포함되지 않는 비인가 외부 IP 주소로 아웃바운드(Initiated: true) 연결을 수립하는 행위 감시</td><td>winlog.event_id, winlog.computer_name, winlog.event_data.Image, winlog.event_data.Initiated, winlog.event_data.SourceIp, winlog.event_data.DestinationIp, winlog.event_data.DestinationPort</td></tr>
 </tbody></table></div>
 <h2 id="elk-query-예시">ELK Query 예시</h2>
-<pre><code>winlog.channel : &quot;Microsoft-Windows-Sysmon/Operational&quot; 
-  and winlog.event_id : 3 
-  and winlog.event_data.Initiated : &quot;true&quot;
-  and not winlog.event_data.DestinationIp : (&quot;10.0.10.77&quot; or &quot;10.0.4.216&quot; or &quot;10.0.13.205&quot; or &quot;10.0.4.30&quot; or &quot;127.0.0.1&quot; or &quot;::1&quot; or &quot;0:0:0:0:0:0:0:1&quot; or fe80*)
-  and not winlog.event_data.DestinationPort : (80 or 443) 
-  and not winlog.event_data.Image : (
-    &quot;System&quot; or
-    &quot;C:\\Windows\\System32\\lsass.exe&quot; or
-    &quot;C:\\Windows\\ADWS\\Microsoft.ActiveDirectory.WebServices.exe&quot; or
-    &quot;C:\\Windows\\System32\\svchost.exe&quot; or
-    &quot;C:\\Windows\\System32\\spoolsv.exe&quot; or
-    &quot;C:\\Windows\\System32\\dns.exe&quot; or
-    &quot;C:\\Windows\\System32\\dfsrs.exe&quot; or
-    &quot;C:\\Program Files\\Windows Defender\\MsMpEng.exe&quot; or
-    &quot;C:\\Windows\\System32\\wbem\\WmiPrvSE.exe&quot; or
-    *\\winlogbeat.exe or 
-    *\\elastic-agent.exe or
-    *\\chrome.exe or 
-    *\\msedge.exe or 
-    *\\iexplore.exe or 
-    *\\firefox.exe or 
-    *\\teams.exe or 
-    *\\slack.exe or
-    *\\zoom.exe
-  )</code></pre>
 <pre><code>winlog.channel : &quot;Microsoft-Windows-Sysmon/Operational&quot;
 and winlog.event_id : 3
 and winlog.event_data.Initiated : &quot;true&quot;
