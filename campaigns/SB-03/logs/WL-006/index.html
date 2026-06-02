@@ -87,10 +87,15 @@
 <tr><td>T1003.006 - OS Credential Dumping: DCSync</td><td>도메인 컨트롤러(DC01) 상에서 정상적인 시스템/컴퓨터 동기화 계정(이름 끝에 $가 붙는 형태)이 아닌, 일반 사용자 계정이 AD 데이터 복제 및 자격 증명 요청에 필수적인 특수 스키마 GUID(1131f6ad-9c07-11d1-f79f-00c04fc2dcd2)를 호출하는 행위 집중 감시</td><td>winlog.event_id, winlog.computer_name, winlog.event_data.SubjectUserName, winlog.event_data.SubjectLogonId, winlog.event_data.AccessMask, winlog.event_data.Properties</td></tr>
 </tbody></table></div>
 <h2 id="elk-query-예시">ELK Query 예시</h2>
-<pre><code>host.name:&quot;DC01.mycompany.local&quot;
-AND event.code:&quot;4662&quot;
-AND winlog.event_data.Properties:*1131f6ad-9c07-11d1-f79f-00c04fc2dcd2*
-AND NOT winlog.event_data.SubjectUserName:*$*</code></pre>
+<pre><code>host.name : &quot;DC01.mycompany.local&quot;
+and event.code : &quot;4662&quot;
+and winlog.channel : &quot;Security&quot;
+and (
+  winlog.event_data.Properties : *1131f6ad-9c07-11d1-f79f-00c04fc2dcd2*
+  or winlog.event_data.Properties : *1131f6aa-9c07-11d1-f79f-00c04fc2dcd2*
+  or winlog.event_data.Properties : *89e95b76-444d-4c62-991a-0facbeda640c*
+)
+and not winlog.event_data.SubjectUserName : *$*</code></pre>
       <footer class="footer">
         Spacebar Project. This campaign log page is scoped to SB-03.
       </footer>
