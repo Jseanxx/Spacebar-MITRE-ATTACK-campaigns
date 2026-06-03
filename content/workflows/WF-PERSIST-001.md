@@ -71,12 +71,15 @@ event.action: ("CreateUser" or "AttachUserPolicy" or "CreateRole" or "CreateRole
 
 ## 6. 판단 기준
 
-| 구분 | 확인 기준 |
-| --- | --- |
-| 의심 | 배포 경로에 비정상 스크립트/webshell 파일 생성 |
-| 의심 | 운영 승인 없이 SYSTEM/root scheduled task 등록 |
-| 의심 | Golden Ticket, 과도한 RBAC, 신규 계정/키 생성 |
-| 정상 가능성 | 승인된 배포, 운영 자동화, 정기 작업 변경과 일치 |
+본 판단 기준은 MITRE ATT&CK 기법의 Detection Strategy/Data Sources 관점과 CISA Incident Response Playbook의 Detection & Analysis 절차를 함께 적용한다.  
+단일 이벤트만으로 확정하지 않고, 로그 보존, 이벤트 상관분석, 타임라인 작성, 정상 활동과의 deconfliction, ATT&CK TTP 매핑을 통해 판단한다.
+
+| 구분 | 확인 기준 | 근거 |
+| --- | --- | --- |
+| 의심 | 배포 경로에 비정상 스크립트/webshell 파일 생성 | MITRE ATT&CK `T1505.003`, `T1053`, `T1558.001`, `T1098`, CISA Detection & Analysis 기준 |
+| 의심 | 운영 승인 없이 SYSTEM/root scheduled task 등록 | MITRE ATT&CK `T1505.003`, `T1053`, `T1558.001`, `T1098`, CISA Detection & Analysis 기준 |
+| 의심 | Golden Ticket, 과도한 RBAC, 신규 계정/키 생성 | MITRE ATT&CK `T1505.003`, `T1053`, `T1558.001`, `T1098`, CISA Detection & Analysis 기준 |
+| 정상 가능성 | 승인된 배포, 운영 자동화, 정기 작업 변경과 일치 | CISA authorized activity deconfliction, 조직 baseline 및 승인 작업 확인 |
 
 ## 7. LLM Prompt Template
 
@@ -112,3 +115,10 @@ event.action: ("CreateUser" or "AttachUserPolicy" or "CreateRole" or "CreateRole
 - 의심 지속성 객체를 격리하고 관련 credential을 회전한다.
 - 동일 hash/task/계정/source IP로 확장 검색한다.
 - 변경 승인과 무결성 검증 절차를 개선한다.
+
+## 9. 근거자료
+
+- CISA, [Cybersecurity Incident & Vulnerability Response Playbooks](C:/Users/iregr/Downloads/Federal_Government_Cybersecurity_Incident_and_Vulnerability_Response_Playbooks_508C.pdf) - Detection & Analysis 단계의 로그 보존, 이벤트 상관분석, 타임라인 작성, 정상 활동 deconfliction 기준을 판단 근거로 사용한다.
+- MITRE ATT&CK, [Detection Strategies](https://attack.mitre.org/detectionstrategies/) - 기법별 탐지 전략과 데이터 소스 관점을 판단 기준에 반영한다.
+- MITRE ATT&CK, [T1558.001](https://attack.mitre.org/techniques/T1558/001/)
+- MITRE ATT&CK, [T1036](https://attack.mitre.org/techniques/T1036/)

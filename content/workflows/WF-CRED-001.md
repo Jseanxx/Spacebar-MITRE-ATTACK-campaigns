@@ -71,12 +71,15 @@ event.provider: "secretsmanager.amazonaws.com" and event.action: ("GetSecretValu
 
 ## 6. 판단 기준
 
-| 구분 | 확인 기준 |
-| --- | --- |
-| 의심 | 운영 시간 외 credential 파일/Secret 대량 조회 |
-| 의심 | 웹/앱/컨테이너 프로세스가 secret 저장소 또는 `.env`를 비정상 조회 |
-| 의심 | 조회 직후 SSH, DB, AWS API, K8s API 인증 성공 |
-| 정상 가능성 | 배포, 백업, secret rotation, 운영 점검 절차와 일치 |
+본 판단 기준은 MITRE ATT&CK 기법의 Detection Strategy/Data Sources 관점과 CISA Incident Response Playbook의 Detection & Analysis 절차를 함께 적용한다.  
+단일 이벤트만으로 확정하지 않고, 로그 보존, 이벤트 상관분석, 타임라인 작성, 정상 활동과의 deconfliction, ATT&CK TTP 매핑을 통해 판단한다.
+
+| 구분 | 확인 기준 | 근거 |
+| --- | --- | --- |
+| 의심 | 운영 시간 외 credential 파일/Secret 대량 조회 | MITRE ATT&CK `T1552`, `T1552.001`, `T1552.004`, `T1555`, CISA Detection & Analysis 기준 |
+| 의심 | 웹/앱/컨테이너 프로세스가 secret 저장소 또는 `.env`를 비정상 조회 | MITRE ATT&CK `T1552`, `T1552.001`, `T1552.004`, `T1555`, CISA Detection & Analysis 기준 |
+| 의심 | 조회 직후 SSH, DB, AWS API, K8s API 인증 성공 | MITRE ATT&CK `T1552`, `T1552.001`, `T1552.004`, `T1555`, CISA Detection & Analysis 기준 |
+| 정상 가능성 | 배포, 백업, secret rotation, 운영 점검 절차와 일치 | CISA authorized activity deconfliction, 조직 baseline 및 승인 작업 확인 |
 
 ## 7. LLM Prompt Template
 
@@ -112,3 +115,9 @@ event.provider: "secretsmanager.amazonaws.com" and event.action: ("GetSecretValu
 - 노출 가능성이 있는 token, key, password를 우선 회전한다.
 - 해당 credential의 사용 로그를 전체 기간으로 확장 검색한다.
 - secret 저장 위치와 권한, audit 설정, rotation 주기를 개선한다.
+
+## 9. 근거자료
+
+- CISA, [Cybersecurity Incident & Vulnerability Response Playbooks](C:/Users/iregr/Downloads/Federal_Government_Cybersecurity_Incident_and_Vulnerability_Response_Playbooks_508C.pdf) - Detection & Analysis 단계의 로그 보존, 이벤트 상관분석, 타임라인 작성, 정상 활동 deconfliction 기준을 판단 근거로 사용한다.
+- MITRE ATT&CK, [Detection Strategies](https://attack.mitre.org/detectionstrategies/) - 기법별 탐지 전략과 데이터 소스 관점을 판단 기준에 반영한다.
+- MITRE ATT&CK, [T1078](https://attack.mitre.org/techniques/T1078/)

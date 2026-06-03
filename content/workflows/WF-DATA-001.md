@@ -71,12 +71,15 @@ event.provider: "s3.amazonaws.com" and event.action: ("GetObject" or "ListBucket
 
 ## 6. 판단 기준
 
-| 구분 | 확인 기준 |
-| --- | --- |
-| 의심 | 업무 계정이 평소 접근하지 않던 DB/파일/secret 대량 조회 |
-| 의심 | credential 접근 직후 민감 데이터 조회 |
-| 의심 | 조회 직후 임시 경로 staging, archive 생성, 외부 전송 |
-| 정상 가능성 | 승인된 리포트, 백업, 데이터 이관, 운영 점검과 일치 |
+본 판단 기준은 MITRE ATT&CK 기법의 Detection Strategy/Data Sources 관점과 CISA Incident Response Playbook의 Detection & Analysis 절차를 함께 적용한다.  
+단일 이벤트만으로 확정하지 않고, 로그 보존, 이벤트 상관분석, 타임라인 작성, 정상 활동과의 deconfliction, ATT&CK TTP 매핑을 통해 판단한다.
+
+| 구분 | 확인 기준 | 근거 |
+| --- | --- | --- |
+| 의심 | 업무 계정이 평소 접근하지 않던 DB/파일/secret 대량 조회 | MITRE ATT&CK `T1213`, `T1005`, `T1530`, `T1552`, CISA Detection & Analysis 기준 |
+| 의심 | credential 접근 직후 민감 데이터 조회 | MITRE ATT&CK `T1213`, `T1005`, `T1530`, `T1552`, CISA Detection & Analysis 기준 |
+| 의심 | 조회 직후 임시 경로 staging, archive 생성, 외부 전송 | MITRE ATT&CK `T1213`, `T1005`, `T1530`, `T1552`, CISA Detection & Analysis 기준 |
+| 정상 가능성 | 승인된 리포트, 백업, 데이터 이관, 운영 점검과 일치 | CISA authorized activity deconfliction, 조직 baseline 및 승인 작업 확인 |
 
 ## 7. LLM Prompt Template
 
@@ -113,3 +116,9 @@ event.provider: "s3.amazonaws.com" and event.action: ("GetObject" or "ListBucket
 - 의심 계정과 credential을 통제하고 접근 권한을 재검토한다.
 - 조회 데이터의 민감도와 개인정보 포함 여부를 확인한다.
 - staging, archive, 외부 전송 로그로 즉시 Pivot한다.
+
+## 9. 근거자료
+
+- CISA, [Cybersecurity Incident & Vulnerability Response Playbooks](C:/Users/iregr/Downloads/Federal_Government_Cybersecurity_Incident_and_Vulnerability_Response_Playbooks_508C.pdf) - Detection & Analysis 단계의 로그 보존, 이벤트 상관분석, 타임라인 작성, 정상 활동 deconfliction 기준을 판단 근거로 사용한다.
+- MITRE ATT&CK, [Detection Strategies](https://attack.mitre.org/detectionstrategies/) - 기법별 탐지 전략과 데이터 소스 관점을 판단 기준에 반영한다.
+- MITRE ATT&CK, [T1074.001](https://attack.mitre.org/techniques/T1074/001/)

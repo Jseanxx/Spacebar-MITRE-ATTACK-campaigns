@@ -72,12 +72,15 @@ winlog.event_id: 4662 and winlog.event_data.Properties: ("*DS-Replication-Get-Ch
 
 ## 6. 판단 기준
 
-| 구분 | 확인 기준 |
-| --- | --- |
-| 의심 | 일반 사용자/감염 호스트에서 대량 TGS 요청 또는 Rubeus 실행 |
-| 의심 | LSASS dump 파일 생성, comsvcs.dll/rundll32 악용 |
-| 의심 | 비정상 계정의 DCSync/NTDS 접근 또는 DC 원격 실행 |
-| 정상 가능성 | 승인된 백업, AD 점검, 보안 도구 스캔과 일치 |
+본 판단 기준은 MITRE ATT&CK 기법의 Detection Strategy/Data Sources 관점과 CISA Incident Response Playbook의 Detection & Analysis 절차를 함께 적용한다.  
+단일 이벤트만으로 확정하지 않고, 로그 보존, 이벤트 상관분석, 타임라인 작성, 정상 활동과의 deconfliction, ATT&CK TTP 매핑을 통해 판단한다.
+
+| 구분 | 확인 기준 | 근거 |
+| --- | --- | --- |
+| 의심 | 일반 사용자/감염 호스트에서 대량 TGS 요청 또는 Rubeus 실행 | MITRE ATT&CK `T1558.003`, `T1003.001`, `T1003.006`, `T1003.003`, CISA Detection & Analysis 기준 |
+| 의심 | LSASS dump 파일 생성, comsvcs.dll/rundll32 악용 | MITRE ATT&CK `T1558.003`, `T1003.001`, `T1003.006`, `T1003.003`, CISA Detection & Analysis 기준 |
+| 의심 | 비정상 계정의 DCSync/NTDS 접근 또는 DC 원격 실행 | MITRE ATT&CK `T1558.003`, `T1003.001`, `T1003.006`, `T1003.003`, CISA Detection & Analysis 기준 |
+| 정상 가능성 | 승인된 백업, AD 점검, 보안 도구 스캔과 일치 | CISA authorized activity deconfliction, 조직 baseline 및 승인 작업 확인 |
 
 ## 7. LLM Prompt Template
 
@@ -114,3 +117,14 @@ winlog.event_id: 4662 and winlog.event_data.Properties: ("*DS-Replication-Get-Ch
 - 의심 계정 비활성화, 관리자 credential 회전, krbtgt 회전 필요성을 검토한다.
 - DC 접근 source host를 격리하고 전체 도메인 인증 로그를 확장 검색한다.
 - AD Tiering, 최소 권한, credential 보호 설정을 점검한다.
+
+## 9. 근거자료
+
+- CISA, [Cybersecurity Incident & Vulnerability Response Playbooks](C:/Users/iregr/Downloads/Federal_Government_Cybersecurity_Incident_and_Vulnerability_Response_Playbooks_508C.pdf) - Detection & Analysis 단계의 로그 보존, 이벤트 상관분석, 타임라인 작성, 정상 활동 deconfliction 기준을 판단 근거로 사용한다.
+- MITRE ATT&CK, [Detection Strategies](https://attack.mitre.org/detectionstrategies/) - 기법별 탐지 전략과 데이터 소스 관점을 판단 기준에 반영한다.
+- MITRE ATT&CK, [T1558.003](https://attack.mitre.org/techniques/T1558/003/)
+- MITRE ATT&CK, [T1003.001](https://attack.mitre.org/techniques/T1003/001/)
+- MITRE ATT&CK, [T1003.006](https://attack.mitre.org/techniques/T1003/006/)
+- MITRE ATT&CK, [T1003.003](https://attack.mitre.org/techniques/T1003/003/)
+- MITRE ATT&CK, [T1558.001](https://attack.mitre.org/techniques/T1558/001/)
+- MITRE ATT&CK, [T1021.006](https://attack.mitre.org/techniques/T1021/006/)

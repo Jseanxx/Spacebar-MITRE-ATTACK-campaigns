@@ -71,12 +71,15 @@ message: "Accepted publickey" and user.name: ("deploy" or "jenkins" or "app")
 
 ## 6. 판단 기준
 
-| 구분 | 확인 기준 |
-| --- | --- |
-| 의심 | 개발자 단말 외 source에서 API Token 또는 CLI 사용 |
-| 의심 | credential, workspace, config, build log를 짧은 시간에 대량 조회 |
-| 의심 | CI/CD 조회 직후 App 서버 SSH 접속 또는 DB credential 접근 |
-| 정상 가능성 | 승인된 배포, 장애 대응, 정기 Job 실행과 일치 |
+본 판단 기준은 MITRE ATT&CK 기법의 Detection Strategy/Data Sources 관점과 CISA Incident Response Playbook의 Detection & Analysis 절차를 함께 적용한다.  
+단일 이벤트만으로 확정하지 않고, 로그 보존, 이벤트 상관분석, 타임라인 작성, 정상 활동과의 deconfliction, ATT&CK TTP 매핑을 통해 판단한다.
+
+| 구분 | 확인 기준 | 근거 |
+| --- | --- | --- |
+| 의심 | 개발자 단말 외 source에서 API Token 또는 CLI 사용 | MITRE ATT&CK `T1592`, `T1552`, `T1078`, `T1213`, CISA Detection & Analysis 기준 |
+| 의심 | credential, workspace, config, build log를 짧은 시간에 대량 조회 | MITRE ATT&CK `T1592`, `T1552`, `T1078`, `T1213`, CISA Detection & Analysis 기준 |
+| 의심 | CI/CD 조회 직후 App 서버 SSH 접속 또는 DB credential 접근 | MITRE ATT&CK `T1592`, `T1552`, `T1078`, `T1213`, CISA Detection & Analysis 기준 |
+| 정상 가능성 | 승인된 배포, 장애 대응, 정기 Job 실행과 일치 | CISA authorized activity deconfliction, 조직 baseline 및 승인 작업 확인 |
 
 ## 7. LLM Prompt Template
 
@@ -114,3 +117,11 @@ message: "Accepted publickey" and user.name: ("deploy" or "jenkins" or "app")
 - 의심 API Token, SSH key, 배포 credential을 회전한다.
 - 해당 계정의 권한과 최근 Job 실행 이력을 검토한다.
 - 동일 token/source IP로 전체 CI/CD 로그를 확장 검색한다.
+
+## 9. 근거자료
+
+- CISA, [Cybersecurity Incident & Vulnerability Response Playbooks](C:/Users/iregr/Downloads/Federal_Government_Cybersecurity_Incident_and_Vulnerability_Response_Playbooks_508C.pdf) - Detection & Analysis 단계의 로그 보존, 이벤트 상관분석, 타임라인 작성, 정상 활동 deconfliction 기준을 판단 근거로 사용한다.
+- MITRE ATT&CK, [Detection Strategies](https://attack.mitre.org/detectionstrategies/) - 기법별 탐지 전략과 데이터 소스 관점을 판단 기준에 반영한다.
+- MITRE ATT&CK, [T1592](https://attack.mitre.org/techniques/T1592/)
+- MITRE ATT&CK, [T1078](https://attack.mitre.org/techniques/T1078/)
+- MITRE ATT&CK, [T1021.004](https://attack.mitre.org/techniques/T1021/004/)

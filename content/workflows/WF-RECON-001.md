@@ -13,7 +13,7 @@ techniques: "T1595, T1595.002, T1592, T1590, T1593"
 | Field | Value |
 | --- | --- |
 | 분석 대상 행위 | 외부 노출 서비스 식별, 배너/버전 수집, URL/API 구조 탐색, 취약 표면 확인 |
-| 관련 캠페인 | SB-04, SB-06, 외부 노출 서비스 기반 침투 캠페인 공통 |
+| 관련 캠페인 | SB-04, SB-06 |
 | 분석 결과물 | 정찰 주체, 대상 서비스, 수집된 표면 정보, 취약점 악용 가능성, 후속 Pivot |
 
 ## 1. 행위 정의
@@ -100,14 +100,13 @@ url.path: *
 
 ## 6. 판단 기준
 
-본 판단 기준은 MITRE ATT&CK Reconnaissance 기법과 CISA Incident Response Playbook의 Detection & Analysis 절차를 기반으로 한다.  
-CISA는 사고 분석 단계에서 관련 로그를 수집·보존하고, 이벤트를 상관분석하여 타임라인을 작성하며, 정상 baseline과 비교해 이상행위를 식별하고, 확인된 행위를 ATT&CK TTP에 매핑하도록 권고한다.  
-따라서 아래 기준은 단일 이벤트를 확정 근거로 사용하는 것이 아니라, 여러 로그와 정상 활동 여부를 교차 확인하기 위한 분석 기준이다.
+본 판단 기준은 MITRE ATT&CK 기법의 Detection Strategy/Data Sources 관점과 CISA Incident Response Playbook의 Detection & Analysis 절차를 함께 적용한다.  
+단일 이벤트만으로 확정하지 않고, 로그 보존, 이벤트 상관분석, 타임라인 작성, 정상 활동과의 deconfliction, ATT&CK TTP 매핑을 통해 판단한다.
 
 | 구분 | 확인 기준 | 근거 |
 | --- | --- | --- |
 | 의심 | 같은 `source.ip`가 짧은 시간 동안 다수 경로, 다수 host, 다수 포트로 반복 요청 | MITRE ATT&CK `T1595 Active Scanning`, CISA 이벤트 상관분석/타임라인 작성 |
-| 의심 | 외부 노출된 Jenkins CLI, Langflow API, JBoss 관리 경로, K8s Ingress, `.env`, `/config`, `/debug`, `/actuator`, `/admin` 등 민감 경로 확인 | MITRE ATT&CK `T1595.002 Vulnerability Scanning`, `T1592 Gather Victim Host Information` |
+| 의심 | 외부 노출된 Langflow API, React/Next.js 프론트엔드, K8s Ingress, `.env`, `/config`, `/debug`, `/actuator`, `/admin` 등 민감 경로 확인 | MITRE ATT&CK `T1595.002 Vulnerability Scanning`, `T1592 Gather Victim Host Information` |
 | 의심 | 서비스 버전, 응답 헤더, 에러 메시지, framework fingerprint를 유도하는 요청 패턴 | MITRE ATT&CK `T1592 Gather Victim Host Information`, `T1590 Gather Victim Network Information` |
 | 의심 | 정찰 직후 RCE, 인증 우회, credential 접근, 원격 접속, 데이터 접근 등 후속 침투 행위가 이어짐 | CISA 조사 범위 갱신 및 ATT&CK TTP 분석 |
 | 정상 가능성 | 승인된 취약점 점검, 외부 공격표면 관리(ASM), 모니터링, WAF 점검, 검색엔진 크롤러와 일치 | CISA authorized activity deconfliction, 조직 baseline 비교 |
@@ -117,7 +116,8 @@ CISA는 사고 분석 단계에서 관련 로그를 수집·보존하고, 이벤
 ```text
 너는 ELK, Splunk 등 SIEM에 연결된 침해사고 분석 보조자다.
 다음 조건으로 "외부 노출 서비스 및 취약 표면 정찰" 의심 정황을 조사하라.
-반드시 조회한 로그 근거를 기반으로 판단하고, 확인되지 않은 내용은 추정이라고 표시하라.
+반드시 조회한 로그 또는 제공된 로그 근거를 기반으로 판단하고, 확인되지 않은 내용은 추정이라고 표시하라.
+정상 점검, 배포, 보안 도구 실행 가능성을 함께 확인해 오탐과 실제 침투 가능성을 구분하라.
 분석은 CISA Incident Response Playbook의 Detection & Analysis 절차에 맞춰 로그 보존, 이벤트 상관분석, 타임라인 작성, 정상 baseline 비교, ATT&CK TTP 매핑 관점으로 수행하라.
 
 입력:
@@ -164,3 +164,13 @@ CISA는 사고 분석 단계에서 관련 로그를 수집·보존하고, 이벤
 - 정찰된 서비스의 외부 노출 범위, 버전, 관리 UI, 민감 경로, 불필요한 응답 헤더/에러 정보 노출 여부를 점검한다.
 - 후속 침투 정황이 없으면 WAF 룰, rate limit, 접근 제어, 노출 정보 최소화 등 예방 조치를 우선 검토한다.
 - 정찰 이후 RCE, 인증 우회, credential 접근, 원격 명령 실행, 데이터 접근이 확인되면 `WF-INITIAL-001`, `WF-CRED-001`, `WF-REMOTE-001`, `WF-DATA-001`로 Pivot한다.
+
+## 9. 근거자료
+
+- CISA, [Cybersecurity Incident & Vulnerability Response Playbooks](C:/Users/iregr/Downloads/Federal_Government_Cybersecurity_Incident_and_Vulnerability_Response_Playbooks_508C.pdf) - Detection & Analysis 단계의 로그 보존, 이벤트 상관분석, 타임라인 작성, 정상 활동 deconfliction 기준을 판단 근거로 사용한다.
+- MITRE ATT&CK, [Detection Strategies](https://attack.mitre.org/detectionstrategies/) - 기법별 탐지 전략과 데이터 소스 관점을 판단 기준에 반영한다.
+- MITRE ATT&CK, [T1595](https://attack.mitre.org/techniques/T1595/)
+- MITRE ATT&CK, [T1595.002](https://attack.mitre.org/techniques/T1595/002/)
+- MITRE ATT&CK, [T1592](https://attack.mitre.org/techniques/T1592/)
+- MITRE ATT&CK, [T1590](https://attack.mitre.org/techniques/T1590/)
+- MITRE ATT&CK, [T1593](https://attack.mitre.org/techniques/T1593/)

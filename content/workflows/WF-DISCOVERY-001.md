@@ -73,12 +73,15 @@ kubernetes.audit.verb: ("get" or "list") and kubernetes.audit.objectRef.resource
 
 ## 6. 판단 기준
 
-| 구분 | 확인 기준 |
-| --- | --- |
-| 의심 | 침투 직후 여러 discovery 명령이 자동화된 순서로 실행 |
-| 의심 | 서비스 계정, 웹 프로세스, SYSTEM 컨텍스트에서 내부 구조 조회 |
-| 의심 | 정찰 직후 특정 서버로 WinRM/SSH/SMB/K8s API 접근 |
-| 정상 가능성 | 승인된 점검 스크립트, 배포 스크립트, 장애 대응 절차와 일치 |
+본 판단 기준은 MITRE ATT&CK 기법의 Detection Strategy/Data Sources 관점과 CISA Incident Response Playbook의 Detection & Analysis 절차를 함께 적용한다.  
+단일 이벤트만으로 확정하지 않고, 로그 보존, 이벤트 상관분석, 타임라인 작성, 정상 활동과의 deconfliction, ATT&CK TTP 매핑을 통해 판단한다.
+
+| 구분 | 확인 기준 | 근거 |
+| --- | --- | --- |
+| 의심 | 침투 직후 여러 discovery 명령이 자동화된 순서로 실행 | MITRE ATT&CK `T1082`, `T1033`, `T1087`, `T1016`, CISA Detection & Analysis 기준 |
+| 의심 | 서비스 계정, 웹 프로세스, SYSTEM 컨텍스트에서 내부 구조 조회 | MITRE ATT&CK `T1082`, `T1033`, `T1087`, `T1016`, CISA Detection & Analysis 기준 |
+| 의심 | 정찰 직후 특정 서버로 WinRM/SSH/SMB/K8s API 접근 | MITRE ATT&CK `T1082`, `T1033`, `T1087`, `T1016`, CISA Detection & Analysis 기준 |
+| 정상 가능성 | 승인된 점검 스크립트, 배포 스크립트, 장애 대응 절차와 일치 | CISA authorized activity deconfliction, 조직 baseline 및 승인 작업 확인 |
 
 ## 7. LLM Prompt Template
 
@@ -115,3 +118,10 @@ kubernetes.audit.verb: ("get" or "list") and kubernetes.audit.objectRef.resource
 - 의심 주체의 세션, 권한, 최근 인증 로그를 확인한다.
 - 동일 명령 묶음과 동일 source로 전체 로그를 확장 검색한다.
 - 정찰된 주요 서버와 계정에 대한 후속 접근을 우선 점검한다.
+
+## 9. 근거자료
+
+- CISA, [Cybersecurity Incident & Vulnerability Response Playbooks](C:/Users/iregr/Downloads/Federal_Government_Cybersecurity_Incident_and_Vulnerability_Response_Playbooks_508C.pdf) - Detection & Analysis 단계의 로그 보존, 이벤트 상관분석, 타임라인 작성, 정상 활동 deconfliction 기준을 판단 근거로 사용한다.
+- MITRE ATT&CK, [Detection Strategies](https://attack.mitre.org/detectionstrategies/) - 기법별 탐지 전략과 데이터 소스 관점을 판단 기준에 반영한다.
+- MITRE ATT&CK, [T1046](https://attack.mitre.org/techniques/T1046/)
+- MITRE ATT&CK, [T1021.004](https://attack.mitre.org/techniques/T1021/004/)

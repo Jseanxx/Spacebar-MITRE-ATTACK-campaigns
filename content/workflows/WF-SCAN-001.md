@@ -68,18 +68,22 @@ winlog.provider_name: "Microsoft-Windows-Sysmon" and winlog.event_id: 3 and dest
 
 ## 6. 판단 기준
 
-| 구분 | 확인 기준 |
-| --- | --- |
-| 의심 | 같은 출발지에서 짧은 시간 내 다수 IP 또는 다수 포트로 연결 시도 |
-| 의심 | 스캔 직후 인증 시도, WinRM/SSH/RDP 접속, 파일 전송, credential 접근이 이어짐 |
-| 정상 가능성 | 승인된 취약점 점검, 모니터링, 자산 스캐너, BAS 실행 시간대와 일치 |
+본 판단 기준은 MITRE ATT&CK 기법의 Detection Strategy/Data Sources 관점과 CISA Incident Response Playbook의 Detection & Analysis 절차를 함께 적용한다.  
+단일 이벤트만으로 확정하지 않고, 로그 보존, 이벤트 상관분석, 타임라인 작성, 정상 활동과의 deconfliction, ATT&CK TTP 매핑을 통해 판단한다.
+
+| 구분 | 확인 기준 | 근거 |
+| --- | --- | --- |
+| 의심 | 같은 출발지에서 짧은 시간 내 다수 IP 또는 다수 포트로 연결 시도 | MITRE ATT&CK `T1046`, `T1018`, `T1592`, `T1059`, CISA Detection & Analysis 기준 |
+| 의심 | 스캔 직후 인증 시도, WinRM/SSH/RDP 접속, 파일 전송, credential 접근이 이어짐 | MITRE ATT&CK `T1046`, `T1018`, `T1592`, `T1059`, CISA Detection & Analysis 기준 |
+| 정상 가능성 | 승인된 취약점 점검, 모니터링, 자산 스캐너, BAS 실행 시간대와 일치 | CISA authorized activity deconfliction, 조직 baseline 및 승인 작업 확인 |
 
 ## 7. LLM Prompt Template
 
 ```text
 너는 ELK, Splunk 등 SIEM에 연결된 침해사고 분석 보조자다.
 다음 조건으로 "내부망 스캔 또는 서비스 탐색" 의심 정황을 조사하라.
-반드시 조회한 로그 근거를 기반으로 판단하고, 확인되지 않은 내용은 추정이라고 표시하라.
+반드시 조회한 로그 또는 제공된 로그 근거를 기반으로 판단하고, 확인되지 않은 내용은 추정이라고 표시하라.
+정상 점검, 배포, 보안 도구 실행 가능성을 함께 확인해 오탐과 실제 침투 가능성을 구분하라.
 
 입력:
 - 시간 범위:
@@ -115,3 +119,11 @@ winlog.provider_name: "Microsoft-Windows-Sysmon" and winlog.event_id: 3 and dest
 - 정상 취약점 점검, 모니터링, BAS 실행 여부를 확인한다.
 - 비정상으로 판단되면 출발지 호스트 격리, 계정 사용 내역 확인, 동일 패턴 확장 검색을 수행한다.
 - 스캔 이후 성공한 인증, 원격 접속, 데이터 접근 로그를 우선 확인한다.
+
+## 9. 근거자료
+
+- CISA, [Cybersecurity Incident & Vulnerability Response Playbooks](C:/Users/iregr/Downloads/Federal_Government_Cybersecurity_Incident_and_Vulnerability_Response_Playbooks_508C.pdf) - Detection & Analysis 단계의 로그 보존, 이벤트 상관분석, 타임라인 작성, 정상 활동 deconfliction 기준을 판단 근거로 사용한다.
+- MITRE ATT&CK, [Detection Strategies](https://attack.mitre.org/detectionstrategies/) - 기법별 탐지 전략과 데이터 소스 관점을 판단 기준에 반영한다.
+- MITRE ATT&CK, [T1046](https://attack.mitre.org/techniques/T1046/)
+- MITRE ATT&CK, [T1592](https://attack.mitre.org/techniques/T1592/)
+- MITRE ATT&CK, [T1059](https://attack.mitre.org/techniques/T1059/)

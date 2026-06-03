@@ -71,12 +71,15 @@ event.provider: "s3.amazonaws.com" and event.action: ("PutObject" or "GetObject"
 
 ## 6. 판단 기준
 
-| 구분 | 확인 기준 |
-| --- | --- |
-| 의심 | 서버/파드에서 예상치 못한 STS GetCallerIdentity 또는 AWS CLI userAgent |
-| 의심 | 애플리케이션 역할이 평소 접근하지 않던 Secret/Bucket 조회 |
-| 의심 | Secret 조회 직후 DB 접근 또는 외부 bucket 업로드 |
-| 정상 가능성 | 애플리케이션 정규 기능, 백업, 배포, 운영 자동화와 일치 |
+본 판단 기준은 MITRE ATT&CK 기법의 Detection Strategy/Data Sources 관점과 CISA Incident Response Playbook의 Detection & Analysis 절차를 함께 적용한다.  
+단일 이벤트만으로 확정하지 않고, 로그 보존, 이벤트 상관분석, 타임라인 작성, 정상 활동과의 deconfliction, ATT&CK TTP 매핑을 통해 판단한다.
+
+| 구분 | 확인 기준 | 근거 |
+| --- | --- | --- |
+| 의심 | 서버/파드에서 예상치 못한 STS GetCallerIdentity 또는 AWS CLI userAgent | MITRE ATT&CK `T1552.005`, `T1078.004`, `T1528`, `T1530`, CISA Detection & Analysis 기준 |
+| 의심 | 애플리케이션 역할이 평소 접근하지 않던 Secret/Bucket 조회 | MITRE ATT&CK `T1552.005`, `T1078.004`, `T1528`, `T1530`, CISA Detection & Analysis 기준 |
+| 의심 | Secret 조회 직후 DB 접근 또는 외부 bucket 업로드 | MITRE ATT&CK `T1552.005`, `T1078.004`, `T1528`, `T1530`, CISA Detection & Analysis 기준 |
+| 정상 가능성 | 애플리케이션 정규 기능, 백업, 배포, 운영 자동화와 일치 | CISA authorized activity deconfliction, 조직 baseline 및 승인 작업 확인 |
 
 ## 7. LLM Prompt Template
 
@@ -113,3 +116,9 @@ event.provider: "s3.amazonaws.com" and event.action: ("PutObject" or "GetObject"
 - 노출 가능 role의 세션 차단, 권한 축소, secret 회전을 검토한다.
 - S3/Secrets/RDS 접근 로그를 전체 기간으로 확장 검색한다.
 - IMDSv2 강제, 최소 권한, pod identity 분리를 점검한다.
+
+## 9. 근거자료
+
+- CISA, [Cybersecurity Incident & Vulnerability Response Playbooks](C:/Users/iregr/Downloads/Federal_Government_Cybersecurity_Incident_and_Vulnerability_Response_Playbooks_508C.pdf) - Detection & Analysis 단계의 로그 보존, 이벤트 상관분석, 타임라인 작성, 정상 활동 deconfliction 기준을 판단 근거로 사용한다.
+- MITRE ATT&CK, [Detection Strategies](https://attack.mitre.org/detectionstrategies/) - 기법별 탐지 전략과 데이터 소스 관점을 판단 기준에 반영한다.
+- MITRE ATT&CK, [T1078](https://attack.mitre.org/techniques/T1078/)

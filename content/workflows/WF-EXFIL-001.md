@@ -71,12 +71,15 @@ event.provider: "s3.amazonaws.com" and event.action: "PutObject"
 
 ## 6. 판단 기준
 
-| 구분 | 확인 기준 |
-| --- | --- |
-| 의심 | 임시 archive 생성 직후 외부 HTTP POST/SSH/S3 업로드 |
-| 의심 | 서버/파드에서 평소 없던 대량 outbound 또는 AWS CLI PutObject |
-| 의심 | 외부 웹 수신지, 개인/비승인 cloud bucket으로 전송 |
-| 정상 가능성 | 승인된 백업, 로그 전송, 배포 artifact 업로드와 일치 |
+본 판단 기준은 MITRE ATT&CK 기법의 Detection Strategy/Data Sources 관점과 CISA Incident Response Playbook의 Detection & Analysis 절차를 함께 적용한다.  
+단일 이벤트만으로 확정하지 않고, 로그 보존, 이벤트 상관분석, 타임라인 작성, 정상 활동과의 deconfliction, ATT&CK TTP 매핑을 통해 판단한다.
+
+| 구분 | 확인 기준 | 근거 |
+| --- | --- | --- |
+| 의심 | 임시 archive 생성 직후 외부 HTTP POST/SSH/S3 업로드 | MITRE ATT&CK `T1041`, `T1048`, `T1048.002`, `T1567.002`, CISA Detection & Analysis 기준 |
+| 의심 | 서버/파드에서 평소 없던 대량 outbound 또는 AWS CLI PutObject | MITRE ATT&CK `T1041`, `T1048`, `T1048.002`, `T1567.002`, CISA Detection & Analysis 기준 |
+| 의심 | 외부 웹 수신지, 개인/비승인 cloud bucket으로 전송 | MITRE ATT&CK `T1041`, `T1048`, `T1048.002`, `T1567.002`, CISA Detection & Analysis 기준 |
+| 정상 가능성 | 승인된 백업, 로그 전송, 배포 artifact 업로드와 일치 | CISA authorized activity deconfliction, 조직 baseline 및 승인 작업 확인 |
 
 ## 7. LLM Prompt Template
 
@@ -113,3 +116,10 @@ event.provider: "s3.amazonaws.com" and event.action: "PutObject"
 - 진행 중인 유출이면 egress 차단과 호스트/계정 격리를 수행한다.
 - 전송된 파일 후보와 민감도, 개인정보 포함 여부를 확인한다.
 - 동일 destination과 동일 archive/hash로 과거 로그를 확장 검색한다.
+
+## 9. 근거자료
+
+- CISA, [Cybersecurity Incident & Vulnerability Response Playbooks](C:/Users/iregr/Downloads/Federal_Government_Cybersecurity_Incident_and_Vulnerability_Response_Playbooks_508C.pdf) - Detection & Analysis 단계의 로그 보존, 이벤트 상관분석, 타임라인 작성, 정상 활동 deconfliction 기준을 판단 근거로 사용한다.
+- MITRE ATT&CK, [Detection Strategies](https://attack.mitre.org/detectionstrategies/) - 기법별 탐지 전략과 데이터 소스 관점을 판단 기준에 반영한다.
+- MITRE ATT&CK, [T1105](https://attack.mitre.org/techniques/T1105/)
+- MITRE ATT&CK, [T1560](https://attack.mitre.org/techniques/T1560/)

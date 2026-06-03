@@ -72,12 +72,15 @@ kubernetes.audit.verb: "create" and kubernetes.audit.objectRef.subresource: "exe
 
 ## 6. 판단 기준
 
-| 구분 | 확인 기준 |
-| --- | --- |
-| 의심 | 웹/앱/서비스 프로세스 하위에서 shell 또는 PowerShell 실행 |
-| 의심 | `curl`, `wget`, `Invoke-WebRequest`, `python -c`, encoded command 사용 |
-| 의심 | kubectl exec로 컨테이너 내부에서 환경변수/secret/파일 구조 확인 |
-| 정상 가능성 | 승인된 운영 스크립트, 배포 자동화, 장애 대응 절차와 일치 |
+본 판단 기준은 MITRE ATT&CK 기법의 Detection Strategy/Data Sources 관점과 CISA Incident Response Playbook의 Detection & Analysis 절차를 함께 적용한다.  
+단일 이벤트만으로 확정하지 않고, 로그 보존, 이벤트 상관분석, 타임라인 작성, 정상 활동과의 deconfliction, ATT&CK TTP 매핑을 통해 판단한다.
+
+| 구분 | 확인 기준 | 근거 |
+| --- | --- | --- |
+| 의심 | 웹/앱/서비스 프로세스 하위에서 shell 또는 PowerShell 실행 | MITRE ATT&CK `T1059`, `T1059.001`, `T1059.004`, `T1059.006`, CISA Detection & Analysis 기준 |
+| 의심 | `curl`, `wget`, `Invoke-WebRequest`, `python -c`, encoded command 사용 | MITRE ATT&CK `T1059`, `T1059.001`, `T1059.004`, `T1059.006`, CISA Detection & Analysis 기준 |
+| 의심 | kubectl exec로 컨테이너 내부에서 환경변수/secret/파일 구조 확인 | MITRE ATT&CK `T1059`, `T1059.001`, `T1059.004`, `T1059.006`, CISA Detection & Analysis 기준 |
+| 정상 가능성 | 승인된 운영 스크립트, 배포 자동화, 장애 대응 절차와 일치 | CISA authorized activity deconfliction, 조직 baseline 및 승인 작업 확인 |
 
 ## 7. LLM Prompt Template
 
@@ -114,3 +117,11 @@ kubernetes.audit.verb: "create" and kubernetes.audit.objectRef.subresource: "exe
 - 비정상 실행이면 호스트/파드 격리와 계정 사용 중지를 검토한다.
 - 다운로드 URL, destination IP, 명령 패턴으로 확장 검색한다.
 - 운영 자동화 예외 목록과 로깅 정책을 정비한다.
+
+## 9. 근거자료
+
+- CISA, [Cybersecurity Incident & Vulnerability Response Playbooks](C:/Users/iregr/Downloads/Federal_Government_Cybersecurity_Incident_and_Vulnerability_Response_Playbooks_508C.pdf) - Detection & Analysis 단계의 로그 보존, 이벤트 상관분석, 타임라인 작성, 정상 활동 deconfliction 기준을 판단 근거로 사용한다.
+- MITRE ATT&CK, [Detection Strategies](https://attack.mitre.org/detectionstrategies/) - 기법별 탐지 전략과 데이터 소스 관점을 판단 기준에 반영한다.
+- MITRE ATT&CK, [T1059](https://attack.mitre.org/techniques/T1059/)
+- MITRE ATT&CK, [T1059.001](https://attack.mitre.org/techniques/T1059/001/)
+- MITRE ATT&CK, [T1105](https://attack.mitre.org/techniques/T1105/)

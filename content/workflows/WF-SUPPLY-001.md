@@ -72,12 +72,15 @@ process.command_line: ("*patch.ps1*" or "*powershell*updates*" or "*deploy*")
 
 ## 6. 판단 기준
 
-| 구분 | 확인 기준 |
-| --- | --- |
-| 의심 | 승인 없는 patch/manifest/artifact 변경 |
-| 의심 | hash/version만 갱신되고 파일 내용이 비정상 변경 |
-| 의심 | 업데이트 에이전트가 SYSTEM/root 권한으로 공격 명령 실행 |
-| 정상 가능성 | 배포 티켓, 변경 승인, 코드 서명, 릴리스 노트와 일치 |
+본 판단 기준은 MITRE ATT&CK 기법의 Detection Strategy/Data Sources 관점과 CISA Incident Response Playbook의 Detection & Analysis 절차를 함께 적용한다.  
+단일 이벤트만으로 확정하지 않고, 로그 보존, 이벤트 상관분석, 타임라인 작성, 정상 활동과의 deconfliction, ATT&CK TTP 매핑을 통해 판단한다.
+
+| 구분 | 확인 기준 | 근거 |
+| --- | --- | --- |
+| 의심 | 승인 없는 patch/manifest/artifact 변경 | MITRE ATT&CK `T1195`, `T1195.002`, `T1036`, `T1105`, CISA Detection & Analysis 기준 |
+| 의심 | hash/version만 갱신되고 파일 내용이 비정상 변경 | MITRE ATT&CK `T1195`, `T1195.002`, `T1036`, `T1105`, CISA Detection & Analysis 기준 |
+| 의심 | 업데이트 에이전트가 SYSTEM/root 권한으로 공격 명령 실행 | MITRE ATT&CK `T1195`, `T1195.002`, `T1036`, `T1105`, CISA Detection & Analysis 기준 |
+| 정상 가능성 | 배포 티켓, 변경 승인, 코드 서명, 릴리스 노트와 일치 | CISA authorized activity deconfliction, 조직 baseline 및 승인 작업 확인 |
 
 ## 7. LLM Prompt Template
 
@@ -114,3 +117,12 @@ process.command_line: ("*patch.ps1*" or "*powershell*updates*" or "*deploy*")
 - 배포/업데이트 경로를 임시 중단하고 정상 artifact로 롤백한다.
 - 영향받은 클라이언트를 식별해 실행 로그와 credential 접근을 확인한다.
 - 코드 서명, 승인 절차, artifact 무결성 검증을 강화한다.
+
+## 9. 근거자료
+
+- CISA, [Cybersecurity Incident & Vulnerability Response Playbooks](C:/Users/iregr/Downloads/Federal_Government_Cybersecurity_Incident_and_Vulnerability_Response_Playbooks_508C.pdf) - Detection & Analysis 단계의 로그 보존, 이벤트 상관분석, 타임라인 작성, 정상 활동 deconfliction 기준을 판단 근거로 사용한다.
+- MITRE ATT&CK, [Detection Strategies](https://attack.mitre.org/detectionstrategies/) - 기법별 탐지 전략과 데이터 소스 관점을 판단 기준에 반영한다.
+- MITRE ATT&CK, [T1195.002](https://attack.mitre.org/techniques/T1195/002/)
+- MITRE ATT&CK, [T1036](https://attack.mitre.org/techniques/T1036/)
+- MITRE ATT&CK, [T1105](https://attack.mitre.org/techniques/T1105/)
+- MITRE ATT&CK, [T1059](https://attack.mitre.org/techniques/T1059/)

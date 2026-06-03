@@ -72,12 +72,15 @@ user.effective.id: 0 and process.name: ("bash" or "sh" or "python" or "sudo")
 
 ## 6. 판단 기준
 
-| 구분 | 확인 기준 |
-| --- | --- |
-| 의심 | 웹/앱/일반 사용자 컨텍스트에서 root/SYSTEM 권한 실행으로 전환 |
-| 의심 | privileged pod, hostPath, scheduled task, 관리자 공유 접근이 연속 발생 |
-| 의심 | 권한 상승 직후 credential dump 또는 secret 조회 |
-| 정상 가능성 | 승인된 패치, 운영 자동화, 클러스터 관리 작업과 일치 |
+본 판단 기준은 MITRE ATT&CK 기법의 Detection Strategy/Data Sources 관점과 CISA Incident Response Playbook의 Detection & Analysis 절차를 함께 적용한다.  
+단일 이벤트만으로 확정하지 않고, 로그 보존, 이벤트 상관분석, 타임라인 작성, 정상 활동과의 deconfliction, ATT&CK TTP 매핑을 통해 판단한다.
+
+| 구분 | 확인 기준 | 근거 |
+| --- | --- | --- |
+| 의심 | 웹/앱/일반 사용자 컨텍스트에서 root/SYSTEM 권한 실행으로 전환 | MITRE ATT&CK `T1068`, `T1611`, `T1610`, `T1134`, CISA Detection & Analysis 기준 |
+| 의심 | privileged pod, hostPath, scheduled task, 관리자 공유 접근이 연속 발생 | MITRE ATT&CK `T1068`, `T1611`, `T1610`, `T1134`, CISA Detection & Analysis 기준 |
+| 의심 | 권한 상승 직후 credential dump 또는 secret 조회 | MITRE ATT&CK `T1068`, `T1611`, `T1610`, `T1134`, CISA Detection & Analysis 기준 |
+| 정상 가능성 | 승인된 패치, 운영 자동화, 클러스터 관리 작업과 일치 | CISA authorized activity deconfliction, 조직 baseline 및 승인 작업 확인 |
 
 ## 7. LLM Prompt Template
 
@@ -113,3 +116,9 @@ user.effective.id: 0 and process.name: ("bash" or "sh" or "python" or "sudo")
 - 영향 호스트/파드/노드를 격리하고 credential 회전을 검토한다.
 - 동일 exploit/Pod spec/task 이름으로 전체 로그를 확장 검색한다.
 - 취약점 패치, RBAC 축소, 고권한 작업 승인 절차를 점검한다.
+
+## 9. 근거자료
+
+- CISA, [Cybersecurity Incident & Vulnerability Response Playbooks](C:/Users/iregr/Downloads/Federal_Government_Cybersecurity_Incident_and_Vulnerability_Response_Playbooks_508C.pdf) - Detection & Analysis 단계의 로그 보존, 이벤트 상관분석, 타임라인 작성, 정상 활동 deconfliction 기준을 판단 근거로 사용한다.
+- MITRE ATT&CK, [Detection Strategies](https://attack.mitre.org/detectionstrategies/) - 기법별 탐지 전략과 데이터 소스 관점을 판단 기준에 반영한다.
+- MITRE ATT&CK, [T1003.001](https://attack.mitre.org/techniques/T1003/001/)

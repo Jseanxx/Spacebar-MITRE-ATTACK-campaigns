@@ -72,12 +72,15 @@ process.command_line: ("*schtasks /create*" or "*Register-ScheduledTask*")
 
 ## 6. 판단 기준
 
-| 구분 | 확인 기준 |
-| --- | --- |
-| 의심 | rundll32/comsvcs로 LSASS 접근 또는 dump 생성 |
-| 의심 | PowerShell encoded command, 외부 다운로드, 비정상 parent |
-| 의심 | schtasks로 SYSTEM 권한 payload 실행 |
-| 정상 가능성 | 승인된 관리 도구, 백업, 패치, EDR/관리 솔루션 작업과 일치 |
+본 판단 기준은 MITRE ATT&CK 기법의 Detection Strategy/Data Sources 관점과 CISA Incident Response Playbook의 Detection & Analysis 절차를 함께 적용한다.  
+단일 이벤트만으로 확정하지 않고, 로그 보존, 이벤트 상관분석, 타임라인 작성, 정상 활동과의 deconfliction, ATT&CK TTP 매핑을 통해 판단한다.
+
+| 구분 | 확인 기준 | 근거 |
+| --- | --- | --- |
+| 의심 | rundll32/comsvcs로 LSASS 접근 또는 dump 생성 | MITRE ATT&CK `T1218`, `T1218.011`, `T1059.001`, `T1003.001`, CISA Detection & Analysis 기준 |
+| 의심 | PowerShell encoded command, 외부 다운로드, 비정상 parent | MITRE ATT&CK `T1218`, `T1218.011`, `T1059.001`, `T1003.001`, CISA Detection & Analysis 기준 |
+| 의심 | schtasks로 SYSTEM 권한 payload 실행 | MITRE ATT&CK `T1218`, `T1218.011`, `T1059.001`, `T1003.001`, CISA Detection & Analysis 기준 |
+| 정상 가능성 | 승인된 관리 도구, 백업, 패치, EDR/관리 솔루션 작업과 일치 | CISA authorized activity deconfliction, 조직 baseline 및 승인 작업 확인 |
 
 ## 7. LLM Prompt Template
 
@@ -114,3 +117,11 @@ process.command_line: ("*schtasks /create*" or "*Register-ScheduledTask*")
 - 비정상 도구 사용이면 호스트 격리와 credential 회전을 검토한다.
 - 동일 command line, parent, destination으로 확장 검색한다.
 - LOLBin 탐지 룰과 허용된 관리 도구 기준을 정비한다.
+
+## 9. 근거자료
+
+- CISA, [Cybersecurity Incident & Vulnerability Response Playbooks](C:/Users/iregr/Downloads/Federal_Government_Cybersecurity_Incident_and_Vulnerability_Response_Playbooks_508C.pdf) - Detection & Analysis 단계의 로그 보존, 이벤트 상관분석, 타임라인 작성, 정상 활동 deconfliction 기준을 판단 근거로 사용한다.
+- MITRE ATT&CK, [Detection Strategies](https://attack.mitre.org/detectionstrategies/) - 기법별 탐지 전략과 데이터 소스 관점을 판단 기준에 반영한다.
+- MITRE ATT&CK, [T1059.001](https://attack.mitre.org/techniques/T1059/001/)
+- MITRE ATT&CK, [T1003.001](https://attack.mitre.org/techniques/T1003/001/)
+- MITRE ATT&CK, [T1105](https://attack.mitre.org/techniques/T1105/)
