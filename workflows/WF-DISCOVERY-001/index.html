@@ -72,14 +72,15 @@
 <li>정찰 이후 원격 접속, credential 접근, 권한 상승이 이어졌는지 Pivot한다.</li>
 </ol>
 <h2 id="6-판단-기준">6. 판단 기준</h2>
+<p>본 판단 기준은 MITRE ATT&amp;CK 기법의 Detection Strategy/Data Sources 관점과 CISA Incident Response Playbook의 Detection &amp; Analysis 절차를 함께 적용한다. 단일 이벤트만으로 확정하지 않고, 로그 보존, 이벤트 상관분석, 타임라인 작성, 정상 활동과의 deconfliction, ATT&amp;CK TTP 매핑을 통해 판단한다.</p>
 <div class="table-wrap wide-table">
 <table>
-<thead><tr><th>구분</th><th>확인 기준</th></tr></thead>
+<thead><tr><th>구분</th><th>확인 기준</th><th>근거</th></tr></thead>
 <tbody>
-<tr><td>의심</td><td>침투 직후 여러 discovery 명령이 자동화된 순서로 실행</td></tr>
-<tr><td>의심</td><td>서비스 계정, 웹 프로세스, SYSTEM 컨텍스트에서 내부 구조 조회</td></tr>
-<tr><td>의심</td><td>정찰 직후 특정 서버로 WinRM/SSH/SMB/K8s API 접근</td></tr>
-<tr><td>정상 가능성</td><td>승인된 점검 스크립트, 배포 스크립트, 장애 대응 절차와 일치</td></tr>
+<tr><td>의심</td><td>침투 직후 여러 discovery 명령이 자동화된 순서로 실행</td><td>MITRE ATT&amp;CK <code>T1082</code>, <code>T1033</code>, <code>T1087</code>, <code>T1016</code>, CISA Detection &amp; Analysis 기준</td></tr>
+<tr><td>의심</td><td>서비스 계정, 웹 프로세스, SYSTEM 컨텍스트에서 내부 구조 조회</td><td>MITRE ATT&amp;CK <code>T1082</code>, <code>T1033</code>, <code>T1087</code>, <code>T1016</code>, CISA Detection &amp; Analysis 기준</td></tr>
+<tr><td>의심</td><td>정찰 직후 특정 서버로 WinRM/SSH/SMB/K8s API 접근</td><td>MITRE ATT&amp;CK <code>T1082</code>, <code>T1033</code>, <code>T1087</code>, <code>T1016</code>, CISA Detection &amp; Analysis 기준</td></tr>
+<tr><td>정상 가능성</td><td>승인된 점검 스크립트, 배포 스크립트, 장애 대응 절차와 일치</td><td>CISA authorized activity deconfliction, 조직 baseline 및 승인 작업 확인</td></tr>
 </tbody></table></div>
 <h2 id="7-llm-prompt-template">7. LLM Prompt Template</h2>
 <pre><code>너는 SIEM에 연결된 침해사고 분석 보조자다.
@@ -112,6 +113,13 @@
 <li>의심 주체의 세션, 권한, 최근 인증 로그를 확인한다.</li>
 <li>동일 명령 묶음과 동일 source로 전체 로그를 확장 검색한다.</li>
 <li>정찰된 주요 서버와 계정에 대한 후속 접근을 우선 점검한다.</li>
+</ul>
+<h2 id="9-근거자료">9. 근거자료</h2>
+<ul>
+<li>CISA, <a href="C:/Users/iregr/Downloads/Federal_Government_Cybersecurity_Incident_and_Vulnerability_Response_Playbooks_508C.pdf">Cybersecurity Incident &amp; Vulnerability Response Playbooks</a> - Detection &amp; Analysis 단계의 로그 보존, 이벤트 상관분석, 타임라인 작성, 정상 활동 deconfliction 기준을 판단 근거로 사용한다.</li>
+<li>MITRE ATT&amp;CK, <a href="https://attack.mitre.org/detectionstrategies/">Detection Strategies</a> - 기법별 탐지 전략과 데이터 소스 관점을 판단 기준에 반영한다.</li>
+<li>MITRE ATT&amp;CK, <a href="https://attack.mitre.org/techniques/T1046/">T1046</a></li>
+<li>MITRE ATT&amp;CK, <a href="https://attack.mitre.org/techniques/T1021/004/">T1021.004</a></li>
 </ul>
     <footer class="footer">
       Spacebar Project. This workflow is an educational blue team playbook artifact.

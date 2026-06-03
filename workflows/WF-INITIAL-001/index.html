@@ -26,12 +26,12 @@
 <div class="meta-label">분석 대상 행위:</div>
 <div class="meta-value">RCE, 비인증 API 악용, 취약 웹/애플리케이션 서비스 악용</div>
 <div class="meta-label">관련 캠페인:</div>
-<div class="meta-value">SB-04, SB-06, SB-07, 외부 서비스 침투 캠페인 공통</div>
+<div class="meta-value">SB-04, SB-06, 외부 서비스 침투 캠페인 공통</div>
 <div class="meta-label">분석 결과물:</div>
 <div class="meta-value">악용 요청, 최초 실행 위치, 실행 계정, 후속 다운로드/명령 실행 여부</div>
 </div>
 <h2 id="1-행위-정의">1. 행위 정의</h2>
-<p>공격자가 Jenkins, Langflow, JBoss, 프론트엔드 파드 같은 외부 노출 서비스를 통해 서버 측 코드 실행 또는 명령 실행 권한을 확보하는 행위다. HTTP 요청만 보지 않고 요청 직후 생성된 프로세스, 애플리케이션 에러, 다운로드, outbound 연결을 함께 확인해야 한다.</p>
+<p>공격자가 외부에 노출되었거나 내부 접근 경로를 통해 도달 가능한 웹·애플리케이션 서비스를 악용하여 서버 측 코드 실행 또는 명령 실행 권한을 확보하는 행위다. HTTP 요청만 보지 않고 요청 직후 생성된 프로세스, 애플리케이션 에러, 다운로드, outbound 연결을 함께 확인해야 한다.</p>
 <h2 id="2-관련-technique">2. 관련 Technique</h2>
 <div class="table-wrap wide-table">
 <table>
@@ -39,7 +39,6 @@
 <tbody>
 <tr><td>T1190</td><td>Exploit Public-Facing Application</td><td>외부 노출 서비스 취약점 악용 여부 확인</td></tr>
 <tr><td>T1059</td><td>Command and Scripting Interpreter</td><td>취약점 악용 이후 쉘, Python, PowerShell 실행 여부 확인</td></tr>
-<tr><td>T1203</td><td>Exploitation for Client Execution</td><td>취약 입력이 런타임 실행으로 이어졌는지 확인</td></tr>
 <tr><td>T1105</td><td>Ingress Tool Transfer</td><td>초기 침투 직후 후속 도구 다운로드 여부 확인</td></tr>
 </tbody></table></div>
 <h2 id="3-먼저-확인할-로그">3. 먼저 확인할 로그</h2>
@@ -47,42 +46,49 @@
 <table>
 <thead><tr><th>환경</th><th>대표 로그</th><th>핵심 필드</th></tr></thead>
 <tbody>
-<tr><td>Web / App</td><td>access log, error log, framework log</td><td><code>source.ip</code>, <code>url.path</code>, <code>http.request.method</code>, <code>status</code>, <code>exception</code>, <code>trace_id</code></td></tr>
-<tr><td>Cloud / Edge</td><td>ALB, WAF, CDN log</td><td><code>client_ip</code>, <code>request_url</code>, <code>target_status_code</code>, <code>waf.action</code>, <code>rule_id</code></td></tr>
-<tr><td>Linux / Container</td><td>auditd, syslog, container stdout/stderr</td><td><code>process.name</code>, <code>process.command_line</code>, <code>user.name</code>, <code>container.id</code></td></tr>
-<tr><td>Windows</td><td>Sysmon 1/3, PowerShell 4104</td><td><code>process.command_line</code>, <code>parent.process.name</code>, <code>destination.ip</code>, <code>ScriptBlockText</code></td></tr>
-<tr><td>EDR</td><td>process/network alert</td><td>process tree, command line, parent process, network destination</td></tr>
+<tr><td>Web / App</td><td>access log, error log, framework log</td><td><code>source.ip</code>, <code>url.path</code>, <code>http.request.method</code>, <code>http.request.body.content</code>, <code>http.response.status_code</code>, <code>user_agent.original</code>, <code>exception</code>, <code>trace_id</code></td></tr>
+<tr><td>Cloud / Edge</td><td>ALB, WAF, CDN log</td><td><code>client.ip</code>, <code>url.original</code>, <code>http.response.status_code</code>, <code>waf.action</code>, <code>rule.id</code>, <code>host.name</code></td></tr>
+<tr><td>Linux / Container</td><td>auditd, syslog, container stdout/stderr</td><td><code>process.name</code>, <code>process.parent.name</code>, <code>process.command_line</code>, <code>user.name</code>, <code>container.id</code>, <code>kubernetes.pod.name</code></td></tr>
+<tr><td>Windows</td><td>Sysmon 1/3/11, PowerShell 4104</td><td><code>process.command_line</code>, <code>process.parent.name</code>, <code>destination.ip</code>, <code>file.path</code>, <code>powershell.file.script_block_text</code></td></tr>
+<tr><td>EDR</td><td>process, network, file alert</td><td><code>process.entity_id</code>, <code>process.parent.entity_id</code>, <code>process.command_line</code>, <code>destination.ip</code>, <code>file.path</code></td></tr>
 </tbody></table></div>
 <h2 id="4-빠른-kql">4. 빠른 KQL</h2>
 <h3 id="취약-api-rce-요청-후보">취약 API/RCE 요청 후보</h3>
-<pre><code>url.path: (&quot;*/validate*&quot; or &quot;*/api*&quot; or &quot;*/upload*&quot; or &quot;*/debug*&quot; or &quot;*/actuator*&quot; or &quot;*/invoker*&quot; or &quot;*/jmx-console*&quot;)</code></pre>
+<pre><code>url.path: (&quot;*/validate*&quot; or &quot;*/upload*&quot; or &quot;*/debug*&quot; or &quot;*/actuator*&quot; or &quot;*/invoker*&quot; or &quot;*/jmx-console*&quot;)
+and http.request.method: (&quot;POST&quot; or &quot;PUT&quot;)
+and http.response.status_code &lt; 500</code></pre>
 <h3 id="웹-프로세스-하위-명령-실행">웹 프로세스 하위 명령 실행</h3>
-<pre><code>process.parent.name: (&quot;nginx&quot; or &quot;apache2&quot; or &quot;java&quot; or &quot;node&quot; or &quot;python&quot;) and
-process.name: (&quot;sh&quot; or &quot;bash&quot; or &quot;cmd.exe&quot; or &quot;powershell.exe&quot; or &quot;python&quot; or &quot;curl&quot; or &quot;wget&quot;)</code></pre>
+<pre><code>process.parent.name: (&quot;nginx&quot; or &quot;apache2&quot; or &quot;httpd&quot; or &quot;java&quot; or &quot;node&quot; or &quot;python&quot;)
+and process.name: (&quot;sh&quot; or &quot;bash&quot; or &quot;cmd.exe&quot; or &quot;powershell.exe&quot; or &quot;python&quot; or &quot;curl&quot; or &quot;wget&quot;)</code></pre>
 <h3 id="침투-직후-outbound-연결">침투 직후 outbound 연결</h3>
-<pre><code>event.category: &quot;network&quot; and process.name: (&quot;curl&quot; or &quot;wget&quot; or &quot;python&quot; or &quot;powershell.exe&quot; or &quot;java&quot;)</code></pre>
+<pre><code>event.category: &quot;network&quot;
+and process.name: (&quot;curl&quot; or &quot;wget&quot; or &quot;python&quot; or &quot;powershell.exe&quot; or &quot;java&quot;)</code></pre>
 <h2 id="5-분석자가-할-일">5. 분석자가 할 일</h2>
 <ol>
-<li>의심 HTTP 요청의 source IP, URL, request body 후보, status code를 고정한다.</li>
-<li>같은 시간대 애플리케이션 에러와 프로세스 생성 로그를 확인한다.</li>
+<li>의심 HTTP 요청의 source IP, URL, method, request body 후보, user-agent, status code, trace/request ID를 고정한다.</li>
+<li>같은 시간대의 애플리케이션 에러, access log, framework log, 프로세스 생성 로그를 확인한다.</li>
 <li>웹/앱 프로세스 하위에 쉘, 스크립트, 다운로드 도구가 실행됐는지 본다.</li>
-<li>취약점 악용 이후 credential 접근, 내부 정찰, 도구 반입으로 이어졌는지 Pivot한다.</li>
-<li>영향 서비스의 버전, 패치 상태, 노출 범위를 확인한다.</li>
+<li>취약점 악용 이후 credential 접근, 내부 정찰, 도구 반입, outbound 연결로 이어졌는지 Pivot한다.</li>
+<li>영향 서비스의 버전, 패치 상태, 인증 여부, 외부 노출 범위를 확인한다.</li>
 </ol>
 <h2 id="6-판단-기준">6. 판단 기준</h2>
+<p>본 판단 기준은 MITRE ATT&amp;CK 기법의 Detection Strategy/Data Sources 관점과 CISA Incident Response Playbook의 Detection &amp; Analysis 절차를 함께 적용한다. 단일 이벤트만으로 확정하지 않고, 로그 보존, 이벤트 상관분석, 타임라인 작성, 정상 활동과의 deconfliction, ATT&amp;CK TTP 매핑을 통해 판단한다.</p>
 <div class="table-wrap wide-table">
 <table>
-<thead><tr><th>구분</th><th>확인 기준</th></tr></thead>
+<thead><tr><th>구분</th><th>확인 기준</th><th>근거</th></tr></thead>
 <tbody>
-<tr><td>의심</td><td>취약 경로 요청 직후 웹/앱 프로세스 하위 명령 실행</td></tr>
-<tr><td>의심</td><td>정상 기능과 무관한 <code>curl</code>, <code>wget</code>, <code>sh</code>, <code>python</code>, <code>powershell</code> 실행</td></tr>
-<tr><td>의심</td><td>에러 로그에 역직렬화, 템플릿, 코드 검증, JBoss/Jenkins 취약 경로 흔적</td></tr>
-<tr><td>정상 가능성</td><td>승인된 보안 점검, 헬스체크, QA 테스트와 일치</td></tr>
+<tr><td>침투 가능성 높음</td><td>취약 경로 요청 직후 웹/앱 프로세스 하위에서 쉘, 스크립트, 다운로드 도구 실행이 관측됨</td><td>MITRE ATT&amp;CK <code>T1190</code>, <code>T1059</code>, <code>T1105</code>, CISA 이벤트 상관분석/타임라인 작성</td></tr>
+<tr><td>침투 가능성 높음</td><td>요청 source IP와 프로세스 실행 시각, trace/request ID, 컨테이너/호스트가 서로 연결됨</td><td>MITRE ATT&amp;CK <code>T1190</code>, <code>T1059</code>, <code>T1105</code>, CISA 이벤트 상관분석/타임라인 작성</td></tr>
+<tr><td>의심</td><td>정상 기능과 무관한 <code>curl</code>, <code>wget</code>, <code>sh</code>, <code>python</code>, <code>powershell</code> 실행</td><td>MITRE ATT&amp;CK <code>T1190</code>, <code>T1059</code>, <code>T1105</code>, CISA Detection &amp; Analysis 기준</td></tr>
+<tr><td>의심</td><td>에러 로그에 역직렬화, 템플릿 인젝션, 코드 검증 API, JBoss/Jenkins 취약 경로 흔적</td><td>MITRE ATT&amp;CK <code>T1190</code>, <code>T1059</code>, <code>T1105</code>, CISA Detection &amp; Analysis 기준</td></tr>
+<tr><td>추가 확인 필요</td><td>취약 URL 요청은 있으나 프로세스 생성, outbound 연결, 파일 생성 증거가 없음</td><td>CISA 조사 범위 갱신, 추가 로그 수집 및 타임라인 보강</td></tr>
+<tr><td>정상 가능성</td><td>승인된 보안 점검, 헬스체크, QA 테스트, 배포 작업 시간대와 일치</td><td>CISA authorized activity deconfliction, 조직 baseline 및 승인 작업 확인</td></tr>
 </tbody></table></div>
 <h2 id="7-llm-prompt-template">7. LLM Prompt Template</h2>
 <pre><code>너는 SIEM에 연결된 침해사고 분석 보조자다.
 다음 조건으로 &quot;취약 서비스 악용 기반 초기 침투&quot; 정황을 조사하라.
-반드시 조회한 로그 근거를 기반으로 판단하고, 확인되지 않은 내용은 추정이라고 표시하라.
+반드시 조회한 로그 또는 제공된 로그 근거를 기반으로 판단하고, 확인되지 않은 내용은 추정이라고 표시하라.
+정상 점검, 배포, 보안 도구 실행 가능성을 함께 확인해 오탐과 실제 침투 가능성을 구분하라.
 
 입력:
 - 시간 범위:
@@ -111,6 +117,14 @@ process.name: (&quot;sh&quot; or &quot;bash&quot; or &quot;cmd.exe&quot; or &quo
 <li>취약 서비스의 외부 노출을 임시 제한하고 WAF/접근 제어를 강화한다.</li>
 <li>동일 source IP와 동일 URL 패턴으로 과거 로그를 확장 검색한다.</li>
 <li>침투 성공 가능성이 있으면 호스트/파드 격리, 토큰 회전, 취약 버전 패치를 수행한다.</li>
+</ul>
+<h2 id="9-근거자료">9. 근거자료</h2>
+<ul>
+<li>CISA, <a href="C:/Users/iregr/Downloads/Federal_Government_Cybersecurity_Incident_and_Vulnerability_Response_Playbooks_508C.pdf">Cybersecurity Incident &amp; Vulnerability Response Playbooks</a> - Detection &amp; Analysis 단계의 로그 보존, 이벤트 상관분석, 타임라인 작성, 정상 활동 deconfliction 기준을 판단 근거로 사용한다.</li>
+<li>MITRE ATT&amp;CK, <a href="https://attack.mitre.org/detectionstrategies/">Detection Strategies</a> - 기법별 탐지 전략과 데이터 소스 관점을 판단 기준에 반영한다.</li>
+<li>MITRE ATT&amp;CK, <a href="https://attack.mitre.org/techniques/T1190/">T1190</a></li>
+<li>MITRE ATT&amp;CK, <a href="https://attack.mitre.org/techniques/T1059/">T1059</a></li>
+<li>MITRE ATT&amp;CK, <a href="https://attack.mitre.org/techniques/T1105/">T1105</a></li>
 </ul>
     <footer class="footer">
       Spacebar Project. This workflow is an educational blue team playbook artifact.
