@@ -63,11 +63,11 @@ event.provider: "secretsmanager.amazonaws.com" and event.action: ("GetSecretValu
 
 ## 5. 분석자가 할 일
 
-1. 어떤 주체가 어느 secret 위치에 접근했는지 고정한다.
+1. 어떤 주체가 어떤 secret 저장 위치에 접근했는지 식별한다.
 2. 조회 방식이 파일 읽기, API 조회, 환경변수 출력, 메모리 덤프인지 구분한다.
 3. 수집 가능한 credential 종류와 권한 범위를 추정한다.
-4. 해당 credential이 이후 인증/접속에 사용됐는지 Pivot한다.
-5. 회전해야 할 key, token, password, certificate 범위를 정리한다.
+4. 해당 credential이 이후 인증/접속에 사용됐는지 추적한다.
+5. 교체 또는 폐기·재발급이 필요한 key, token, password, certificate 범위를 정리한다.
 
 ## 6. 판단 기준
 
