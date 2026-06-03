@@ -28,13 +28,10 @@
           <a class="sidebar-link active" href="/campaigns/SB-07/logs/">Campaign Logs</a>
           <a class="sidebar-link" href="/campaigns/SB-07/logs/HAB-001/"><span>HAB-001</span>Bastion SSH Auth Log</a>
           <a class="sidebar-link" href="/campaigns/SB-07/logs/HAP-001/"><span>HAP-001</span>PMS JBoss and Update Relay HTTP Log</a>
-          <a class="sidebar-link" href="/campaigns/SB-07/logs/HAC-001/"><span>HAC-001</span>Hanguel AD Sequential Correlator Alert</a>
           <a class="sidebar-link" href="/campaigns/SB-07/logs/HAP-002/"><span>HAP-002</span>PMS Patch Manifest and Hash Evidence</a>
           <a class="sidebar-link" href="/campaigns/SB-07/logs/HAW-001/"><span>HAW-001</span>Win01 Hanguel AD Agent Enriched Event</a>
           <a class="sidebar-link" href="/campaigns/SB-07/logs/HAW-003/"><span>HAW-003</span>Windows Task Scheduler Operational Log</a>
-          <a class="sidebar-link" href="/campaigns/SB-07/logs/HTE-002/"><span>HTE-002</span>SB-07 Attack Traffic Emulation Event</a>
           <a class="sidebar-link" href="/campaigns/SB-07/logs/HAW-002/"><span>HAW-002</span>Win01 PowerShell Operational Log</a>
-          <a class="sidebar-link" href="/campaigns/SB-07/logs/HAC-002/"><span>HAC-002</span>AWS Control-Plane Local Admin Bridge Verification</a>
           <a class="sidebar-link" href="/campaigns/SB-07/logs/HAW-004/"><span>HAW-004</span>Windows Security Process Creation Log</a>
           <a class="sidebar-link" href="/campaigns/SB-07/logs/HAD-002/"><span>HAD-002</span>DC Loader and Dump Artifact Evidence</a>
           <a class="sidebar-link" href="/campaigns/SB-07/logs/HAD-004/"><span>HAD-004</span>DC Loader Run Log</a>
@@ -44,7 +41,6 @@
           <a class="sidebar-link" href="/campaigns/SB-07/logs/HAD-006/"><span>HAD-006</span>DC Amcache Artifact</a>
           <a class="sidebar-link" href="/campaigns/SB-07/logs/HAD-007/"><span>HAD-007</span>DC ShimCache AppCompatCache Artifact</a>
           <a class="sidebar-link" href="/campaigns/SB-07/logs/HAD-008/"><span>HAD-008</span>DC TaskCache Registry and Task XML Artifact</a>
-          <a class="sidebar-link" href="/campaigns/SB-07/logs/HTE-001/"><span>HTE-001</span>SB-07 Normal Traffic Emulation Event</a>
         </nav>
       </div>
       <div class="sidebar-block">
@@ -82,18 +78,6 @@
           </div>
         </article>
         <article class="card">
-          <h3><a href="/campaigns/SB-07/logs/HAC-001/">HAC-001 Hanguel AD Sequential Correlator Alert</a></h3>
-          <p>hanguel-alerts-* 인덱스에 생성되는 SB-07 sequential correlation alert와 rule.id를 확인하는 상관분석 로그.</p>
-          <div class="tag-row">
-            <span class="tag">T1195.002</span>
-            <span class="tag">T1552</span>
-            <span class="tag">T1021.006</span>
-            <span class="tag">T1021.002</span>
-            <span class="tag">T1620</span>
-            <span class="tag">T1003.001</span>
-          </div>
-        </article>
-        <article class="card">
           <h3><a href="/campaigns/SB-07/logs/HAP-002/">HAP-002 PMS Patch Manifest and Hash Evidence</a></h3>
           <p>PMS 업데이트 manifest와 patch.ps1의 버전, 해시, 파일 경로 변화를 기록하는 공급망 변조 증거.</p>
           <div class="tag-row">
@@ -126,19 +110,6 @@
           </div>
         </article>
         <article class="card">
-          <h3><a href="/campaigns/SB-07/logs/HTE-002/">HTE-002 SB-07 Attack Traffic Emulation Event</a></h3>
-          <p>PMS patch 실행, AD/DC discovery, credential artifact, WinRM/C$ 접근 흐름을 안전하게 재현해 correlation rule을 검증하는 emulation 이벤트.</p>
-          <div class="tag-row">
-            <span class="tag">T1053.005</span>
-            <span class="tag">T1082</span>
-            <span class="tag">T1482</span>
-            <span class="tag">T1018</span>
-            <span class="tag">T1552</span>
-            <span class="tag">T1021.006</span>
-            <span class="tag">T1021.002</span>
-          </div>
-        </article>
-        <article class="card">
           <h3><a href="/campaigns/SB-07/logs/HAW-002/">HAW-002 Win01 PowerShell Operational Log</a></h3>
           <p>win01에서 Import-Clixml, Invoke-Command, New-PSDrive 등 PowerShell 기반 credential 사용과 DC 접근을 확인하는 로그.</p>
           <div class="tag-row">
@@ -147,18 +118,6 @@
             <span class="tag">T1021.002</span>
             <span class="tag">T1003.001</span>
             <span class="tag">T1620</span>
-          </div>
-        </article>
-        <article class="card">
-          <h3><a href="/campaigns/SB-07/logs/HAC-002/">HAC-002 AWS Control-Plane Local Admin Bridge Verification</a></h3>
-          <p>AWS GetPasswordData로 win01 EC2 local Administrator 컨텍스트를 확인하고, dc_cred.xml Import-Clixml 및 DC WinRM/C$ 접근을 비밀 출력 없이 검증하는 수동/선택적 collector 로그.</p>
-          <div class="tag-row">
-            <span class="tag">T1078.004</span>
-            <span class="tag">T1078.003</span>
-            <span class="tag">T1021.001</span>
-            <span class="tag">T1552</span>
-            <span class="tag">T1021.006</span>
-            <span class="tag">T1021.002</span>
           </div>
         </article>
         <article class="card">
@@ -238,14 +197,6 @@
             <span class="tag">T1053.005</span>
             <span class="tag">T1620</span>
             <span class="tag">T1003.001</span>
-          </div>
-        </article>
-        <article class="card">
-          <h3><a href="/campaigns/SB-07/logs/HTE-001/">HTE-001 SB-07 Normal Traffic Emulation Event</a></h3>
-          <p>정상 PMS manifest 조회, DNS lookup, WinRM reachability 같은 baseline 행위를 만들어 normal 태그를 검증하는 emulation 이벤트.</p>
-          <div class="tag-row">
-            <span class="tag">T1082</span>
-            <span class="tag">T1018</span>
           </div>
         </article>
       </div>

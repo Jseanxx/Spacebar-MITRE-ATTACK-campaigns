@@ -50,9 +50,9 @@
 <p class="summary">
       OZZY PMS Chain은 AWS 기반 AD 환경에서 JBoss/PMS 업데이트 경로의 신뢰 체인을 악용하는 공급망 침해 캠페인이다.
       HanguelPMSChain은 bastion을 통해 내부망으로 진입한 뒤 hanguel-ops-pms의 JBoss AS 6 취약 표면을 확인하고, PMS update manifest와 patch.ps1을 변조한다.
-      이후 hanguel-win01의 Hanguel PMS Agent가 변조된 패치를 <code>nt authority\system</code> 권한으로 실행하면서 AD/DC discovery와 <code>dc_cred.xml</code> 을 발견한다.
-      SYSTEM 컨텍스트의 <code>Import-Clixml</code>은 실패했으므로, 별도 AWS control-plane credential과 EC2 private key를 이용해 win01 EC2 local Administrator password를 획득하고, 그 local Administrator 컨텍스트에서 <code>dc_cred.xml</code>을 복호화해 DC C$/WinRM 접근으로 이어지는 활동을 수행했다.
-       <!-- 피해 환경은 AWS VPC, bastion, JBoss/PMS 서버, Windows 클라이언트, Active Directory Domain Controller, Hanguel AD Agent, ELK Stack으로 구성된 기업형 AD 운영 환경으로 모델링된다. -->
+      이후 hanguel-win01의 Hanguel PMS Agent가 변조된 패치를 <code>nt authority\system</code> 권한으로 실행하면서 AD/DC discovery와 <code>dc_cred.xml</code> 발견까지 수행했다.
+      SYSTEM 컨텍스트의 <code>Import-Clixml</code>은 실패했으므로, bastion에서 발견한 static AWS credential과 EC2 private key를 이용해 <code>ec2:GetPasswordData</code>로 win01 EC2 local Administrator password를 복호화했다. 그 local Administrator 컨텍스트에서 <code>dc_cred.xml</code>을 복호화해 DC C$/WinRM 접근으로 이어지는 활동을 수행했다.
+      피해 환경은 AWS VPC, bastion, JBoss/PMS 서버, Windows 클라이언트, Active Directory Domain Controller, Hanguel AD Agent, ELK Stack으로 구성된 기업형 AD 운영 환경으로 모델링된다.
     </p>
   </div>
 <div class="meta-grid" aria-label="Campaign metadata">
@@ -108,7 +108,7 @@
       이 캠페인은 외부 접근 경로, Linux 기반 JBoss/PMS 서버, Windows PMS Agent, Active Directory 도메인 컨트롤러가 연결된 기업형 운영망 침해 흐름으로 모델링된다.
       핵심 전개는 <code>hanguel-ops-pms</code>의 업데이트 경로를 변조해 <code>hanguel-win01</code>에서 SYSTEM 실행을 만들고,
       SYSTEM 컨텍스트에서 <code>dc_cred.xml</code>을 발견하되 복호화 실패를 확인한 뒤,
-      AWS control-plane의 <code>GetPasswordData</code> 경로로 win01 local Administrator 컨텍스트를 확보해 <code>HANGUEL\Administrator</code> credential object를 복호화하는 것이다.
+      AWS control-plane의 <code>GetPasswordData</code> 경로로 win01 local Administrator 컨텍스트를 확보해 <code>HANGUEL\Administrator</code> credential object를 복호화하는 것이다. 현재 실습 환경에서는 bastion에 static <code>~/.aws/credentials</code>와 <code>~/.ssh/hanguel-ad-lab-key.pem</code>를 남긴 운영 실수 시나리오로 구성했고, metadata role을 끈 상태에서도 static credential로 password data 조회가 가능함을 확인했다.
       이후 공격자는 DC의 관리 공유 및 WinRM 실행 경로를 이용해 로더와 암호화된 payload를 배치하고,
       로더 실행 산출물, Windows Event Log, Amcache, ShimCache, TaskCache, USN Journal을 조합해 loader chain을 재구성할 수 있는 흔적을 남긴다.
     </p>
@@ -207,7 +207,7 @@
             <td class="id-cell">T1190</td>
             <td>Exploit Public-Facing Application</td>
             <td>HanguelPMSChain은 <code>hanguel-ops-pms</code>의 JBoss AS 6 취약 표면을 이용해 PMS 서버 컨테이너 내부 명령 실행 권한을 확보했다.</td>
-            <td><a href="/campaigns/SB-07/logs/HAP-001/">HAP-001</a>, <a href="/campaigns/SB-07/logs/HAC-001/">HAC-001</a></td>
+            <td><a href="/campaigns/SB-07/logs/HAP-001/">HAP-001</a></td>
           </tr>
           <tr>
             <td>Enterprise</td>
@@ -235,7 +235,7 @@
             <td class="id-cell">T1195.002</td>
             <td>Supply Chain Compromise: Compromise Software Supply Chain</td>
             <td>HanguelPMSChain은 PMS 업데이트 경로의 <code>patch.ps1</code>과 manifest를 변조하여 내부 Windows 클라이언트가 신뢰하는 정상 패치 배포 흐름에 공격 코드를 삽입했다.</td>
-            <td><a href="/campaigns/SB-07/logs/HAP-002/">HAP-002</a>, <a href="/campaigns/SB-07/logs/HAW-001/">HAW-001</a>, <a href="/campaigns/SB-07/logs/HAC-001/">HAC-001</a></td>
+            <td><a href="/campaigns/SB-07/logs/HAP-002/">HAP-002</a>, <a href="/campaigns/SB-07/logs/HAW-001/">HAW-001</a></td>
           </tr>
           <tr>
             <td>Enterprise</td>
@@ -256,63 +256,70 @@
             <td class="id-cell">T1082</td>
             <td>System Information Discovery</td>
             <td>HanguelPMSChain은 win01 SYSTEM 컨텍스트에서 사용자, 호스트명, IP 구성, DNS 서버, 실행 권한을 확인하여 감염된 클라이언트의 내부 위치와 권한 수준을 파악했다.</td>
-            <td><a href="/campaigns/SB-07/logs/HAW-001/">HAW-001</a>, <a href="/campaigns/SB-07/logs/HTE-002/">HTE-002</a></td>
+            <td><a href="/campaigns/SB-07/logs/HAW-001/">HAW-001</a></td>
           </tr>
           <tr>
             <td>Enterprise</td>
             <td class="id-cell">T1482</td>
             <td>Domain Trust Discovery</td>
             <td>HanguelPMSChain은 win01에서 <code>hanguel.local</code> 도메인과 도메인 컨트롤러 <code>hanguel-dc01.hanguel.local / 10.60.20.10</code> 존재를 확인했다.</td>
-            <td><a href="/campaigns/SB-07/logs/HAW-001/">HAW-001</a>, <a href="/campaigns/SB-07/logs/HTE-002/">HTE-002</a></td>
+            <td><a href="/campaigns/SB-07/logs/HAW-001/">HAW-001</a></td>
           </tr>
           <tr>
             <td>Enterprise</td>
             <td class="id-cell">T1018</td>
             <td>Remote System Discovery</td>
             <td>HanguelPMSChain은 <code>hanguel-dc01</code>의 SMB, WinRM, LDAP, Kerberos, DNS 서비스 접근 가능성을 확인하고 후속 장악 대상으로 지정했다.</td>
-            <td><a href="/campaigns/SB-07/logs/HAW-001/">HAW-001</a>, <a href="/campaigns/SB-07/logs/HTE-002/">HTE-002</a></td>
+            <td><a href="/campaigns/SB-07/logs/HAW-001/">HAW-001</a></td>
           </tr>
           <tr>
             <td>Enterprise</td>
             <td class="id-cell">T1552</td>
             <td>Unsecured Credentials</td>
             <td>HanguelPMSChain은 win01 SYSTEM 컨텍스트에서 <code>C:\ProgramData\HanguelPMS\dc_cred.xml</code> credential artifact를 발견했다. SYSTEM <code>Import-Clixml</code>은 실패했고, 이후 win01 local Administrator 컨텍스트에서 같은 파일의 <code>HANGUEL\Administrator</code> credential object 복호화가 성공했다.</td>
-            <td><a href="/campaigns/SB-07/logs/HAW-001/">HAW-001</a>, <a href="/campaigns/SB-07/logs/HAW-002/">HAW-002</a>, <a href="/campaigns/SB-07/logs/HTE-002/">HTE-002</a>, <a href="/campaigns/SB-07/logs/HAC-002/">HAC-002</a></td>
+            <td><a href="/campaigns/SB-07/logs/HAW-001/">HAW-001</a>, <a href="/campaigns/SB-07/logs/HAW-002/">HAW-002</a></td>
           </tr>
           <tr>
             <td>Enterprise</td>
             <td class="id-cell">T1078.004</td>
             <td>Valid Accounts: Cloud Accounts</td>
-            <td>HanguelPMSChain은 별도 AWS control-plane credential과 EC2 private key를 사용해 <code>ec2:GetPasswordData</code>로 <code>hanguel-win01</code> EC2 local Administrator password를 획득했다.</td>
-            <td><a href="/campaigns/SB-07/logs/HAC-002/">HAC-002</a></td>
+            <td>HanguelPMSChain은 bastion에서 발견한 static AWS credential <code>~/.aws/credentials</code>를 사용해 <code>ec2:GetPasswordData</code>를 호출하고, 함께 발견한 EC2 private key <code>~/.ssh/hanguel-ad-lab-key.pem</code>로 <code>hanguel-win01</code> EC2 local Administrator password를 복호화했다. 보고/검증 출력에는 평문 password를 남기지 않는다.</td>
+            <td><a href="/campaigns/SB-07/logs/HAB-001/">HAB-001</a></td>
+          </tr>
+          <tr>
+            <td>Enterprise</td>
+            <td class="id-cell">T1552.001</td>
+            <td>Unsecured Credentials: Credentials In Files</td>
+            <td>HanguelPMSChain은 bastion의 <code>~/.aws/credentials</code>, <code>~/.aws/config</code>, <code>~/.ssh/hanguel-ad-lab-key.pem</code> 파일을 발견해 AWS control-plane 접근과 EC2 Windows password 복호화에 사용했다.</td>
+            <td><a href="/campaigns/SB-07/logs/HAB-001/">HAB-001</a></td>
           </tr>
           <tr>
             <td>Enterprise</td>
             <td class="id-cell">T1078.003</td>
             <td>Valid Accounts: Local Accounts</td>
             <td>HanguelPMSChain은 AWS control-plane에서 확보한 win01 local <code>Administrator</code> 계정으로 RDP/WinRM 관리 세션을 열고, 해당 사용자 DPAPI 컨텍스트에서 <code>dc_cred.xml</code>을 <code>Import-Clixml</code>로 복호화했다.</td>
-            <td><a href="/campaigns/SB-07/logs/HAW-002/">HAW-002</a>, <a href="/campaigns/SB-07/logs/HAC-002/">HAC-002</a></td>
+            <td><a href="/campaigns/SB-07/logs/HAW-002/">HAW-002</a></td>
           </tr>
           <tr>
             <td>Enterprise</td>
             <td class="id-cell">T1021.001</td>
             <td>Remote Services: Remote Desktop Protocol</td>
             <td>분석/공격 흐름에서는 bastion 터널을 통해 <code>127.0.0.1:13390 -> 10.60.30.10:3389</code>로 win01 RDP 접근이 가능했고, local Administrator 컨텍스트 확보 검증에 사용됐다.</td>
-            <td><a href="/campaigns/SB-07/logs/HAC-002/">HAC-002</a></td>
+            <td><a href="/campaigns/SB-07/logs/HAB-001/">HAB-001</a>, <a href="/campaigns/SB-07/logs/HAW-002/">HAW-002</a></td>
           </tr>
           <tr>
             <td>Enterprise</td>
             <td class="id-cell">T1021.002</td>
             <td>Remote Services: SMB / Windows Admin Shares</td>
             <td>HanguelPMSChain은 <code>HANGUEL\Administrator</code> 자격 증명으로 win01에서 DC의 <code>\\10.60.20.10\C$</code> 관리 공유에 접근하고 loader chain 파일을 <code>C:\Windows\Temp</code>에 배치했다.</td>
-            <td><a href="/campaigns/SB-07/logs/HAW-002/">HAW-002</a>, <a href="/campaigns/SB-07/logs/HAW-004/">HAW-004</a>, <a href="/campaigns/SB-07/logs/HTE-002/">HTE-002</a></td>
+            <td><a href="/campaigns/SB-07/logs/HAW-002/">HAW-002</a>, <a href="/campaigns/SB-07/logs/HAW-004/">HAW-004</a></td>
           </tr>
           <tr>
             <td>Enterprise</td>
             <td class="id-cell">T1021.006</td>
             <td>Remote Services: Windows Remote Management</td>
             <td>HanguelPMSChain은 <code>HANGUEL\Administrator</code> 자격 증명으로 win01에서 DC에 WinRM 명령을 실행하고, DC 내부에서 SYSTEM 권한 Scheduled Task를 등록했다.</td>
-            <td><a href="/campaigns/SB-07/logs/HAW-002/">HAW-002</a>, <a href="/campaigns/SB-07/logs/HAW-003/">HAW-003</a>, <a href="/campaigns/SB-07/logs/HTE-002/">HTE-002</a></td>
+            <td><a href="/campaigns/SB-07/logs/HAW-002/">HAW-002</a>, <a href="/campaigns/SB-07/logs/HAW-003/">HAW-003</a></td>
           </tr>
           <tr>
             <td>Enterprise</td>
@@ -326,21 +333,21 @@
             <td class="id-cell">T1620</td>
             <td>Reflective Code Loading</td>
             <td>HanguelPMSChain은 <code>hgl_loader.exe</code>를 이용해 암호화된 PE/DLL payload를 메모리에서 복호화하고, PE header/section mapping, relocation, import resolving을 직접 수행하는 loader 기반 실행 흐름을 사용했다.</td>
-            <td><a href="/campaigns/SB-07/logs/HAD-003/">HAD-003</a>, <a href="/campaigns/SB-07/logs/HAD-004/">HAD-004</a>, <a href="/campaigns/SB-07/logs/HAD-005/">HAD-005</a>, <a href="/campaigns/SB-07/logs/HAD-006/">HAD-006</a>, <a href="/campaigns/SB-07/logs/HAD-007/">HAD-007</a>, <a href="/campaigns/SB-07/logs/HAD-008/">HAD-008</a>, <a href="/campaigns/SB-07/logs/HAC-001/">HAC-001</a></td>
+            <td><a href="/campaigns/SB-07/logs/HAD-003/">HAD-003</a>, <a href="/campaigns/SB-07/logs/HAD-004/">HAD-004</a>, <a href="/campaigns/SB-07/logs/HAD-005/">HAD-005</a>, <a href="/campaigns/SB-07/logs/HAD-006/">HAD-006</a>, <a href="/campaigns/SB-07/logs/HAD-007/">HAD-007</a>, <a href="/campaigns/SB-07/logs/HAD-008/">HAD-008</a></td>
           </tr>
           <tr>
             <td>Enterprise</td>
             <td class="id-cell">T1003.001</td>
             <td>OS Credential Dumping: LSASS Memory</td>
             <td>HanguelPMSChain은 DC의 SYSTEM Scheduled Task에서 loader 기반 dump 흐름을 실행해 LSASS dump artifact를 생성하고, 이를 win01에서 offline 분석하는 흐름을 구성했다.</td>
-            <td><a href="/campaigns/SB-07/logs/HAD-002/">HAD-002</a>, <a href="/campaigns/SB-07/logs/HAD-003/">HAD-003</a>, <a href="/campaigns/SB-07/logs/HAD-004/">HAD-004</a>, <a href="/campaigns/SB-07/logs/HAD-005/">HAD-005</a>, <a href="/campaigns/SB-07/logs/HAC-001/">HAC-001</a></td>
+            <td><a href="/campaigns/SB-07/logs/HAD-002/">HAD-002</a>, <a href="/campaigns/SB-07/logs/HAD-003/">HAD-003</a>, <a href="/campaigns/SB-07/logs/HAD-004/">HAD-004</a>, <a href="/campaigns/SB-07/logs/HAD-005/">HAD-005</a></td>
           </tr>
           <tr>
             <td>Enterprise</td>
             <td class="id-cell">T1550.002</td>
             <td>Use Alternate Authentication Material: Pass the Hash</td>
             <td>HanguelPMSChain은 LSASS dump에서 확보한 <code>HANGUEL\Administrator</code> NTLM hash를 이용해 평문 비밀번호 없이 DC 및 다른 Windows 시스템 접근을 시도할 수 있는 후속 경로를 확보했다.</td>
-            <td><a href="/campaigns/SB-07/logs/HTE-002/">HTE-002</a>, <a href="/campaigns/SB-07/logs/HAC-001/">HAC-001</a></td>
+            <td><a href="/campaigns/SB-07/logs/HAD-003/">HAD-003</a>, <a href="/campaigns/SB-07/logs/HAW-002/">HAW-002</a></td>
           </tr>
         </tbody>
       </table>
@@ -436,30 +443,6 @@
           <div class="tag-row">
             <span class="tag">T1133</span>
             <span class="tag">T1078</span>
-          </div>
-        </article>
-        <article class="card">
-          <h3><a href="/campaigns/SB-07/logs/HAC-001/">HAC-001 Hanguel AD Sequential Correlator Alert</a></h3>
-          <p>hanguel-alerts-* 인덱스에 생성되는 SB-07 sequential correlation alert와 rule.id를 확인하는 상관분석 로그.</p>
-          <div class="tag-row">
-            <span class="tag">T1195.002</span>
-            <span class="tag">T1552</span>
-            <span class="tag">T1021.006</span>
-            <span class="tag">T1021.002</span>
-            <span class="tag">T1620</span>
-            <span class="tag">T1003.001</span>
-          </div>
-        </article>
-        <article class="card">
-          <h3><a href="/campaigns/SB-07/logs/HAC-002/">HAC-002 AWS Control-Plane Local Admin Bridge Verification</a></h3>
-          <p>AWS GetPasswordData로 win01 EC2 local Administrator 컨텍스트를 확인하고, dc_cred.xml Import-Clixml 및 DC WinRM/C$ 접근을 비밀 출력 없이 검증하는 수동/선택적 collector 로그.</p>
-          <div class="tag-row">
-            <span class="tag">T1078.004</span>
-            <span class="tag">T1078.003</span>
-            <span class="tag">T1021.001</span>
-            <span class="tag">T1552</span>
-            <span class="tag">T1021.006</span>
-            <span class="tag">T1021.002</span>
           </div>
         </article>
         <article class="card">
@@ -595,27 +578,6 @@
             <span class="tag">T1027</span>
           </div>
         </article>
-        <article class="card">
-          <h3><a href="/campaigns/SB-07/logs/HTE-001/">HTE-001 SB-07 Normal Traffic Emulation Event</a></h3>
-          <p>정상 PMS manifest 조회, DNS lookup, WinRM reachability 같은 baseline 행위를 만들어 normal 태그를 검증하는 emulation 이벤트.</p>
-          <div class="tag-row">
-            <span class="tag">T1082</span>
-            <span class="tag">T1018</span>
-          </div>
-        </article>
-        <article class="card">
-          <h3><a href="/campaigns/SB-07/logs/HTE-002/">HTE-002 SB-07 Attack Traffic Emulation Event</a></h3>
-          <p>PMS patch 실행, AD/DC discovery, credential artifact, WinRM/C$ 접근 흐름을 안전하게 재현해 correlation rule을 검증하는 emulation 이벤트.</p>
-          <div class="tag-row">
-            <span class="tag">T1053.005</span>
-            <span class="tag">T1082</span>
-            <span class="tag">T1482</span>
-            <span class="tag">T1018</span>
-            <span class="tag">T1552</span>
-            <span class="tag">T1021.006</span>
-            <span class="tag">T1021.002</span>
-          </div>
-        </article>
       </div>
     </section>
     <h2 id="software">Software</h2>
@@ -692,7 +654,7 @@
     <div class="cards">
       <article class="card">
         <h3>1. PMS Patch Chain</h3>
-        <p><code>patch.ps1</code> 변경, win01 patch 다운로드, PMS Agent SYSTEM 실행, AD/DC discovery가 짧은 시간 안에 이어지는지 확인한다. 정상 baseline은 <a href="/campaigns/SB-07/logs/HTE-001/">HTE-001</a>로 분리한다.</p>
+        <p><code>patch.ps1</code> 변경, win01 patch 다운로드, PMS Agent SYSTEM 실행, AD/DC discovery가 짧은 시간 안에 이어지는지 원본 PMS/Windows 로그로 확인한다.</p>
       </article>
       <article class="card">
         <h3>2. Credential to DC Access</h3>
@@ -744,7 +706,7 @@ and event.action: ("pms_patch_executed" or "domain_controller_discovery" or "dc_
   -> hanguel-soc01 ELK</code></pre>
       <pre><code># Analyst KQL
 campaign.id: "SB-07"
-log.id: ("HAW-001" or "HAD-005" or "HAC-001")
+log.id: ("HAW-001" or "HAD-005" or "HAD-008")
 hanguel.classification: ("suspicious" or "attack")</code></pre>
     </div>
 
