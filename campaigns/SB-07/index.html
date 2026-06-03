@@ -162,7 +162,14 @@
       </table>
     </div>
 
-    <h2 id="techniques-used">Techniques Used</h2>
+    <div class="view-switch" role="tablist" aria-label="SB-07 campaign views">
+      <button class="active" type="button" data-view="table">Table View</button>
+      <button type="button" data-view="matrix">Matrix View</button>
+      <button type="button" data-view="campaign-logs">Campaign Logs</button>
+    </div>
+
+    <section id="table" class="view-panel active">
+<h2 id="techniques-used">Techniques Used</h2>
     <div class="table-tools">
       <label class="searchbox" for="techFilter">
         <span>Filter</span>
@@ -338,7 +345,279 @@
         </tbody>
       </table>
     </div>
+    </section>
 
+    <section id="matrix" class="view-panel">
+      <h2>Matrix View</h2>
+      <div class="matrix-scroll">
+        <section class="attack-matrix" aria-label="SB-07 ATT&CK matrix">
+          <div class="tactic">
+            <div class="tactic-header">Reconnaissance</div>
+          <div class="technique-card"><strong>No SB-07 Technique</strong><span>현재 캠페인에서 이 tactic에 매핑된 Technique 없음</span></div>
+          </div>
+          <div class="tactic">
+            <div class="tactic-header">Resource Development</div>
+          <div class="technique-card"><strong>No SB-07 Technique</strong><span>현재 캠페인에서 이 tactic에 매핑된 Technique 없음</span></div>
+          </div>
+          <div class="tactic">
+            <div class="tactic-header">Initial Access</div>
+          <div class="technique-card used"><strong><a href="https://attack.mitre.org/techniques/T1133/" target="_blank" rel="noopener noreferrer"><code>T1133</code></a> External Remote Services</strong><span>OZZY PMS Chain 당시 HanguelPMSChain은 제공된 SSH 접근 경로로 <code>hanguel-bastion</code>에 접속하고, 이를 내부망 <code>10.60.0.0/16</code> 진입 거점으로 사용했다.</span></div>
+          <div class="technique-card used"><strong><a href="https://attack.mitre.org/techniques/T1190/" target="_blank" rel="noopener noreferrer"><code>T1190</code></a> Exploit Public-Facing Application</strong><span>HanguelPMSChain은 <code>hanguel-ops-pms</code>의 JBoss AS 6 취약 표면을 이용해 PMS 서버 컨테이너 내부 명령 실행 권한을 확보했다.</span></div>
+          <div class="technique-card used"><strong><a href="https://attack.mitre.org/techniques/T1195/002/" target="_blank" rel="noopener noreferrer"><code>T1195.002</code></a> Supply Chain Compromise: Compromise Software Supply Chain</strong><span>HanguelPMSChain은 PMS 업데이트 경로의 <code>patch.ps1</code>과 manifest를 변조하여 내부 Windows 클라이언트가 신뢰하는 정상 패치 배포 흐름에 공격 코드를 삽입했다.</span></div>
+          <div class="technique-card used"><strong><a href="https://attack.mitre.org/techniques/T1078/004/" target="_blank" rel="noopener noreferrer"><code>T1078.004</code></a> Valid Accounts: Cloud Accounts</strong><span>HanguelPMSChain은 별도 AWS control-plane credential과 EC2 private key를 사용해 <code>ec2:GetPasswordData</code>로 <code>hanguel-win01</code> EC2 local Administrator password를 획득했다.</span></div>
+          </div>
+          <div class="tactic">
+            <div class="tactic-header">Execution</div>
+          <div class="technique-card used"><strong><a href="https://attack.mitre.org/techniques/T1059/004/" target="_blank" rel="noopener noreferrer"><code>T1059.004</code></a> Command and Scripting Interpreter: Unix Shell</strong><span>HanguelPMSChain은 JBoss 컨테이너 shell에서 <code>id</code>, <code>hostname</code>, <code>pwd</code>, 배포 디렉터리 확인으로 실행 위치와 권한을 파악했다.</span></div>
+          <div class="technique-card used"><strong><a href="https://attack.mitre.org/techniques/T1053/005/" target="_blank" rel="noopener noreferrer"><code>T1053.005</code></a> Scheduled Task / Job: Scheduled Task</strong><span><code>hanguel-win01</code>의 Hanguel PMS Agent Scheduled Task가 PMS 서버에서 변조 패치를 다운로드하고 <code>nt authority\system</code> 권한으로 실행했다.</span></div>
+          </div>
+          <div class="tactic">
+            <div class="tactic-header">Persistence</div>
+          <div class="technique-card used"><strong><a href="https://attack.mitre.org/techniques/T1505/003/" target="_blank" rel="noopener noreferrer"><code>T1505.003</code></a> Server Software Component: Web Shell</strong><span>HanguelPMSChain은 JBoss 배포 경로에 JSP webshell 또는 marker를 배치하여 PMS 서버에서 지속적인 명령 실행 채널을 유지할 수 있는 구조를 만들었다.</span></div>
+          </div>
+          <div class="tactic">
+            <div class="tactic-header">Privilege Escalation</div>
+          <div class="technique-card"><strong>No SB-07 Technique</strong><span>현재 캠페인에서 이 tactic에 매핑된 Technique 없음</span></div>
+          </div>
+          <div class="tactic">
+            <div class="tactic-header">Defense Evasion</div>
+          <div class="technique-card used"><strong><a href="https://attack.mitre.org/techniques/T1036/005/" target="_blank" rel="noopener noreferrer"><code>T1036.005</code></a> Masquerading: Match Legitimate Name or Location</strong><span>HanguelPMSChain은 변조 패치를 기존 파일명과 경로인 <code>/updates/patch.ps1</code>로 유지하고 manifest 버전/해시만 갱신하여 정상 업데이트처럼 보이게 만들었다.</span></div>
+          <div class="technique-card used"><strong><a href="https://attack.mitre.org/techniques/T1027/" target="_blank" rel="noopener noreferrer"><code>T1027</code></a> Obfuscated Files or Information</strong><span>HanguelPMSChain은 LSASS dump payload DLL을 XOR 암호화된 <code>hgl_payload.enc</code> 형태로 전달하여 정적 파일 탐지 가능성을 줄였다.</span></div>
+          <div class="technique-card used"><strong><a href="https://attack.mitre.org/techniques/T1620/" target="_blank" rel="noopener noreferrer"><code>T1620</code></a> Reflective Code Loading</strong><span>HanguelPMSChain은 <code>hgl_loader.exe</code>를 이용해 암호화된 PE/DLL payload를 메모리에서 복호화하고, PE header/section mapping, relocation, import resolving을 직접 수행하는 loader 기반 실행 흐름을 사용했다.</span></div>
+          </div>
+          <div class="tactic">
+            <div class="tactic-header">Credential Access</div>
+          <div class="technique-card used"><strong><a href="https://attack.mitre.org/techniques/T1552/" target="_blank" rel="noopener noreferrer"><code>T1552</code></a> Unsecured Credentials</strong><span>HanguelPMSChain은 win01 SYSTEM 컨텍스트에서 <code>C:\ProgramData\HanguelPMS\dc_cred.xml</code> credential artifact를 발견했다. SYSTEM <code>Import-Clixml</code>은 실패했고, 이후 win01 local Administrator 컨텍스트에서 같은 파일의 <code>HANGUEL\Administrator</code> credential object 복호화가 성공했다.</span></div>
+          <div class="technique-card used"><strong><a href="https://attack.mitre.org/techniques/T1003/001/" target="_blank" rel="noopener noreferrer"><code>T1003.001</code></a> OS Credential Dumping: LSASS Memory</strong><span>HanguelPMSChain은 DC의 SYSTEM Scheduled Task에서 loader 기반 dump 흐름을 실행해 LSASS dump artifact를 생성하고, 이를 win01에서 offline 분석하는 흐름을 구성했다.</span></div>
+          </div>
+          <div class="tactic">
+            <div class="tactic-header">Discovery</div>
+          <div class="technique-card used"><strong><a href="https://attack.mitre.org/techniques/T1046/" target="_blank" rel="noopener noreferrer"><code>T1046</code></a> Network Service Discovery</strong><span>HanguelPMSChain은 bastion에서 내부망을 스캔하여 <code>hanguel-ops-pms:8080</code>, <code>hanguel-dc01:{445,3389,5985}</code>, <code>hanguel-win01:{3389,5985}</code> 등 주요 서비스를 식별했다.</span></div>
+          <div class="technique-card used"><strong><a href="https://attack.mitre.org/techniques/T1083/" target="_blank" rel="noopener noreferrer"><code>T1083</code></a> File and Directory Discovery</strong><span>HanguelPMSChain은 PMS 서버 내부에서 JBoss 배포 경로와 Windows PMS Agent가 신뢰하는 <code>/updates/manifest.json</code>, <code>/updates/patch.ps1</code> 업데이트 구조를 확인했다.</span></div>
+          <div class="technique-card used"><strong><a href="https://attack.mitre.org/techniques/T1082/" target="_blank" rel="noopener noreferrer"><code>T1082</code></a> System Information Discovery</strong><span>HanguelPMSChain은 win01 SYSTEM 컨텍스트에서 사용자, 호스트명, IP 구성, DNS 서버, 실행 권한을 확인하여 감염된 클라이언트의 내부 위치와 권한 수준을 파악했다.</span></div>
+          <div class="technique-card used"><strong><a href="https://attack.mitre.org/techniques/T1482/" target="_blank" rel="noopener noreferrer"><code>T1482</code></a> Domain Trust Discovery</strong><span>HanguelPMSChain은 win01에서 <code>hanguel.local</code> 도메인과 도메인 컨트롤러 <code>hanguel-dc01.hanguel.local / 10.60.20.10</code> 존재를 확인했다.</span></div>
+          <div class="technique-card used"><strong><a href="https://attack.mitre.org/techniques/T1018/" target="_blank" rel="noopener noreferrer"><code>T1018</code></a> Remote System Discovery</strong><span>HanguelPMSChain은 <code>hanguel-dc01</code>의 SMB, WinRM, LDAP, Kerberos, DNS 서비스 접근 가능성을 확인하고 후속 장악 대상으로 지정했다.</span></div>
+          </div>
+          <div class="tactic">
+            <div class="tactic-header">Lateral Movement</div>
+          <div class="technique-card used"><strong><a href="https://attack.mitre.org/techniques/T1078/003/" target="_blank" rel="noopener noreferrer"><code>T1078.003</code></a> Valid Accounts: Local Accounts</strong><span>HanguelPMSChain은 AWS control-plane에서 확보한 win01 local <code>Administrator</code> 계정으로 RDP/WinRM 관리 세션을 열고, 해당 사용자 DPAPI 컨텍스트에서 <code>dc_cred.xml</code>을 <code>Import-Clixml</code>로 복호화했다.</span></div>
+          <div class="technique-card used"><strong><a href="https://attack.mitre.org/techniques/T1021/001/" target="_blank" rel="noopener noreferrer"><code>T1021.001</code></a> Remote Services: Remote Desktop Protocol</strong><span>분석/공격 흐름에서는 bastion 터널을 통해 <code>127.0.0.1:13390 -> 10.60.30.10:3389</code>로 win01 RDP 접근이 가능했고, local Administrator 컨텍스트 확보 검증에 사용됐다.</span></div>
+          <div class="technique-card used"><strong><a href="https://attack.mitre.org/techniques/T1021/002/" target="_blank" rel="noopener noreferrer"><code>T1021.002</code></a> Remote Services: SMB / Windows Admin Shares</strong><span>HanguelPMSChain은 <code>HANGUEL\Administrator</code> 자격 증명으로 win01에서 DC의 <code>\\10.60.20.10\C$</code> 관리 공유에 접근하고 loader chain 파일을 <code>C:\Windows\Temp</code>에 배치했다.</span></div>
+          <div class="technique-card used"><strong><a href="https://attack.mitre.org/techniques/T1021/006/" target="_blank" rel="noopener noreferrer"><code>T1021.006</code></a> Remote Services: Windows Remote Management</strong><span>HanguelPMSChain은 <code>HANGUEL\Administrator</code> 자격 증명으로 win01에서 DC에 WinRM 명령을 실행하고, DC 내부에서 SYSTEM 권한 Scheduled Task를 등록했다.</span></div>
+          <div class="technique-card used"><strong><a href="https://attack.mitre.org/techniques/T1550/002/" target="_blank" rel="noopener noreferrer"><code>T1550.002</code></a> Use Alternate Authentication Material: Pass the Hash</strong><span>HanguelPMSChain은 LSASS dump에서 확보한 <code>HANGUEL\Administrator</code> NTLM hash를 이용해 평문 비밀번호 없이 DC 및 다른 Windows 시스템 접근을 시도할 수 있는 후속 경로를 확보했다.</span></div>
+          </div>
+          <div class="tactic">
+            <div class="tactic-header">Collection</div>
+          <div class="technique-card"><strong>No SB-07 Technique</strong><span>현재 캠페인에서 이 tactic에 매핑된 Technique 없음</span></div>
+          </div>
+          <div class="tactic">
+            <div class="tactic-header">Command and Control</div>
+          <div class="technique-card"><strong>No SB-07 Technique</strong><span>현재 캠페인에서 이 tactic에 매핑된 Technique 없음</span></div>
+          </div>
+          <div class="tactic">
+            <div class="tactic-header">Exfiltration</div>
+          <div class="technique-card"><strong>No SB-07 Technique</strong><span>현재 캠페인에서 이 tactic에 매핑된 Technique 없음</span></div>
+          </div>
+          <div class="tactic">
+            <div class="tactic-header">Impact</div>
+          <div class="technique-card"><strong>No SB-07 Technique</strong><span>현재 캠페인에서 이 tactic에 매핑된 Technique 없음</span></div>
+          </div>
+        </section>
+      </div>
+    </section>
+
+    <section id="campaign-logs" class="view-panel">
+      <h2>SB-07 Campaign Logs</h2>
+      <p class="summary">SB-07에서 관측한 bastion, PMS, Windows, AD, CloudTrail, loader artifact 로그를 한 화면에서 확인한다.</p>
+      <div class="cards">
+        <article class="card">
+          <h3><a href="/campaigns/SB-07/logs/HAB-001/">HAB-001 Bastion SSH Auth Log</a></h3>
+          <p>bastion을 통한 내부망 진입과 SSH 세션 성공/실패를 확인하는 Linux 인증 로그.</p>
+          <div class="tag-row">
+            <span class="tag">T1133</span>
+            <span class="tag">T1078</span>
+          </div>
+        </article>
+        <article class="card">
+          <h3><a href="/campaigns/SB-07/logs/HAC-001/">HAC-001 Hanguel AD Sequential Correlator Alert</a></h3>
+          <p>hanguel-alerts-* 인덱스에 생성되는 SB-07 sequential correlation alert와 rule.id를 확인하는 상관분석 로그.</p>
+          <div class="tag-row">
+            <span class="tag">T1195.002</span>
+            <span class="tag">T1552</span>
+            <span class="tag">T1021.006</span>
+            <span class="tag">T1021.002</span>
+            <span class="tag">T1620</span>
+            <span class="tag">T1003.001</span>
+          </div>
+        </article>
+        <article class="card">
+          <h3><a href="/campaigns/SB-07/logs/HAC-002/">HAC-002 AWS Control-Plane Local Admin Bridge Verification</a></h3>
+          <p>AWS GetPasswordData로 win01 EC2 local Administrator 컨텍스트를 확인하고, dc_cred.xml Import-Clixml 및 DC WinRM/C$ 접근을 비밀 출력 없이 검증하는 수동/선택적 collector 로그.</p>
+          <div class="tag-row">
+            <span class="tag">T1078.004</span>
+            <span class="tag">T1078.003</span>
+            <span class="tag">T1021.001</span>
+            <span class="tag">T1552</span>
+            <span class="tag">T1021.006</span>
+            <span class="tag">T1021.002</span>
+          </div>
+        </article>
+        <article class="card">
+          <h3><a href="/campaigns/SB-07/logs/HAD-002/">HAD-002 DC Loader and Dump Artifact Evidence</a></h3>
+          <p>DC에 배치된 hgl_loader.exe, hgl_payload.enc, hgl_run.cmd, hgl_diag.bin 같은 loader/dump 산출물을 요약하는 증거.</p>
+          <div class="tag-row">
+            <span class="tag">T1620</span>
+            <span class="tag">T1027</span>
+            <span class="tag">T1003.001</span>
+          </div>
+        </article>
+        <article class="card">
+          <h3><a href="/campaigns/SB-07/logs/HAD-003/">HAD-003 DC Sysmon Operational Log</a></h3>
+          <p>DC에서 hgl_loader.exe의 lsass.exe 접근, dump 파일 생성, suspicious image load를 직접 증명하기 위한 Sysmon 로그.</p>
+          <div class="tag-row">
+            <span class="tag">T1003.001</span>
+            <span class="tag">T1620</span>
+            <span class="tag">T1055</span>
+          </div>
+        </article>
+        <article class="card">
+          <h3><a href="/campaigns/SB-07/logs/HAD-004/">HAD-004 DC Loader Run Log</a></h3>
+          <p>hgl_run.cmd가 생성한 hgl_loader_run.log를 요약하여 encrypted payload 복호화와 entry point 실행 정황을 확인하는 커스텀 실행 로그.</p>
+          <div class="tag-row">
+            <span class="tag">T1620</span>
+            <span class="tag">T1027</span>
+            <span class="tag">T1003.001</span>
+          </div>
+        </article>
+        <article class="card">
+          <h3><a href="/campaigns/SB-07/logs/HAD-005/">HAD-005 DC Application Error and WER Event</a></h3>
+          <p>Application 로그 Event ID 1000/1001에서 hgl_loader.exe crash와 unknown module 정황을 확인하는 Windows 원본 로그.</p>
+          <div class="tag-row">
+            <span class="tag">T1620</span>
+            <span class="tag">T1003.001</span>
+          </div>
+        </article>
+        <article class="card">
+          <h3><a href="/campaigns/SB-07/logs/HAD-006/">HAD-006 DC Amcache Artifact</a></h3>
+          <p>Amcache.hve에서 hgl_loader.exe 경로, PE architecture, application compatibility inventory 흔적을 확인하는 포렌식 아티팩트.</p>
+          <div class="tag-row">
+            <span class="tag">T1620</span>
+            <span class="tag">T1027</span>
+          </div>
+        </article>
+        <article class="card">
+          <h3><a href="/campaigns/SB-07/logs/HAD-007/">HAD-007 DC ShimCache AppCompatCache Artifact</a></h3>
+          <p>SYSTEM AppCompatCache registry value에서 hgl_loader.exe 경로 참조를 확인하는 실행 흔적 계열 포렌식 아티팩트.</p>
+          <div class="tag-row">
+            <span class="tag">T1620</span>
+            <span class="tag">T1027</span>
+          </div>
+        </article>
+        <article class="card">
+          <h3><a href="/campaigns/SB-07/logs/HAD-008/">HAD-008 DC TaskCache Registry and Task XML Artifact</a></h3>
+          <p>HanguelLoaderDiag scheduled task의 TaskCache registry와 Task XML action을 확인하는 DC 포렌식 아티팩트.</p>
+          <div class="tag-row">
+            <span class="tag">T1053.005</span>
+            <span class="tag">T1620</span>
+            <span class="tag">T1003.001</span>
+          </div>
+        </article>
+        <article class="card">
+          <h3><a href="/campaigns/SB-07/logs/HAD-009/">HAD-009 DC NTFS USN Journal Artifact</a></h3>
+          <p>USN Journal에서 hgl_loader.exe, hgl_payload.enc, hgl_run.cmd 파일 생성/갱신 lifecycle을 요약하는 포렌식 아티팩트.</p>
+          <div class="tag-row">
+            <span class="tag">T1105</span>
+            <span class="tag">T1620</span>
+            <span class="tag">T1027</span>
+            <span class="tag">T1003.001</span>
+          </div>
+        </article>
+        <article class="card">
+          <h3><a href="/campaigns/SB-07/logs/HAP-001/">HAP-001 PMS JBoss and Update Relay HTTP Log</a></h3>
+          <p>hanguel-ops-pms의 JBoss 취약 표면 접근, PMS update manifest/patch 조회, relay 접근을 확인하는 HTTP 로그.</p>
+          <div class="tag-row">
+            <span class="tag">T1046</span>
+            <span class="tag">T1190</span>
+            <span class="tag">T1083</span>
+            <span class="tag">T1195.002</span>
+            <span class="tag">T1036.005</span>
+          </div>
+        </article>
+        <article class="card">
+          <h3><a href="/campaigns/SB-07/logs/HAP-002/">HAP-002 PMS Patch Manifest and Hash Evidence</a></h3>
+          <p>PMS 업데이트 manifest와 patch.ps1의 버전, 해시, 파일 경로 변화를 기록하는 공급망 변조 증거.</p>
+          <div class="tag-row">
+            <span class="tag">T1195.002</span>
+            <span class="tag">T1036.005</span>
+            <span class="tag">T1053.005</span>
+          </div>
+        </article>
+        <article class="card">
+          <h3><a href="/campaigns/SB-07/logs/HAW-001/">HAW-001 Win01 Hanguel AD Agent Enriched Event</a></h3>
+          <p>win01에서 PMS patch 실행, AD/DC discovery, credential artifact 발견, WinRM/C$ 접근 검증을 정규화해 ELK로 전송하는 이벤트.</p>
+          <div class="tag-row">
+            <span class="tag">T1053.005</span>
+            <span class="tag">T1082</span>
+            <span class="tag">T1482</span>
+            <span class="tag">T1018</span>
+            <span class="tag">T1552</span>
+            <span class="tag">T1021.006</span>
+            <span class="tag">T1021.002</span>
+          </div>
+        </article>
+        <article class="card">
+          <h3><a href="/campaigns/SB-07/logs/HAW-002/">HAW-002 Win01 PowerShell Operational Log</a></h3>
+          <p>win01에서 Import-Clixml, Invoke-Command, New-PSDrive 등 PowerShell 기반 credential 사용과 DC 접근을 확인하는 로그.</p>
+          <div class="tag-row">
+            <span class="tag">T1552</span>
+            <span class="tag">T1021.006</span>
+            <span class="tag">T1021.002</span>
+            <span class="tag">T1003.001</span>
+            <span class="tag">T1620</span>
+          </div>
+        </article>
+        <article class="card">
+          <h3><a href="/campaigns/SB-07/logs/HAW-003/">HAW-003 Windows Task Scheduler Operational Log</a></h3>
+          <p>win01 PMS Agent scheduled task와 DC loader diagnostic task 등록/실행을 확인하는 Windows 작업 스케줄러 로그.</p>
+          <div class="tag-row">
+            <span class="tag">T1053.005</span>
+            <span class="tag">T1021.006</span>
+            <span class="tag">T1620</span>
+            <span class="tag">T1003.001</span>
+          </div>
+        </article>
+        <article class="card">
+          <h3><a href="/campaigns/SB-07/logs/HAW-004/">HAW-004 Windows Security Process Creation Log</a></h3>
+          <p>Windows Security 4688 또는 process creation telemetry로 rdrleakdiag, comsvcs, loader 실행 흔적을 확인하는 로그.</p>
+          <div class="tag-row">
+            <span class="tag">T1003.001</span>
+            <span class="tag">T1620</span>
+            <span class="tag">T1027</span>
+          </div>
+        </article>
+        <article class="card">
+          <h3><a href="/campaigns/SB-07/logs/HTE-001/">HTE-001 SB-07 Normal Traffic Emulation Event</a></h3>
+          <p>정상 PMS manifest 조회, DNS lookup, WinRM reachability 같은 baseline 행위를 만들어 normal 태그를 검증하는 emulation 이벤트.</p>
+          <div class="tag-row">
+            <span class="tag">T1082</span>
+            <span class="tag">T1018</span>
+          </div>
+        </article>
+        <article class="card">
+          <h3><a href="/campaigns/SB-07/logs/HTE-002/">HTE-002 SB-07 Attack Traffic Emulation Event</a></h3>
+          <p>PMS patch 실행, AD/DC discovery, credential artifact, WinRM/C$ 접근 흐름을 안전하게 재현해 correlation rule을 검증하는 emulation 이벤트.</p>
+          <div class="tag-row">
+            <span class="tag">T1053.005</span>
+            <span class="tag">T1082</span>
+            <span class="tag">T1482</span>
+            <span class="tag">T1018</span>
+            <span class="tag">T1552</span>
+            <span class="tag">T1021.006</span>
+            <span class="tag">T1021.002</span>
+          </div>
+        </article>
+      </div>
+    </section>
     <h2 id="software">Software</h2>
     <div class="table-wrap medium-table">
       <table>
