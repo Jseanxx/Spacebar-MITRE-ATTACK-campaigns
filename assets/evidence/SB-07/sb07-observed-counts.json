@@ -1,5 +1,5 @@
 {
-  "verified_at": "2026-05-28T06:01:01Z",
+  "verified_at": "2026-06-03T13:00:56Z",
   "observed": [
     {
       "data_view": "hanguel-ad-agent-*",
@@ -38,10 +38,19 @@
     },
     {
       "data_view": "hanguel-ad-agent-*",
-      "count": 0,
+      "count": 1,
       "evidence": "sysmon_lsass_process_access_real_endpoint",
       "kql": "event.action:\"sysmon_lsass_process_access\" and not hanguel.test_runner:true",
-      "status": "not_confirmed"
+      "status": "confirmed_from_later_recheck",
+      "note": "Updated after the later endpoint Sysmon Event ID 10 recheck for hgl_loader.exe -> lsass.exe."
+    },
+    {
+      "data_view": "hanguel-ai-analysis-*",
+      "count": 1,
+      "evidence": "ai_one_page_report",
+      "kql": "analyst_report_markdown:* and alert_id:\"sb07-manual-mapping-inferred-014-campaign:SB-07-202606031255\"",
+      "status": "confirmed_from_kibana_document",
+      "note": "AI worker output stored analyst_report_markdown with analysis_status completed and related_event_count 100."
     },
     {
       "data_view": ".internal.alerts-*",
