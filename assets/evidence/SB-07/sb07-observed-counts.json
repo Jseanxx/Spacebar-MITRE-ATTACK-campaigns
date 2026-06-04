@@ -48,16 +48,9 @@
       "data_view": "hanguel-ai-analysis-*",
       "count": 1,
       "evidence": "ai_one_page_report",
-      "kql": "analyst_report_markdown:* and alert_id:\"sb07-manual-mapping-inferred-014-campaign:SB-07-202606031255\"",
-      "status": "confirmed_from_kibana_document",
-      "note": "AI worker output stored analyst_report_markdown with analysis_status completed and related_event_count 100."
-    },
-    {
-      "data_view": ".internal.alerts-*",
-      "count": 0,
-      "evidence": "elastic_native_alerts",
-      "kql": "*",
-      "status": "not_confirmed"
+      "kql": "alert_id:\"sb07-manual-mapping-inferred-014-campaign:SB-07-202606031255\"",
+      "status": "confirmed_from_raw_kibana_discover",
+      "note": "Raw Kibana Discover view shows analyst_report_markdown for the SB-07 manual-mapping alert pivot."
     }
   ]
 }

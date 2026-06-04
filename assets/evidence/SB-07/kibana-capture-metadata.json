@@ -32,12 +32,12 @@
     "url": "http://127.0.0.1:15601/app/discover#/?_g=(filters:!(),refreshInterval:(pause:!t,value:60000),time:(from:'2026-05-28T00:00:00.000Z',to:'2026-05-28T23:59:59.999Z'))&_a=(columns:!(event.action,host.name,user.name,campaign.id,run.id),dataSource:(dataViewId:'29316223-c402-4ee7-8703-72ac49a18ac4',type:dataView),filters:!(),interval:auto,query:(language:kuery,query:'event.action%3A%22dc_winrm_whoami%22'),sort:!(!('@timestamp',desc)))"
   },
   {
-    "file": "kibana-ai-analysis-report-20260603.png",
-    "kql": "analyst_report_markdown:* and alert_id:\"sb07-manual-mapping-inferred-014-campaign:SB-07-202606031255\"",
-    "dataViewId": "hanguel-ai-analysis-*",
-    "path": "C:\\Users\\LG\\Desktop\\침해사고분석_프로젝트\\Spacebar-MITRE-ATTACK-campaigns\\assets\\evidence\\SB-07\\kibana-ai-analysis-report-20260603.png",
-    "size": 64705,
-    "source": "Rendered excerpt from the captured hanguel-ai-analysis-default document observed in Kibana Discover.",
-    "url": "Kibana Discover data view hanguel-ai-analysis-* with analyst_report_markdown selected"
+    "file": "kibana-ai-analysis-discover-raw-20260605.png",
+    "kql": "alert_id:\"sb07-manual-mapping-inferred-014-campaign:SB-07-202606031255\"",
+    "dataViewId": "9e0ad877-23a2-4047-a02f-578ec9c1de25",
+    "path": "C:\\Users\\LG\\Desktop\\침해사고분석_프로젝트\\Spacebar-MITRE-ATTACK-campaigns\\assets\\evidence\\SB-07\\kibana-ai-analysis-discover-raw-20260605.png",
+    "size": 98746,
+    "source": "Raw Kibana Discover screenshot captured from the live local Kibana tunnel on 2026-06-05.",
+    "url": "http://127.0.0.1:15601/app/discover with hanguel-ai-analysis-* data view and analyst_report_markdown field popover open"
   }
 ]

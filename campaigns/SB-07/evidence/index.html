@@ -226,11 +226,6 @@
         <td>21/21 SB-07 custom rules fired</td>
         <td><code>rule.id: sb07-*</code> with the two BAS run IDs</td>
       </tr>
-      <tr>
-        <td>Elastic native alert engine</td>
-        <td><code>.internal.alerts-*</code> docs count 0 at check time</td>
-        <td><code>_cat/indices/.alerts-*</code></td>
-      </tr>
     </tbody>
   </table>
 </div>
@@ -286,17 +281,17 @@
 
 <div class="concept-banner">
   <b>Observed</b>
-  <span>2026-06-03 기준 <code>hanguel-ai-analysis-default</code> 문서에서 <code>analysis_status: completed</code>, <code>llm_model: gpt-5.5</code>, <code>related_event_count: 100</code>, <code>analyst_report_markdown</code> 필드가 확인됐다.</span>
+  <span>2026-06-03 기준 <code>hanguel-ai-analysis-default</code> 문서에서 <code>analysis_status: complete</code>, <code>llm_model: gpt-5.5</code>, <code>related_event_count: 100</code>, <code>analyst_report_markdown</code> 필드가 확인됐다.</span>
 </div>
 
 <div class="cards">
   <article class="card">
-    <h3>One-Page Analyst Report</h3>
-    <p><code>analyst_report_markdown:*</code> / Hanguel AI Analysis / SB-07 manual-mapping alert pivot</p>
-    <a href="/assets/evidence/SB-07/kibana-ai-analysis-report-20260603.png" target="_blank" rel="noopener">
-      <img src="/assets/evidence/SB-07/kibana-ai-analysis-report-20260603.png" alt="AI analysis one-page report excerpt for SB-07" style="width:100%;border:1px solid #cfd8e3;border-radius:4px;">
+    <h3>Raw Kibana Discover View</h3>
+    <p><code>alert_id:"sb07-manual-mapping-inferred-014-campaign:SB-07-202606031255"</code> / <code>hanguel-ai-analysis-*</code> / 실제 Discover 조회 화면</p>
+    <a href="/assets/evidence/SB-07/kibana-ai-analysis-discover-raw-20260605.png" target="_blank" rel="noopener">
+      <img src="/assets/evidence/SB-07/kibana-ai-analysis-discover-raw-20260605.png" alt="Raw Kibana Discover view showing analyst_report_markdown for SB-07" style="width:100%;border:1px solid #cfd8e3;border-radius:4px;">
     </a>
-    <p><a href="/assets/evidence/SB-07/kibana-ai-analysis-report-20260603.png" target="_blank" rel="noopener">Open full-size evidence image</a></p>
+    <p><a href="/assets/evidence/SB-07/kibana-ai-analysis-discover-raw-20260605.png" target="_blank" rel="noopener">Open full-size screenshot</a></p>
   </article>
 </div>
 
@@ -316,117 +311,6 @@
   <b>Capture Metadata</b>
   <span>캡처별 KQL, data view, file path, 확인 count는 <code>/assets/evidence/SB-07/kibana-capture-metadata.json</code>과 <code>/assets/evidence/SB-07/sb07-observed-counts.json</code>에 함께 보관한다.</span>
 </div>
-
-<h2 id="custom-vs-native-alerts">Custom Correlator vs Elastic Native Rules</h2>
-<div class="table-wrap wide-table">
-  <table>
-    <thead>
-      <tr>
-        <th>Alert Path</th>
-        <th>Observed Result</th>
-        <th>Evidence</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>Hanguel AD custom correlator</td>
-        <td><code>hanguel-alerts-*</code>에서 full BAS 20건, no-defender 2건 확인</td>
-        <td><code>correlation.key:"run:SB07-FULL-BAS-20260528-111840"</code></td>
-      </tr>
-      <tr>
-        <td>Elastic Security native alert engine</td>
-        <td><code>.internal.alerts-*</code> count 0</td>
-        <td><code>GET .internal.alerts-*/_count?ignore_unavailable=true</code></td>
-      </tr>
-    </tbody>
-  </table>
-</div>
-<p>
-  따라서 분석 기록에서는 "Kibana native detection rule을 검증했다"가 아니라
-  "ELK 위에 구현한 Hanguel custom sequential correlator가 <code>hanguel-alerts-*</code>로 alert를 생성하는 것을 검증했다"라고 표현한다.
-</p>
-
-<details class="technique-panel" open>
-  <summary>BAS Capture 1. Full run source events in Hanguel AD Agent</summary>
-  <div class="technique-body">
-    <p>전체 Technique Used를 안전한 emulation event로 재현한 뒤, 원본 이벤트가 먼저 수집되었는지 확인한다.</p>
-    <div class="mapping-grid">
-      <div>
-        <h3>Data View</h3>
-        <p>Hanguel AD Agent</p>
-      </div>
-      <div>
-        <h3>KQL</h3>
-        <p><code>run.id:"SB07-FULL-BAS-20260528-111840"</code></p>
-      </div>
-      <div>
-        <h3>Observed Result</h3>
-        <p><code>source_event_count=48</code>, <code>technique_count=21</code></p>
-      </div>
-    </div>
-    <p>
-      이 캡처는 BAS 이벤트가 단순 JSON 파일에만 남은 것이 아니라, 실제 ELK 수집 경로를 통과해 <code>hanguel-ad-agent-*</code> 인덱스에 저장되었음을 보여준다.
-    </p>
-  </div>
-</details>
-
-<details class="technique-panel" open>
-  <summary>BAS Capture 2. Correlation alerts in Hanguel Alerts</summary>
-  <div class="technique-body">
-    <p>수집된 source event를 Hanguel AD custom correlator가 시간창 안에서 묶어 alert로 생성했는지 확인한다.</p>
-    <div class="mapping-grid">
-      <div>
-        <h3>Data View</h3>
-        <p>Hanguel Alerts</p>
-      </div>
-      <div>
-        <h3>KQL</h3>
-        <p><code>correlation.key:"run:SB07-FULL-BAS-20260528-111840"</code></p>
-      </div>
-      <div>
-        <h3>Observed Result</h3>
-        <p><code>full_run_alert_count=20</code></p>
-      </div>
-    </div>
-    <div class="code-grid">
-      <pre><code>rule.id: "sb07-pms-patch-discovery-001"
-rule.id: "sb07-credential-dc-access-002"
-rule.id: "sb07-dc-access-lsass-004"
-rule.id: "sb07-loader-forensic-triad-012"
-rule.id: "sb07-manual-mapping-inferred-014"
-rule.id: "sb07-pass-the-hash-simulated-021"</code></pre>
-    </div>
-    <p>
-      전체 run에서는 PMS patch, credential artifact, DC access, loader/LSASS artifact, Defender 관련 sequence alert가 함께 발생했다.
-      단, <code>sb07-lsass-no-defender-006</code>은 Defender block/action 이벤트가 없는 조건을 요구하므로 별도 run에서 검증한다.
-    </p>
-  </div>
-</details>
-
-<details class="technique-panel">
-  <summary>BAS Capture 3. No-Defender branch</summary>
-  <div class="technique-body">
-    <p>Defender 차단 이벤트가 없는데 LSASS 관련 activity가 관측되는 분기를 별도로 검증한다.</p>
-    <div class="mapping-grid">
-      <div>
-        <h3>Data View</h3>
-        <p>Hanguel Alerts</p>
-      </div>
-      <div>
-        <h3>KQL</h3>
-        <p><code>correlation.key:"run:SB07-NO-DEFENDER-BAS-20260528-112012"</code></p>
-      </div>
-      <div>
-        <h3>Observed Result</h3>
-        <p><code>sb07-loader-lsass-005</code>, <code>sb07-lsass-no-defender-006</code></p>
-      </div>
-    </div>
-    <p>
-      이 분기는 full run과 일부러 분리했다.
-      full run에는 <code>defender_lsass_block</code>, <code>defender_action_taken</code>이 포함되어 있어 no-defender 조건이 성립하지 않기 때문이다.
-    </p>
-  </div>
-</details>
 
 <h2 id="bas-rule-coverage">BAS Rule Coverage Matrix</h2>
 <div class="table-wrap wide-table">
@@ -816,14 +700,6 @@ rule.id: "sb07-pass-the-hash-simulated-021"</code></pre>
         <td>Measured</td>
         <td><code>hanguel-alerts-*</code>, <code>correlation.key</code> pivots</td>
         <td>Hanguel custom correlator가 source event를 시간창 안에서 묶어 alert index에 기록했다.</td>
-      </tr>
-      <tr>
-        <td>Elastic Native Rule</td>
-        <td>Native alert docs</td>
-        <td><code>0</code></td>
-        <td>Out of scope</td>
-        <td><code>.internal.alerts-*</code> count check</td>
-        <td>이번 검증은 Elastic Security native rule이 아니라 Hanguel custom correlator 성능 검증이다.</td>
       </tr>
       <tr>
         <td>Latency</td>
