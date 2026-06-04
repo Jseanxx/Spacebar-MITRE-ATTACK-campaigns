@@ -28,7 +28,6 @@
 | 담당자 | Campaign Page | Campaign Logs |
 | --- | --- | --- |
 | 임준서 | `content/campaigns/SB-01.md` | `content/campaign-logs/SB-01/` |
-| 김정현 | `content/campaigns/SB-02.md` | `content/campaign-logs/SB-02/` |
 | 신가현 | `content/campaigns/SB-03.md` | `content/campaign-logs/SB-03/` |
 | 서현재 | `content/campaigns/SB-04.md` | `content/campaign-logs/SB-04/` |
 | 강지윤 | `content/campaigns/SB-05.md` | `content/campaign-logs/SB-05/` |
@@ -54,10 +53,10 @@
 content/campaign-logs/SB-XX/LOG-ID.md
 ```
 
-예를 들어 SB-02 담당자가 `WL-001` 로그를 만들면:
+예를 들어 SB-XX 담당자가 `WL-001` 로그를 만들면:
 
 ```text
-content/campaign-logs/SB-02/WL-001.md
+content/campaign-logs/SB-XX/WL-001.md
 ```
 
 새 로그를 만들 때는 `content/campaign-logs/TEMPLATE.md`를 복사해서 사용합니다. 필수 소주제는 아래 7개입니다.

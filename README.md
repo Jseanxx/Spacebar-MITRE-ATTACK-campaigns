@@ -45,7 +45,6 @@ spacebar-mitre-attack-campaigns/
 |   |
 |   |-- campaigns/                   # Campaign Page 1 원본
 |   |   |-- SB-01.md                 # SB-01 캠페인 본문
-|   |   |-- SB-02.md                 # SB-02 캠페인 본문
 |   |   `-- SB-XX.md                 # 각자 담당 캠페인 파일
 |   |
 |   |-- campaign-logs/               # 캠페인별 로그 상세 원본
@@ -275,7 +274,6 @@ techniques: "T1558.003"
 | ID | 담당자 | Campaign Page | Campaign Logs |
 | --- | --- | --- | --- |
 | SB-01 | 임준서 | `content/campaigns/SB-01.md` | `content/campaign-logs/SB-01/` |
-| SB-02 | 김정현 | `content/campaigns/SB-02.md` | `content/campaign-logs/SB-02/` |
 | SB-03 | 신가현 | `content/campaigns/SB-03.md` | `content/campaign-logs/SB-03/` |
 | SB-04 | 서현재 | `content/campaigns/SB-04.md` | `content/campaign-logs/SB-04/` |
 | SB-05 | 강지윤 | `content/campaigns/SB-05.md` | `content/campaign-logs/SB-05/` |
