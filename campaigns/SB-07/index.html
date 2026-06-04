@@ -51,7 +51,7 @@
       HanguelPMSChain은 bastion을 통해 내부망으로 진입한 뒤 hanguel-ops-pms의 JBoss AS 6 취약 표면을 확인하고, PMS update manifest와 patch.ps1을 변조한다.
       이후 hanguel-win01의 Hanguel PMS Agent가 변조된 패치를 <code>nt authority\system</code> 권한으로 실행하면서 AD/DC discovery와 <code>dc_cred.xml</code> 발견까지 수행했다.
       SYSTEM 컨텍스트의 <code>Import-Clixml</code>은 실패했으므로, bastion에서 발견한 static AWS credential과 EC2 private key를 이용해 <code>ec2:GetPasswordData</code>로 win01 EC2 local Administrator password를 복호화했다. 그 local Administrator 컨텍스트에서 <code>dc_cred.xml</code>을 복호화해 DC C$/WinRM 접근으로 이어지는 활동을 수행했다.
-      피해 환경은 AWS VPC, bastion, JBoss/PMS 서버, Windows 클라이언트, Active Directory Domain Controller, Hanguel AD Agent, ELK Stack으로 구성된 기업형 AD 운영 환경으로 모델링된다.
+      <!-- 피해 환경은 AWS VPC, bastion, JBoss/PMS 서버, Windows 클라이언트, Active Directory Domain Controller, Hanguel AD Agent, ELK Stack으로 구성된 기업형 AD 운영 환경으로 모델링된다. -->
     </p>
   </div>
 <div class="meta-grid" aria-label="Campaign metadata">
