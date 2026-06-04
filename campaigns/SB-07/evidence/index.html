@@ -537,61 +537,6 @@
     </tbody>
   </table>
 </div>
-
-<h2 id="windows-artifacts">Windows Artifact Cross-Check</h2>
-<div class="table-wrap wide-table">
-  <table>
-    <thead>
-      <tr>
-        <th>Artifact</th>
-        <th>Original Location</th>
-        <th>SB-07 Log ID</th>
-        <th>Investigation Pivot</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr><td>Application Error / WER</td><td>Windows Logs / Application, Event ID 1000/1001</td><td><a href="/campaigns/SB-07/logs/HAD-005/">HAD-005</a></td><td><code>Faulting application name: hgl_loader.exe</code></td></tr>
-      <tr><td>Amcache</td><td><code>C:\Windows\AppCompat\Programs\Amcache.hve</code></td><td><a href="/campaigns/SB-07/logs/HAD-006/">HAD-006</a></td><td><code>hgl_loader.exe</code>, <code>pe64_amd64</code> context</td></tr>
-      <tr><td>ShimCache / AppCompatCache</td><td><code>HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\AppCompatCache</code></td><td><a href="/campaigns/SB-07/logs/HAD-007/">HAD-007</a></td><td><code>C:\Windows\Temp\hgl_loader.exe</code></td></tr>
-      <tr><td>TaskCache Registry</td><td><code>HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Schedule\TaskCache</code></td><td><a href="/campaigns/SB-07/logs/HAD-008/">HAD-008</a></td><td><code>HanguelLoaderDiag</code></td></tr>
-      <tr><td>Task XML</td><td><code>C:\Windows\System32\Tasks\HanguelLoaderDiag</code></td><td><a href="/campaigns/SB-07/logs/HAD-008/">HAD-008</a></td><td><code>cmd.exe /c C:\Windows\Temp\hgl_run.cmd</code></td></tr>
-      <tr><td>USN Journal</td><td><code>fsutil usn readjournal C: csv</code></td><td><a href="/campaigns/SB-07/logs/HAD-009/">HAD-009</a></td><td><code>hgl_loader.exe</code>, <code>hgl_payload.enc</code>, <code>hgl_run.cmd</code></td></tr>
-      <tr><td>Loader run log</td><td><code>C:\Windows\Temp\hgl_loader_run.log</code></td><td><a href="/campaigns/SB-07/logs/HAD-004/">HAD-004</a></td><td><code>decrypted_magic=4d 5a</code>, <code>entry=0x...</code>, dump listing</td></tr>
-    </tbody>
-  </table>
-</div>
-
-<h2 id="analysis-chain">Analyst Reconstruction Chain</h2>
-<div class="flow" aria-label="SB-07 evidence reconstruction chain">
-  <div class="flow-step"><b>1. Patch Chain</b><span>Search HAW/HAP patch events</span></div>
-  <div class="flow-step"><b>2. AWS Bridge</b><span>Confirm redacted AWS bridge JSON</span></div>
-  <div class="flow-step"><b>3. DC Access</b><span>Pivot to WinRM/C$ events</span></div>
-  <div class="flow-step"><b>4. Loader Staging</b><span>Find task and file artifacts</span></div>
-  <div class="flow-step"><b>5. Loader Run</b><span>Review WER, Sysmon, run log</span></div>
-  <div class="flow-step"><b>6. Correlation</b><span>Confirm rule output alerts</span></div>
-  <div class="flow-step"><b>7. Boundary</b><span>Separate direct evidence from inference</span></div>
-</div>
-
-<h2 id="llm-prompt-playbook">LLM Prompt Playbook</h2>
-<p>
-  LLM은 alert 판정 주체가 아니라 분석 보조 도구로 사용한다.
-  AI worker는 <code>hanguel-alerts-*</code>의 alert와 주변 <code>related_events</code>를 가져와 <code>/opt/hanguel-ai-analysis/prompts/system_prompt.md</code>와 workflow prompt를 결합하고, 결과를 <code>hanguel-ai-analysis-*</code>에 저장한다.
-  프롬프트는 <code>확인됨</code>, <code>가능성이 높음</code>, <code>미확인</code>을 분리하고, 분석가가 바로 읽을 수 있는 <code>analyst_report_markdown</code>을 생성하도록 구성했다.
-</p>
-
-<div class="flow" aria-label="SB-07 AI analysis pipeline">
-  <div class="flow-step"><b>1. Alert Created</b><span><code>hanguel-alerts-*</code></span></div>
-  <div class="flow-step"><b>2. Worker Reads Alert</b><span><code>ai_analysis_worker_stdlib.py</code></span></div>
-  <div class="flow-step"><b>3. Related Events Pivot</b><span><code>hanguel-ad-agent-*</code> time window</span></div>
-  <div class="flow-step"><b>4. Prompt Applied</b><span><code>system_prompt.md</code> + workflow prompt</span></div>
-  <div class="flow-step"><b>5. LLM Call</b><span>OpenAI relay on bastion</span></div>
-  <div class="flow-step"><b>6. Report Saved</b><span><code>analyst_report_markdown</code></span></div>
-</div>
-
-<div class="concept-banner">
-  <b>Prompt Boundary</b>
-  <span>프롬프트 전문은 workflow/playbook 산출물에서 관리하고, Evidence 페이지에는 AI 분석 파이프라인과 실제 Kibana 저장 결과만 남긴다.</span>
-</div>
       <footer class="footer">
         Spacebar Project. This evidence page records reproducible investigation pivots and observed artifacts.
       </footer>
