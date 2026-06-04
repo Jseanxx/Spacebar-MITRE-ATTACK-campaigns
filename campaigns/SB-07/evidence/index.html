@@ -332,42 +332,6 @@
   </table>
 </div>
 
-<h2 id="bas-event-rule-matrix">BAS Event to Rule Matrix</h2>
-<p>
-  이 표는 "어떤 emulation event를 넣었고, 어떤 sequential rule이 발화했는지"를 재현 가능한 검증 기록으로 정리한 것이다.
-  전부 안전한 emulation event 기반이며 실제 credential dumping 재실행을 의미하지 않는다.
-</p>
-<div class="table-wrap wide-table">
-  <table>
-    <thead>
-      <tr>
-        <th>Rule ID</th>
-        <th>Alert Action</th>
-        <th>Severity</th>
-        <th>Run</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr><td><code>sb07-pms-patch-discovery-001</code></td><td><code>sb07_pms_patch_to_ad_discovery_sequence</code></td><td>high</td><td>full</td></tr>
-      <tr><td><code>sb07-credential-dc-access-002</code></td><td><code>sb07_credential_artifact_to_dc_access_sequence</code></td><td>critical</td><td>full</td></tr>
-      <tr><td><code>sb07-pms-credential-chain-003</code></td><td><code>sb07_pms_to_credential_chain_sequence</code></td><td>critical</td><td>full</td></tr>
-      <tr><td><code>sb07-aws-control-plane-local-admin-022</code></td><td><code>sb07_aws_control_plane_to_local_admin_bridge_sequence</code></td><td>critical</td><td>AWS bridge verification run</td></tr>
-      <tr><td><code>sb07-dc-access-lsass-004</code></td><td><code>sb07_authenticated_dc_access_to_lsass_activity_sequence</code></td><td>critical</td><td>full</td></tr>
-      <tr><td><code>sb07-loader-lsass-005</code></td><td><code>sb07_manual_mapping_loader_to_lsass_sequence</code></td><td>critical</td><td>full/no-defender</td></tr>
-      <tr><td><code>sb07-lsass-no-defender-006</code></td><td><code>sb07_lsass_activity_without_defender_sequence</code></td><td>high</td><td>no-defender</td></tr>
-      <tr><td><code>sb07-defender-lsass-block-007</code></td><td><code>sb07_defender_lsass_blocked_sequence</code></td><td>critical</td><td>full</td></tr>
-      <tr><td><code>sb07-dc-loader-task-008</code></td><td><code>sb07_dc_loader_task_observed_sequence</code></td><td>high</td><td>full</td></tr>
-      <tr><td><code>sb07-defender-bypass-inferred-009</code></td><td><code>sb07_defender_bypass_inferred_sequence</code></td><td>high</td><td>full</td></tr>
-      <tr><td><code>sb07-dump-bypass-inference-010</code></td><td><code>sb07_dump_artifact_and_bypass_inference_sequence</code></td><td>critical</td><td>full</td></tr>
-      <tr><td><code>sb07-dump-after-defender-block-011</code></td><td><code>sb07_dump_artifact_after_defender_block_sequence</code></td><td>critical</td><td>full</td></tr>
-      <tr><td><code>sb07-loader-forensic-triad-012</code></td><td><code>sb07_loader_forensic_triad_sequence</code></td><td>critical</td><td>full</td></tr>
-      <tr><td><code>sb07-loader-file-lifecycle-013</code></td><td><code>sb07_loader_file_lifecycle_sequence</code></td><td>high</td><td>full</td></tr>
-      <tr><td><code>sb07-manual-mapping-inferred-014</code></td><td><code>sb07_manual_mapping_inferred_from_artifacts_sequence</code></td><td>critical</td><td>full</td></tr>
-      <tr><td><code>sb07-bastion-ssh-entry-015</code> ~ <code>sb07-pass-the-hash-simulated-021</code></td><td>초기 접근/JBoss/PMS/PTA simulation 보강 룰</td><td>low~medium</td><td>full</td></tr>
-    </tbody>
-  </table>
-</div>
-
 <h2 id="bas-performance">BAS Performance Assessment</h2>
 <p>
   이 표는 탐지 품질을 과장하기 위한 점수가 아니라, SB-07 시나리오에서 설계한 emulation event가 수집되고 correlation rule까지 연결되는지를 확인한 운영 검증 결과다.
@@ -388,360 +352,40 @@
       <tr><td>Technique representation</td><td>21 techniques</td><td>21 techniques</td><td>전체 Technique Used가 event.action 형태로 표현되었다.</td></tr>
       <tr><td>Technique alert coverage</td><td>13/21</td><td>21/21</td><td>초기 접근/JBoss/PMS masquerading/Pass-the-Hash simulation 쪽 룰을 보강했다.</td></tr>
       <tr><td>Unique custom rule fired</td><td>14/14</td><td>21/21</td><td>SB-07 lab custom correlation rule set 기준 전부 발화 확인.</td></tr>
-      <tr><td>Native Elastic Security alert</td><td>Not observed</td><td>Out of scope</td><td>이번 검증 범위는 Hanguel custom correlator이다.</td></tr>
     </tbody>
   </table>
 </div>
 
 <h2 id="operational-performance">Operational Performance Evidence</h2>
 <p>
-  이 섹션은 Hanguel AD Agent와 custom correlator가 기업형 환경에 배치될 때 운영 가능한지 판단하기 위한 성능 근거를 분리해 기록한다.
-  현재 값은 SB-07 BAS 검증 결과, Elasticsearch 조회 결과, AWS CloudWatch 지표에서 확인된 항목만 <code>Measured</code>로 표기한다.
-  CloudWatch host CPU처럼 agent 프로세스 단위로 분리되지 않은 값은 <code>Partial</code>로 분리한다.
+  성능 검증은 최종 제출 페이지에서는 요약만 남긴다.
+  자세한 replay 수치와 원본 측정값은 <code>assets/evidence/SB-07/sb07-operational-performance-20260529.json</code>에 보관한다.
+  아래 값은 SB-07 AWS lab에서 확인된 범위이며, 운영망 전체 성능이나 agent 프로세스 단위 overhead를 증명하지는 않는다.
 </p>
-
-<style>
-  .sb07-perf-dashboard {
-    display: grid;
-    gap: 14px;
-    margin: 18px 0 22px;
-  }
-
-  .sb07-kpi-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-    gap: 12px;
-  }
-
-  .sb07-kpi-card,
-  .sb07-chart-card {
-    border: 1px solid var(--sb-line);
-    border-radius: 6px;
-    background: #fff;
-    padding: 14px;
-    box-shadow: 0 1px 0 rgba(21, 25, 29, 0.04);
-  }
-
-  .sb07-kpi-label {
-    color: var(--sb-muted);
-    font-size: 13px;
-    font-weight: 650;
-  }
-
-  .sb07-kpi-value {
-    display: block;
-    margin: 8px 0 4px;
-    color: var(--sb-ink);
-    font-size: 28px;
-    font-weight: 750;
-    line-height: 1.1;
-  }
-
-  .sb07-kpi-note {
-    color: var(--sb-muted);
-    font-size: 13px;
-  }
-
-  .sb07-chart-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    gap: 12px;
-  }
-
-  .sb07-chart-card h3 {
-    margin: 0 0 12px;
-    font-size: 17px;
-  }
-
-  .sb07-bar-row {
-    display: grid;
-    grid-template-columns: minmax(140px, 1fr) minmax(160px, 2fr) 78px;
-    gap: 10px;
-    align-items: center;
-    margin: 10px 0;
-    font-size: 13px;
-  }
-
-  .sb07-bar-track {
-    height: 12px;
-    overflow: hidden;
-    border-radius: 999px;
-    background: #e7ebf0;
-  }
-
-  .sb07-bar-fill {
-    height: 100%;
-    border-radius: 999px;
-    background: #2b5f7f;
-  }
-
-  .sb07-bar-fill.before {
-    background: #8894a3;
-  }
-
-  .sb07-bar-fill.after {
-    background: #2f7d5b;
-  }
-
-  .sb07-bar-fill.pending {
-    background: #b7c0ca;
-  }
-
-  .sb07-bar-fill.partial {
-    background: #c99b3b;
-  }
-
-  .sb07-status-chip {
-    display: inline-block;
-    margin-top: 8px;
-    padding: 3px 8px;
-    border: 1px solid var(--sb-line);
-    border-radius: 999px;
-    color: var(--sb-muted);
-    font-size: 12px;
-  }
-
-  @media (max-width: 760px) {
-    .sb07-bar-row {
-      grid-template-columns: 1fr;
-      gap: 5px;
-    }
-  }
-</style>
-
-<div class="sb07-perf-dashboard" aria-label="SB-07 operational performance dashboard">
-  <div class="sb07-kpi-grid">
-    <div class="sb07-kpi-card">
-      <div class="sb07-kpi-label">Ingestion Success</div>
-      <strong class="sb07-kpi-value">100%</strong>
-      <div class="sb07-kpi-note"><code>48 / 48</code> BAS source events indexed</div>
-      <span class="sb07-status-chip">Measured</span>
-    </div>
-    <div class="sb07-kpi-card">
-      <div class="sb07-kpi-label">Technique Alert Coverage</div>
-      <strong class="sb07-kpi-value">21 / 21</strong>
-      <div class="sb07-kpi-note">Improved custom rule coverage</div>
-      <span class="sb07-status-chip">Measured</span>
-    </div>
-    <div class="sb07-kpi-card">
-      <div class="sb07-kpi-label">Custom Alert Output</div>
-      <strong class="sb07-kpi-value">20 + 2</strong>
-      <div class="sb07-kpi-note">Full BAS run + no-defender branch</div>
-      <span class="sb07-status-chip">Measured</span>
-    </div>
-    <div class="sb07-kpi-card">
-      <div class="sb07-kpi-label">Native Elastic Alerts</div>
-      <strong class="sb07-kpi-value">0</strong>
-      <div class="sb07-kpi-note">Not part of this validation scope</div>
-      <span class="sb07-status-chip">Out of scope</span>
-    </div>
-    <div class="sb07-kpi-card">
-      <div class="sb07-kpi-label">Alert Latency</div>
-      <strong class="sb07-kpi-value">9.9s / 10.9s</strong>
-      <div class="sb07-kpi-note">First alert / full alert set after BAS post</div>
-      <span class="sb07-status-chip">Measured</span>
-    </div>
-    <div class="sb07-kpi-card">
-      <div class="sb07-kpi-label">Replay Throughput</div>
-      <strong class="sb07-kpi-value">130.11 EPS</strong>
-      <div class="sb07-kpi-note"><code>4,800 / 4,800</code> replay events indexed</div>
-      <span class="sb07-status-chip">Measured</span>
-    </div>
-    <div class="sb07-kpi-card">
-      <div class="sb07-kpi-label">Storage Growth</div>
-      <strong class="sb07-kpi-value">530 KB</strong>
-      <div class="sb07-kpi-note">Delta for 4,800 replay events, approximate</div>
-      <span class="sb07-status-chip">Measured</span>
-    </div>
-    <div class="sb07-kpi-card">
-      <div class="sb07-kpi-label">Endpoint Host CPU</div>
-      <strong class="sb07-kpi-value">1.7~1.8%</strong>
-      <div class="sb07-kpi-note">CloudWatch avg CPU for dc01/win01; agent process overhead not isolated</div>
-      <span class="sb07-status-chip">Partial</span>
-    </div>
-  </div>
-
-  <div class="sb07-chart-grid">
-    <div class="sb07-chart-card">
-      <h3>Coverage Before / After Rule Upgrade</h3>
-      <div class="sb07-bar-row">
-        <span>Before</span>
-        <div class="sb07-bar-track"><div class="sb07-bar-fill before" style="width:61.9%"></div></div>
-        <strong>13 / 21</strong>
-      </div>
-      <div class="sb07-bar-row">
-        <span>After</span>
-        <div class="sb07-bar-track"><div class="sb07-bar-fill after" style="width:100%"></div></div>
-        <strong>21 / 21</strong>
-      </div>
-      <p class="sb07-kpi-note">Coverage는 SB-07 Technique Used가 custom correlation rule과 연결되었는지를 의미한다.</p>
-    </div>
-
-    <div class="sb07-chart-card">
-      <h3>BAS Event / Alert Volume</h3>
-      <div class="sb07-bar-row">
-        <span>Source events</span>
-        <div class="sb07-bar-track"><div class="sb07-bar-fill" style="width:100%"></div></div>
-        <strong>48</strong>
-      </div>
-      <div class="sb07-bar-row">
-        <span>Full run alerts</span>
-        <div class="sb07-bar-track"><div class="sb07-bar-fill after" style="width:41.7%"></div></div>
-        <strong>20</strong>
-      </div>
-      <div class="sb07-bar-row">
-        <span>No-defender alerts</span>
-        <div class="sb07-bar-track"><div class="sb07-bar-fill before" style="width:4.2%"></div></div>
-        <strong>2</strong>
-      </div>
-      <p class="sb07-kpi-note">이 그래프는 volume 비교이며, alert 수가 많을수록 좋다는 의미는 아니다.</p>
-    </div>
-
-    <div class="sb07-chart-card">
-      <h3>Operational Measurement Readiness</h3>
-      <div class="sb07-bar-row">
-        <span>Measured</span>
-        <div class="sb07-bar-track"><div class="sb07-bar-fill after" style="width:75%"></div></div>
-        <strong>6</strong>
-      </div>
-      <div class="sb07-bar-row">
-        <span>Partial</span>
-        <div class="sb07-bar-track"><div class="sb07-bar-fill partial" style="width:12.5%"></div></div>
-        <strong>1</strong>
-      </div>
-      <div class="sb07-bar-row">
-        <span>Out of scope</span>
-        <div class="sb07-bar-track"><div class="sb07-bar-fill before" style="width:12.5%"></div></div>
-        <strong>1</strong>
-      </div>
-      <p class="sb07-kpi-note">Measured: ingestion, coverage, custom alert output, latency, replay EPS, storage. Partial: endpoint host CPU context.</p>
-    </div>
-
-    <div class="sb07-chart-card">
-      <h3>Replay Throughput</h3>
-      <div class="sb07-bar-row">
-        <span>480 replay</span>
-        <div class="sb07-bar-track"><div class="sb07-bar-fill" style="width:43.8%"></div></div>
-        <strong>56.95 EPS</strong>
-      </div>
-      <div class="sb07-bar-row">
-        <span>4,800 replay</span>
-        <div class="sb07-bar-track"><div class="sb07-bar-fill after" style="width:100%"></div></div>
-        <strong>130.11 EPS</strong>
-      </div>
-      <p class="sb07-kpi-note">Replay는 안전한 <code>performance_replay_probe</code> event로 수행했으며, 공격 행위 재실행이 아니다.</p>
-    </div>
-
-    <div class="sb07-chart-card">
-      <h3>Alert Latency Window</h3>
-      <div class="sb07-bar-row">
-        <span>Source visible</span>
-        <div class="sb07-bar-track"><div class="sb07-bar-fill" style="width:5.7%"></div></div>
-        <strong>0.616s</strong>
-      </div>
-      <div class="sb07-bar-row">
-        <span>First alert</span>
-        <div class="sb07-bar-track"><div class="sb07-bar-fill partial" style="width:90.6%"></div></div>
-        <strong>9.858s</strong>
-      </div>
-      <div class="sb07-bar-row">
-        <span>Alert set complete</span>
-        <div class="sb07-bar-track"><div class="sb07-bar-fill after" style="width:100%"></div></div>
-        <strong>10.885s</strong>
-      </div>
-      <p class="sb07-kpi-note">지연 시간에는 Logstash/Elasticsearch visible time과 custom correlator polling/write 시간이 포함된다.</p>
-    </div>
-  </div>
-</div>
-
-<div class="concept-banner">
-  <b>Measurement Run</b>
-  <span>
-    2026-05-29 AWS lab에서 <code>SB07-PERF-FULL-20260529-021618</code>,
-    <code>SB07-PERF-REPLAY-480-20260529-021618</code>,
-    <code>SB07-PERF-REPLAY-4800-20260529-021618</code>를 실행해 측정했다.
-    원본 측정 JSON은 <code>assets/evidence/SB-07/sb07-operational-performance-20260529.json</code>에 보관한다.
-  </span>
-</div>
 
 <div class="table-wrap wide-table">
   <table>
     <thead>
       <tr>
-        <th>Category</th>
         <th>Metric</th>
         <th>Observed Result</th>
-        <th>Status</th>
-        <th>Evidence Source</th>
-        <th>Operational Meaning</th>
+        <th>Use in Final Evidence</th>
       </tr>
     </thead>
     <tbody>
-      <tr>
-        <td>Ingestion</td>
-        <td>Source events indexed</td>
-        <td><code>48 / 48</code></td>
-        <td>Measured</td>
-        <td><code>hanguel-ad-agent-*</code>, improved BAS result JSON</td>
-        <td>BAS source event가 수집 파이프라인을 통과해 Elasticsearch에 누락 없이 저장되었다.</td>
-      </tr>
-      <tr>
-        <td>Detection Coverage</td>
-        <td>Technique alert coverage</td>
-        <td><code>21 / 21</code></td>
-        <td>Measured</td>
-        <td><code>full_bas_verification_improved_SB07-FULL-BAS-20260528-111840.json</code></td>
-        <td>SB-07 Technique Used 전체가 custom correlation rule과 연결되었다.</td>
-      </tr>
-      <tr>
-        <td>Correlation</td>
-        <td>Custom alert output</td>
-        <td><code>20</code> full run + <code>2</code> no-defender branch</td>
-        <td>Measured</td>
-        <td><code>hanguel-alerts-*</code>, <code>correlation.key</code> pivots</td>
-        <td>Hanguel custom correlator가 source event를 시간창 안에서 묶어 alert index에 기록했다.</td>
-      </tr>
-      <tr>
-        <td>Latency</td>
-        <td>Event-to-alert elapsed time</td>
-        <td>source visible <code>0.616s</code>, first alert <code>9.858s</code>, full alert set <code>10.885s</code></td>
-        <td>Measured</td>
-        <td><code>SB07-PERF-FULL-20260529-021618</code>, <code>hanguel-alerts-*</code></td>
-        <td>custom correlator polling interval과 alert index write까지 포함한 분석가 도달 지연 시간을 판단한다.</td>
-      </tr>
-      <tr>
-        <td>Endpoint Overhead</td>
-        <td>Host CPU context</td>
-        <td>dc01 avg <code>1.68%</code> max <code>21.24%</code>; win01 avg <code>1.80%</code> max <code>30.94%</code></td>
-        <td>Partial</td>
-        <td>AWS CloudWatch <code>CPUUtilization</code>, 5-minute EC2 datapoints</td>
-        <td>호스트 수준 CPU 참고값이다. agent 프로세스 단위 CPU/메모리/I/O overhead는 Windows performance counter 또는 EDR telemetry로 별도 측정해야 한다.</td>
-      </tr>
-      <tr>
-        <td>Scale</td>
-        <td>BAS replay EPS</td>
-        <td><code>480/480</code> at <code>56.95 EPS</code>; <code>4800/4800</code> at <code>130.11 EPS</code></td>
-        <td>Measured</td>
-        <td><code>SB07-PERF-REPLAY-480*</code>, <code>SB07-PERF-REPLAY-4800*</code></td>
-        <td>대량 로그 replay에서도 Logstash HTTP input과 Elasticsearch indexing이 누락 없이 처리되는지 판단한다.</td>
-      </tr>
-      <tr>
-        <td>Storage</td>
-        <td>Index size growth</td>
-        <td><code>+530,377 bytes</code> for 4,800 replay events, about <code>110.5 B/event</code></td>
-        <td>Measured</td>
-        <td>Elasticsearch <code>_stats</code> docs/store before-after delta</td>
-        <td>보관 주기와 저장 비용 산정에 필요한 1차 추정값이다. Lucene compression과 segment merge 영향으로 장기 평균은 별도 측정해야 한다.</td>
-      </tr>
+      <tr><td>Source event ingestion</td><td><code>48 / 48</code> BAS source events indexed</td><td>BAS 이벤트가 ELK 수집 경로를 통과했는지 확인한다.</td></tr>
+      <tr><td>Technique alert coverage</td><td><code>21 / 21</code> custom rule coverage</td><td>SB-07에 정의한 주요 행위가 correlation rule과 연결됐는지 확인한다.</td></tr>
+      <tr><td>Custom alert output</td><td><code>20</code> full run alerts + <code>2</code> no-defender branch alerts</td><td>source event가 alert index까지 이어졌는지 확인한다.</td></tr>
+      <tr><td>Alert latency</td><td>first alert <code>9.858s</code>, full alert set <code>10.885s</code></td><td>분석가가 alert를 확인하기까지의 대략적인 지연 시간을 보여준다.</td></tr>
+      <tr><td>Replay throughput</td><td><code>4,800 / 4,800</code> replay events indexed at <code>130.11 EPS</code></td><td>대량 검증 이벤트도 누락 없이 저장됐는지 확인한다.</td></tr>
     </tbody>
   </table>
 </div>
 
 <div class="concept-banner">
   <b>Performance Boundary</b>
-  <span>현재 성능 근거는 SB-07 AWS lab에서의 상대 검증이다. replay EPS와 alert latency는 측정되었지만, 실제 기업망 전체 규모와 Windows agent 프로세스 단위 overhead를 증명한 것은 아니다.</span>
+  <span>이 섹션은 탐지 정확도를 과장하기 위한 점수가 아니라, SB-07 lab에서 수집/상관분석 파이프라인이 재현 가능하게 동작했는지 보여주는 보조 근거다.</span>
 </div>
-
 <h2 id="kibana-capture-plan">Kibana Evidence Queries</h2>
 
 <details class="technique-panel" open>
@@ -928,19 +572,6 @@
   <div class="flow-step"><b>7. Boundary</b><span>Separate direct evidence from inference</span></div>
 </div>
 
-<h2 id="capture-checklist">Capture Checklist</h2>
-<ol>
-  <li>Kibana Discover에서 <code>run.id:"SB07-FULL-BAS-20260528-111840"</code> source event 캡처 완료.</li>
-  <li>Hanguel Alerts data view에서 <code>correlation.key:"run:SB07-FULL-BAS-20260528-111840"</code> alert 캡처 완료.</li>
-  <li><code>rule.id:"sb07-manual-mapping-inferred-014"</code> 캡처 완료.</li>
-  <li><code>event.action:"dc_winrm_whoami"</code> 캡처 완료.</li>
-  <li>AWS bridge redacted JSON에서 <code>password_data_present:true</code>, <code>plaintext_printed:false</code>, <code>import_clixml_succeeded:true</code>, <code>dc_winrm_succeeded:true</code>, <code>dc_c_admin_share_succeeded:true</code>를 캡처한다.</li>
-  <li>No-Defender branch는 <code>correlation.key:"run:SB07-NO-DEFENDER-BAS-20260528-112012"</code>로 재캡처 가능하다.</li>
-  <li>Windows Event Viewer에서 Application Event ID 1000의 <code>hgl_loader.exe</code> crash를 캡처한다.</li>
-  <li>ShimCache/AppCompatCache 또는 collector JSONL에서 <code>C:\Windows\Temp\hgl_loader.exe</code> context를 캡처한다.</li>
-  <li>실제 endpoint Sysmon Event ID 10 <code>hgl_loader.exe -> lsass.exe</code>는 2026-05-29 재확인 결과를 기준으로 캡처한다.</li>
-</ol>
-
 <h2 id="llm-prompt-playbook">LLM Prompt Playbook</h2>
 <p>
   LLM은 alert 판정 주체가 아니라 분석 보조 도구로 사용한다.
@@ -957,37 +588,9 @@
   <div class="flow-step"><b>6. Report Saved</b><span><code>analyst_report_markdown</code></span></div>
 </div>
 
-<div class="code-grid">
-  <pre><code>[SB-07 Alert Triage Prompt]
-You are a DF/IR analyst for the SB-07 OZZY PMS Chain lab.
-Input events come from hanguel-ad-agent-*, langflow-agent-*, and hanguel-alerts-*.
-Classify facts into Observed, Inferred, and Missing Evidence.
-Do not claim Elastic native alert execution unless .internal.alerts-* evidence exists.
-Return:
-1. Attack behavior summary
-2. Related Log IDs
-3. ATT&CK mapping
-4. Next KQL pivots
-5. False-positive considerations
-6. Report-ready Korean sentence</code></pre>
-  <pre><code>[SB-07 Timeline Reconstruction Prompt]
-Given a list of event.action values and timestamps,
-reconstruct the chain:
-PMS patch -> win01 SYSTEM execution -> dc_cred.xml discovered ->
-SYSTEM Import-Clixml failed -> AWS GetPasswordData local Administrator bridge ->
-local Administrator Import-Clixml succeeded -> DC WinRM/C$ ->
-loader/task/file artifact -> correlation alert.
-Mark each step as confirmed, inferred, or missing.
-Never convert BAS emulation into real endpoint execution.</code></pre>
-  <pre><code>[SB-07 KQL Pivot Prompt]
-Given one SB-07 alert with rule.id, correlation.key, and related.events,
-produce 5 Kibana KQL pivots:
-- source event run.id
-- related event.action
-- Log ID pivot
-- host/user pivot
-- custom alert pivot
-Also explain which data view to use.</code></pre>
+<div class="concept-banner">
+  <b>Prompt Boundary</b>
+  <span>프롬프트 전문은 workflow/playbook 산출물에서 관리하고, Evidence 페이지에는 AI 분석 파이프라인과 실제 Kibana 저장 결과만 남긴다.</span>
 </div>
       <footer class="footer">
         Spacebar Project. This evidence page records reproducible investigation pivots and observed artifacts.
